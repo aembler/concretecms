@@ -101,9 +101,8 @@ abstract class GenericOauth2TypeController extends GenericOauthTypeController
         } catch (InvalidAuthorizationStateException $e) {
             $this->showError(t('Invalid state token provided, please try again.'));
             exit;
-        } catch (\Exception $e) {
-            dd($e);
         }
+        
         if ($token) {
             if ($this->bindUser($user, $this->getExtractor(true)->getUniqueId())) {
                 $this->showSuccess(t('Successfully attached.'));
