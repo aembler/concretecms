@@ -7,6 +7,7 @@ use Concrete\Core\Application\ApplicationAwareTrait;
 use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Http\Request;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
+use League\Url\UrlInterface;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Storage\SymfonySession;
 use OAuth\OAuth2\Service\Google;
@@ -58,7 +59,7 @@ class GoogleServiceFactory implements ApplicationAwareInterface
      *
      * @return \OAuth\Common\Service\ServiceInterface
      */
-    public function createService()
+    public function createService(UrlInterface $callbackUrl = null)
     {
         $appId = $this->config->get('auth.google.appid');
         $appSecret = $this->config->get('auth.google.secret');
@@ -67,7 +68,9 @@ class GoogleServiceFactory implements ApplicationAwareInterface
         $factory = $this->app->make('oauth/factory/service');
 
         // Get the callback url
-        $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/google/callback/']);
+        if (!$callbackUrl) {
+            $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/google/callback/']);
+        }
         if ($callbackUrl->getHost() == '') {
             $callbackUrl = $callbackUrl->setHost($this->request->getHost());
             $callbackUrl = $callbackUrl->setScheme($this->request->getScheme());

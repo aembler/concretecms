@@ -15,7 +15,6 @@
 
 <style>
     .ccm-ui .btn-google {
-        border-width: 0px;
         background: #dd4b39;
     }
     .ccm-ui .btn-google:focus {

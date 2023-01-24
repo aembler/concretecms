@@ -7,6 +7,7 @@ use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Http\Request;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
 use Concrete\Core\Url\Url;
+use League\Url\UrlInterface;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Http\Uri\Uri;
 use OAuth\Common\Storage\SymfonySession;
@@ -58,7 +59,7 @@ class ServiceFactory
      * @param \OAuth\ServiceFactory $factory
      * @return \OAuth\Common\Service\ServiceInterface
      */
-    public function createService(OAuthServiceFactory $factory)
+    public function createService(OAuthServiceFactory $factory, UrlInterface $callbackUrl = null)
     {
         if ($this->config->has('auth.external_concrete')) {
             $config = $this->config->get('auth.external_concrete');
@@ -73,7 +74,11 @@ class ServiceFactory
 
         // Get the callback url
         /** @var Url $callbackUrl */
-        $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/external_concrete/callback/']);
+        if (!$callbackUrl) {
+            $callbackUrl = $this->urlResolver->resolve(
+                ['/ccm/system/authentication/oauth2/external_concrete/callback/']
+            );
+        }
         if ($callbackUrl->getHost() == '') {
             $callbackUrl = $callbackUrl->setHost($this->request->getHost());
             $callbackUrl = $callbackUrl->setScheme($this->request->getScheme());

@@ -6,11 +6,13 @@ use Concrete\Core\Authentication\Type\ExternalConcrete\ServiceFactory;
 use Concrete\Core\Authentication\Type\OAuth\OAuth2\GenericOauth2TypeController;
 use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Form\Service\Widget\GroupSelector;
+use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
 use Concrete\Core\User\Group\GroupList;
 use Concrete\Core\User\User;
 use InvalidArgumentException;
 use League\Url\Url;
+use League\Url\UrlInterface;
 
 class Controller extends GenericOauth2TypeController
 {
@@ -97,15 +99,27 @@ class Controller extends GenericOauth2TypeController
      *
      * @return \Concrete\Core\Authentication\Type\ExternalConcrete\ExternalConcreteService
      */
-    public function getService()
+    public function getService(UrlInterface $callbackUrl = null)
     {
         if (!$this->service) {
             /** @var \OAuth\ServiceFactory $serviceFactory */
             $serviceFactory = $this->app->make('oauth/factory/service');
-            $this->service = $this->factory->createService($serviceFactory);
+            $this->service = $this->factory->createService($serviceFactory, $callbackUrl);
         }
 
         return $this->service;
+    }
+
+    public function handle_attach_attempt()
+    {
+        $attachCallbackUrl = $this->urlResolver->resolve(
+            ['/ccm/system/authentication/oauth2/external_concrete/attach_callback']
+        );
+        $service = $this->getService($attachCallbackUrl);
+        $url = $service->getAuthorizationUri($this->getAdditionalRequestParameters());
+
+        id(new RedirectResponse((string) $url))->send();
+        exit;
     }
 
     /**

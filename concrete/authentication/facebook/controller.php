@@ -11,6 +11,7 @@ use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
 use Concrete\Core\User\Group\GroupRepository;
 use Concrete\Core\User\User;
+use League\Url\UrlInterface;
 use OAuth\OAuth2\Service\Facebook;
 
 class Controller extends GenericOauth2TypeController
@@ -40,15 +41,27 @@ class Controller extends GenericOauth2TypeController
     /**
      * @return Facebook
      */
-    public function getService()
+    public function getService(UrlInterface $callbackUrl = null)
     {
         if (!$this->service) {
             /** @var FacebookServiceFactory $factory */
             $factory = $this->app->make(FacebookServiceFactory::class);
-            $this->service = $factory->createService();
+            $this->service = $factory->createService($callbackUrl);
         }
 
         return $this->service;
+    }
+
+    public function handle_attach_attempt()
+    {
+        $attachCallbackUrl = $this->urlResolver->resolve(
+            ['/ccm/system/authentication/oauth2/facebook/attach_callback']
+        );
+        $service = $this->getService($attachCallbackUrl);
+        $url = $service->getAuthorizationUri($this->getAdditionalRequestParameters());
+
+        id(new RedirectResponse((string) $url))->send();
+        exit;
     }
 
     public function saveAuthenticationType($args)

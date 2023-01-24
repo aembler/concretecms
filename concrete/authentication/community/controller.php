@@ -7,8 +7,10 @@ use Concrete\Core\Authentication\Type\Community\Service\Community;
 use Concrete\Core\Authentication\Type\Community\Service\Community as CommunityService;
 use Concrete\Core\Authentication\Type\OAuth\OAuth2\GenericOauth2TypeController;
 use Concrete\Core\Form\Service\Widget\GroupSelector;
+use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
 use Concrete\Core\User\Group\GroupRepository;
+use League\Url\UrlInterface;
 use OAuth\ServiceFactory;
 
 /**
@@ -38,10 +40,23 @@ class Controller extends GenericOauth2TypeController
         return 'community';
     }
 
+    public function handle_attach_attempt()
+    {
+        $attachCallbackUrl = $this->urlResolver->resolve(
+            ['/ccm/system/authentication/oauth2/community/attach_callback']
+        );
+        $service = $this->getService($attachCallbackUrl);
+        $url = $service->getAuthorizationUri($this->getAdditionalRequestParameters());
+
+        id(new RedirectResponse((string) $url))->send();
+        exit;
+    }
+
+
     /**
      * @return Community
      */
-    public function getService()
+    public function getService(UrlInterface $callbackUrl = null)
     {
         if (!$this->service) {
             /** @var ServiceFactory $serviceFactory */
@@ -50,7 +65,7 @@ class Controller extends GenericOauth2TypeController
 
             /** @var CommunityServiceFactory $communityFactory */
             $communityFactory = $this->app->make(CommunityServiceFactory::class);
-            $this->service = $communityFactory->createService($serviceFactory);
+            $this->service = $communityFactory->createService($serviceFactory, $callbackUrl);
         }
 
         return $this->service;

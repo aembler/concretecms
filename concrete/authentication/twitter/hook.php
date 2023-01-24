@@ -16,7 +16,6 @@ defined('C5_EXECUTE') or die('Access Denied');
 </div>
 <style>
     .ccm-ui .btn-twitter {
-        border-width: 0px;
         background: #00aced;
     }
 

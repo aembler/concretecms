@@ -7,6 +7,7 @@ use Concrete\Core\Application\ApplicationAwareTrait;
 use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Http\Request;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
+use League\Url\UrlInterface;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Storage\SymfonySession;
 use OAuth\ServiceFactory;
@@ -57,7 +58,7 @@ class TwitterServiceFactory implements ApplicationAwareInterface
      *
      * @return \OAuth\Common\Service\ServiceInterface
      */
-    public function createService()
+    public function createService(UrlInterface $callbackUrl = null)
     {
         $appId = $this->config->get('auth.twitter.appid');
         $appSecret = $this->config->get('auth.twitter.secret');
@@ -66,7 +67,9 @@ class TwitterServiceFactory implements ApplicationAwareInterface
         $factory = $this->app->make('oauth/factory/service');
 
         // Get the callback url
-        $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/twitter/callback/']);
+        if (!$callbackUrl) {
+            $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/twitter/callback/']);
+        }
         if ($callbackUrl->getHost() == '') {
             $callbackUrl = $callbackUrl->setHost($this->request->getHost());
             $callbackUrl = $callbackUrl->setScheme($this->request->getScheme());

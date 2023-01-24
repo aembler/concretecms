@@ -13,6 +13,7 @@ use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\User\Group\GroupRepository;
 use Concrete\Core\User\User;
 use Concrete\Core\Utility\Service\Validation\Strings;
+use League\Url\UrlInterface;
 use OAuth\OAuth2\Service\Google;
 
 class Controller extends GenericOauth2TypeController
@@ -40,15 +41,27 @@ class Controller extends GenericOauth2TypeController
     /**
      * @return Google
      */
-    public function getService()
+    public function getService(UrlInterface $callbackUrl = null)
     {
         if (!$this->service) {
             /** @var GoogleServiceFactory $factory */
             $factory = $this->app->make(GoogleServiceFactory::class);
-            $this->service = $factory->createService();
+            $this->service = $factory->createService($callbackUrl);
         }
 
         return $this->service;
+    }
+
+    public function handle_attach_attempt()
+    {
+        $attachCallbackUrl = $this->urlResolver->resolve(
+            ['/ccm/system/authentication/oauth2/google/attach_callback']
+        );
+        $service = $this->getService($attachCallbackUrl);
+        $url = $service->getAuthorizationUri($this->getAdditionalRequestParameters());
+
+        id(new RedirectResponse((string) $url))->send();
+        exit;
     }
 
     public function saveAuthenticationType($args)

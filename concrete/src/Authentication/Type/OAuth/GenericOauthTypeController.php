@@ -5,6 +5,7 @@ use Concrete\Core\Authentication\AuthenticationType;
 use Concrete\Core\Authentication\AuthenticationTypeController;
 use Concrete\Core\Database\Connection\Connection;
 use Concrete\Core\User\User;
+use League\Url\UrlInterface;
 use OAuth\Common\Exception\Exception;
 use OAuth\Common\Service\AbstractService;
 use OAuth\Common\Token\TokenInterface;
@@ -295,7 +296,7 @@ abstract class GenericOauthTypeController extends AuthenticationTypeController
     /**
      * @return AbstractService
      */
-    abstract public function getService();
+    abstract public function getService(UrlInterface $callbackUrl = null);
 
     protected function isValid()
     {

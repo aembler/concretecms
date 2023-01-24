@@ -62,14 +62,16 @@ class CommunityServiceFactory
      * @param \OAuth\ServiceFactory $factory
      * @return \OAuth\Common\Service\ServiceInterface
      */
-    public function createService(ServiceFactory $factory)
+    public function createService(ServiceFactory $factory, UrlInterface $callbackUrl = null)
     {
         $appId = $this->config->get('auth.community.appid');
         $appSecret = $this->config->get('auth.community.secret');
 
         // Get the callback url
         /** @var Url $callbackUrl */
-        $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/community/callback/']);
+        if (!$callbackUrl) {
+            $callbackUrl = $this->urlResolver->resolve(['/ccm/system/authentication/oauth2/community/callback/']);
+        }
         if ($callbackUrl->getHost() == '') {
             $callbackUrl = $callbackUrl->setHost($this->request->getHost());
             $callbackUrl = $callbackUrl->setScheme($this->request->getScheme());

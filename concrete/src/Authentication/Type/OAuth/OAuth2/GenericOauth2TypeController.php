@@ -76,14 +76,6 @@ abstract class GenericOauth2TypeController extends GenericOauthTypeController
         exit;
     }
 
-    public function handle_attach_attempt()
-    {
-        $url = $this->getService()->getAuthorizationUri($this->getAdditionalRequestParameters());
-
-        id(new RedirectResponse((string) $url))->send();
-        exit;
-    }
-
     public function handle_attach_callback()
     {
         $user = $this->app->make(User::class);
@@ -109,8 +101,9 @@ abstract class GenericOauth2TypeController extends GenericOauthTypeController
         } catch (InvalidAuthorizationStateException $e) {
             $this->showError(t('Invalid state token provided, please try again.'));
             exit;
+        } catch (\Exception $e) {
+            dd($e);
         }
-
         if ($token) {
             if ($this->bindUser($user, $this->getExtractor(true)->getUniqueId())) {
                 $this->showSuccess(t('Successfully attached.'));
@@ -119,14 +112,6 @@ abstract class GenericOauth2TypeController extends GenericOauthTypeController
         }
         $this->showError(t('Unable to attach user.'));
         exit;
-    }
-
-    /**
-     * @return \OAuth\OAuth2\Service\AbstractService
-     */
-    public function getService()
-    {
-        return parent::getService();
     }
 
     public function view()
