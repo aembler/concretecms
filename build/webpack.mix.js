@@ -10,7 +10,7 @@ mix.override((config) => {
 });
 
 mix.webpackConfig({
-    /* cache: false,*/ // Uncomment if you're working with changes in node_modules like developing bedrock
+    cache: false,
     resolve: {
         symlinks: false
     },
@@ -68,7 +68,17 @@ if (mix.inProduction()) {
     mix.copy('node_modules/@fortawesome/fontawesome-free/css/all.css', '../concrete/css/fontawesome/all.css');
     mix.copy('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js', '../concrete/js/bootstrap.js');
     mix.copy('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map', '../concrete/js/bootstrap.bundle.min.js.map');
-    mix.copy('node_modules/ckeditor4', '../concrete/js/ckeditor');
+    mix.copy('node_modules/ckeditor4/adapters', '../concrete/js/ckeditor/adapters');
+mix.copy('node_modules/ckeditor4/ckeditor.js', '../concrete/js/ckeditor/ckeditor.js');
+mix.copy('node_modules/ckeditor4/config.js', '../concrete/js/ckeditor/config.js');
+mix.copy('node_modules/ckeditor4/contents.css', '../concrete/js/ckeditor/contents.css');
+mix.copy('node_modules/ckeditor4/lang', '../concrete/js/ckeditor/lang');
+mix.copy('node_modules/ckeditor4/plugins', '../concrete/js/ckeditor/plugins');
+mix.copy('node_modules/ckeditor4/skins', '../concrete/js/ckeditor/skins');
+mix.copy('node_modules/ckeditor4/styles.js', '../concrete/js/ckeditor/styles.js');
+mix.copy('node_modules/ckeditor4/vendor', '../concrete/js/ckeditor/vendor');
+
+
     mix.copy('node_modules/ace-builds/src-min', '../concrete/js/ace');
 
 

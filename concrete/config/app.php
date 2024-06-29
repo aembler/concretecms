@@ -161,6 +161,9 @@ return [
         // Api - has to come after Express (and possibly other items)
         'core_api' => 'Concrete\Core\Api\ApiServiceProvider',
 
+        // Marketplace
+        'core_marketplace' => \Concrete\Core\Marketplace\MarketplaceServiceProvider::class,
+
         // Symfony Components
         'core_twig' => 'Concrete\Core\Twig\TwigServiceProvider',
         'core_symfony_form' => 'Concrete\Core\Providers\SymfonyFormServiceProvider',
@@ -600,6 +603,13 @@ return [
             ['css', 'css/translator.css', ['minify' => false]],
         ],
 
+        // Todo: remove this when jQuery UI is fully removed from concrete/js/cms.js. This is a separate
+        // asset because we need the dynamic endpoint to load translations for jQuery UI
+        // See (https://github.com/concretecms/concretecms/issues/11901)
+        'jquery/ui' => [
+            ['javascript-localized', '/ccm/assets/localization/jquery/ui/js'],
+        ],
+
         'htmldiff' => [
             ['css', 'css/htmldiff.css'],
         ],
@@ -658,6 +668,7 @@ return [
                 ['javascript', 'core/cms'],
                 ['javascript-localized', 'core/cms'],
                 ['css', 'core/cms'],
+                ['javascript-localized', 'jquery/ui'],
             ],
         ],
         'fullcalendar' => [

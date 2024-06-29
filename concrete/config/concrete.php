@@ -6,9 +6,9 @@ return [
      *
      * @var string
      */
-    'version' => '10.0.0a1',
-    'version_installed' => '10.0.0a1',
-    'version_db' => '20231002142400', // the key of the latest database migration
+    'version' => '10.0.2',
+    'version_installed' => '10.0.2',
+    'version_db' => '20240515173142', // the key of the latest database migration
 
     /*
      * Installation status
@@ -789,8 +789,8 @@ return [
         'enable_permissions_protection' => true,
         'check_threshold' => 172800,
         'services' => [
-            'get_available_updates' => 'https://marketplace.concretecms.com/tools/update_core',
-            'inspect_update' => 'https://marketplace.concretecms.com/tools/inspect_update',
+            'get_available_updates' => 'https://www.concretecms.com/api/remote_update/update_core',
+            'inspect_update' => 'https://www.concretecms.com/api/remote_update/inspect_update',
         ],
         // Set to true to skip checking if there's a newer core version available (useful for example if the core is upgraded via composer)
         'skip_core' => false,
@@ -958,13 +958,12 @@ return [
         ],
     ],
     'urls' => [
-        'concrete' => 'http://marketplace.concretecms.com',
-        'concrete_secure' => 'https://marketplace.concretecms.com',
         'concrete_community' => 'https://community.concretecms.com',
+        'package_repository' => 'https://dl.market.concretecms.com',
+        'marketplace' => 'https://market.concretecms.com',
         'background_feed' => 'https://backgroundimages.concretecms.com/wallpaper',
         'privacy_policy' => '//www.concretecms.com/about/legal/privacy-policy',
-        'background_feed_secure' => 'https://backgroundimages.concrete5.org/wallpaper',
-        'background_info' => 'http://backgroundimages.concretecms.com/get_image_data.php',
+        'background_info' => 'https://backgroundimages.concretecms.com/get_image_data.php',
         'videos' => 'https://www.youtube.com/user/concrete5cms/videos',
         'activity_slots' => 'https://marketing.concretecms.com/ccm/marketing/activity_slots',
         'help' => [
@@ -975,18 +974,17 @@ return [
             'remote_search' => 'https://documentation.concretecms.org/ccm/documentation/remote_search',
         ],
         'paths' => [
-            'site_page' => '/private/sites',
+            'package_repository' => [
+                'connect' => '/concrete/connect',
+                'connect_validate' => '/concrete/connect/validate',
+                'update' => '/concrete/update',
+                'register_url' => '/concrete/connect/register_url',
+                'list' => '/concrete/public/list',
+                'get' => '/concrete/public/package/%s',
+            ],
             'marketplace' => [
-                'projects' => '/profile/projects/',
-                'connect' => '/marketplace/connect',
-                'connect_success' => '/marketplace/connect/-/connected',
-                'connect_validate' => '/marketplace/connect/-/validate',
-                'connect_new_token' => '/marketplace/connect/-/generate_token',
-                'checkout' => '/cart/-/add',
-                'purchases' => '/marketplace/connect/-/get_available_licenses',
-                'item_information' => '/marketplace/connect/-/get_item_information',
-                'item_free_license' => '/marketplace/connect/-/enable_free_license',
-                'remote_item_list' => '/marketplace/',
+                'connect' => '/depot/connect',
+                'projects' => '/account/sites/details',
             ],
         ],
     ],
