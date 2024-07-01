@@ -52,7 +52,7 @@ class ThemeStartingPoint extends AbstractStartingPoint
 
     public function getName(): string
     {
-        return $this->theme->getThemeName();
+        return (string) $this->theme->getThemeName();
     }
 
     public function getThumbnail(): ?string

@@ -67,13 +67,20 @@ class InstallDatabaseRoutineHandler
             $config->setMetadataDriverImpl($driverImpl);
             $em = EntityManager::create($this->db, $config);
             $dbm = new DatabaseStructureManager($em);
-            $dbm->destroyProxyClasses();
-            $dbm->generateProxyClasses();
+            //$dbm->destroyProxyClasses();
+            //$dbm->generateProxyClasses();
 
-            Package::installDB($installDirectory . '/db.xml');
+            $installSqlFile = DIR_BASE_CORE
+                . DIRECTORY_SEPARATOR
+                . DIRNAME_CONFIG
+                . DIRECTORY_SEPARATOR
+                . 'install'
+                . DIRECTORY_SEPARATOR
+                . 'database'
+                . DIRECTORY_SEPARATOR
+                . 'install.sql';
 
-            $dbm->installDatabase();
-            $this->indexAdditionalDatabaseFields();
+            $this->db->executeQuery(file_get_contents($installSqlFile));
 
             $configuration = new Configuration();
             $version = $configuration->getVersion($this->config->get('concrete.version_db'));

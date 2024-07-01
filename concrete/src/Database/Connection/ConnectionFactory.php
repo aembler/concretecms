@@ -38,9 +38,10 @@ class ConnectionFactory
         if (!isset($params['driverOptions'])) {
             $params['driverOptions'] = [];
         }
+        /*
         if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
             $params['driverOptions'][\PDO::MYSQL_ATTR_MULTI_STATEMENTS] = false;
-        }
+        }*/
         $params['wrapperClass'] = array_get($config, 'wrapperClass', '\Concrete\Core\Database\Connection\Connection');
         unset($params['driver']);
 
