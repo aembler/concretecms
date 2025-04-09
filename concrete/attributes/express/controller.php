@@ -205,9 +205,24 @@ class Controller extends AttributeTypeController implements
         return ExpressSettings::class;
     }
 
+    public function validateKey($data = false)
+    {
+        if ($data == false) {
+            $data = $this->post();
+        }
+
+        $e = $this->app->make('error');
+
+        if (!isset($data['exEntityID'])) {
+            $e->add(t('You must specify a valid Express entity.'));
+        }
+
+        return $e;
+    }
+
     public function validateForm($p)
     {
-        return $p['value'] != false;
+        return is_array($p) && isset($p['value']) && $p['value'] != false;
     }
 
     public function validateValue()

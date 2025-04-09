@@ -88,7 +88,7 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
      */
     protected $includeInactivePages = false;
 
-    public function __construct(StickyRequest $req = null)
+    public function __construct(?StickyRequest $req = null)
     {
         $u = Application::getFacadeApplication()->make(User::class);
         if ($u->isSuperUser()) {
@@ -138,7 +138,7 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
         $this->includeSystemPages = true;
     }
 
-    public function setPermissionsChecker(\Closure $checker = null)
+    public function setPermissionsChecker(?\Closure $checker = null)
     {
         $this->permissionsChecker = $checker;
     }
@@ -188,7 +188,6 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
 
     public function finalizeQuery(\Doctrine\DBAL\Query\QueryBuilder $query)
     {
-        $expr = $query->expr();
         if ($this->includeAliases) {
             $query->from('Pages', 'p')
                 ->leftJoin('p', 'Pages', 'pa', 'p.cPointerID = pa.cID')
@@ -209,24 +208,41 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
                 ->andWhere('p.cIsTemplate = 0');
         }
 
+        $app = Application::getFacadeApplication();
         switch ($this->pageVersionToRetrieve) {
             case self::PAGE_VERSION_RECENT:
-                $query->andWhere('cv.cvID = (select max(cvID) from CollectionVersions where cID = cv.cID)');
+                $query->innerJoin(
+                    'p',
+                    '(select cID, max(cvID) as max_cvID from CollectionVersions group by cID)',
+                    'cv_max',
+                    'cv_max.cID = p.cID and cv_max.max_cvID = cv.cvID'
+                );
                 break;
             case self::PAGE_VERSION_RECENT_UNAPPROVED:
-                $query
-                    ->andWhere('cv.cvID = (select max(cvID) from CollectionVersions where cID = cv.cID)')
-                    ->andWhere($expr->eq('cvIsApproved', 0));
+                $query->innerJoin(
+                    'p',
+                    '(select cID, max(cvID) as max_cvID from CollectionVersions where cvIsApproved = 0 group by cID)',
+                    'cv_max',
+                    'cv_max.cID = p.cID and cv_max.max_cvID = cv.cvID'
+                );
                 break;
             case self::PAGE_VERSION_SCHEDULED:
-                $now = new \DateTime();
-                $query->andWhere('cv.cvID = (select cvID from CollectionVersions where cID = cv.cID and cvIsApproved = 1 and ((cvPublishDate > :cvPublishDate) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)) order by cvPublishDate desc limit 1)');
-                $query->setParameter('cvPublishDate', $now->format('Y-m-d H:i:s'));
+                $query->innerJoin(
+                    'p',
+                    '(select cID, max(cvPublishDate) as max_cvPublishDate from CollectionVersions where cvIsApproved = 1 and ((cvPublishDate > :cvPublishDate) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)) group by cID)',
+                    'cv_max',
+                    'cv_max.cID = p.cID and cv_max.max_cvPublishDate = cv.cvPublishDate'
+                );
+                $query->setParameter('cvPublishDate', $app->make('date')->getOverridableNow());
                 break;
             case self::PAGE_VERSION_ACTIVE:
             default:
-                $app = Application::getFacadeApplication();
-                $query->andWhere('cv.cvID = (select max(cvID) from CollectionVersions where cID = cv.cID and cvIsApproved = 1 and ((cvPublishDate <= :cvPublishDate or cvPublishDate is null) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)))');
+                $query->innerJoin(
+                  'p',
+                  '(select cID, max(cvID) as max_cvID from CollectionVersions where cvIsApproved = 1 and ((cvPublishDate <= :cvPublishDate or cvPublishDate is null) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)) group by cID)',
+                  'cv_max',
+                  'cv_max.cID = p.cID and cv_max.max_cvID = cv.cvID'
+                );
                 $query->setParameter('cvPublishDate', $app->make('date')->getOverridableNow());
                 break;
         }
@@ -245,13 +261,13 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
             } else {
                 switch ($this->siteTree) {
                     case self::SITE_TREE_CURRENT:
-                        $c = \Page::getCurrentPage();
+                        $c = Page::getCurrentPage();
                         $tree = false;
                         if (is_object($c) && !$c->isError()) {
                             $tree = $c->getSiteTreeObject();
                         }
                         if (!is_object($tree)) {
-                            $site = \Core::make('site')->getSite();
+                            $site = $app->make('site')->getSite();
                             $tree = $site->getSiteTreeObject();
                         }
                         break;
@@ -480,6 +496,10 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
      */
     public function filterByPagesWithCustomStyles()
     {
+        if ($this->queryHasAlias('cvStyles')) {
+            return;
+        }
+
         $this->query->innerJoin(
             'cv',
             'CollectionVersionThemeCustomStyles',
@@ -562,7 +582,14 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
      */
     public function filterByPath($path, $includeAllChildren = true)
     {
-        $this->query->leftJoin('p', 'PagePaths', 'pp', 'p.cID = pp.cID and pp.ppIsCanonical = true');
+        if (!is_string($path)) {
+            return;
+        }
+
+        if (!$this->queryHasAlias('pp')) {
+            $this->query->leftJoin('p', 'PagePaths', 'pp', 'p.cID = pp.cID and pp.ppIsCanonical = true');
+        }
+
         if (!$includeAllChildren) {
             $this->query->andWhere('pp.cPath = :cPath');
             $this->query->setParameter('cPath', $path);
@@ -691,6 +718,12 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
             $this->query->expr()->in('p.cID', $query->getSQL())
         );
         $this->query->setParameter('containerID', $containerID);
+    }
+
+    public function filterByCacheSettings($value)
+    {
+        $this->query->andWhere('p.cCacheFullPageContent = :cacheSettings');
+        $this->query->setParameter('cacheSettings', $value);
     }
 
 
@@ -826,5 +859,35 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
             $selects[0] = 'distinct p.cID';
             $this->query->select($selects);
         }
+    }
+
+    /**
+     * Checks whether the query already contains the given alias.
+     *
+     * This avoids the following kind of query exceptions in case the join would
+     * be added multiple times:
+     * The given alias 'pp' is not unique in FROM and JOIN clause table.
+     *
+     * This can happen e.g. at Concrete\Block\Search\Controller due to the
+     * `filterByPath` method potentially called multiple times.
+     *
+     * @property string $alias The alias to look for in the join statements.
+     *
+     * @example <code><pre>
+     * $this->queryHasAlias('pp');
+     * </code></pre>
+     */
+    protected function queryHasAlias($alias): bool
+    {
+        $queryParts = $this->query->getQueryPart('join');
+        foreach ($queryParts as $tableJoins) {
+            foreach ($tableJoins as $join) {
+                $value = $join['joinAlias'] ?? null;
+                if ($value === $alias) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

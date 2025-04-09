@@ -41,6 +41,7 @@ class Installer
     public function getRoutineFromRequest(): RoutineInterface
     {
         $routineData = $this->request->request->get('routine') ?? [];
+        dd($this->serializer);
         $routine = $this->serializer->denormalize($routineData, $routineData['class']);
         return $routine;
     }

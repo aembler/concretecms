@@ -2,13 +2,17 @@
 
 namespace Concrete\Tests\Block;
 
+use Concrete\Core\Application\Application;
 use Concrete\Core\Attribute\Key\Category;
 use Concrete\Core\Attribute\Key\FileKey;
 use Concrete\Core\Attribute\Type as AttributeType;
 use Concrete\Core\Cache\CacheLocal;
+use Concrete\Core\Database\Connection\Connection;
 use Concrete\Core\File\Import\FileImporter;
+use Concrete\Core\Utility\Service\Xml;
 use Concrete\TestHelpers\File\FileStorageTestCase;
-use Core;
+use Doctrine\DBAL\Platforms\MySqlPlatform;
+use Mockery as M;
 use SimpleXMLElement;
 
 class ContentFileTranslateTest extends FileStorageTestCase
@@ -69,19 +73,44 @@ class ContentFileTranslateTest extends FileStorageTestCase
         mkdir($this->getStorageDirectory());
         $this->getStorageLocation();
 
-        $fi = Core::make(FileImporter::class);
+        $fi = app(FileImporter::class);
         $file = DIR_TESTS . '/assets/Block/background-slider-blue-sky.png';
         $r = $fi->importLocalFile($file, 'background-slider-blue-sky.png');
-        $path = $r->getRelativePath();
+        $this->assertEquals('background-slider-blue-sky.png', $r->getFilename());
 
+        $path = $r->getRelativePath();
+        $config = app('site')->getSite()->getConfigRepository();
+        $config->withKey('misc.img_src_absolute', true, static function() use ($from, $path) {
+            $translated = \Concrete\Core\Editor\LinkAbstractor::translateFrom($from);
+            $to = '<p>This is really nice.</p><img src="http://www.dummyco.com' . $path . '" alt="Happy Cat" width="48" height="20">';
+            self::assertEquals($to, $translated);
+        });
         $translated = \Concrete\Core\Editor\LinkAbstractor::translateFrom($from);
 
         $to = '<p>This is really nice.</p><img src="' . $path . '" alt="Happy Cat" width="48" height="20">';
 
-        $this->assertEquals('background-slider-blue-sky.png', $r->getFilename());
+        
         $this->assertEquals($to, $translated);
 
         $c = app(\Concrete\Block\Content\Controller::class);
+        $btSchema = \DoctrineXml\Parser::fromFile(DIR_BASE_CORE . '/blocks/content/db.xml', new MySqlPlatform());
+        $btTables = $btSchema->getTables();
+        $tableName = reset($btTables)->getName();
+        $mRecordset = M::mock(\Doctrine\DBAL\Result::class);
+        $mRecordset
+            ->shouldReceive('fetchAssociative')->twice()->andReturn(['bID' => 1, 'content' => $from], false)
+        ;
+        $mConn = M::mock(Connection::class);
+        $mConn
+            ->shouldReceive('MetaColumns')->once()->with($tableName)->andReturn($btSchema->getTable($tableName)->getColumns())
+            ->shouldReceive('executeQuery')->once()->andReturn($mRecordset)
+        ;
+        $mApp = M::mock(Application::class);
+        $mApp
+            ->shouldReceive('make')->once()->with(Connection::class)->andReturn($mConn)
+            ->shouldReceive('make')->once()->with(Xml::class)->andReturn(app(Xml::class))
+        ;
+        $c->setApplication($mApp);
         $c->content = $from;
         $sx = new SimpleXMLElement('<test />');
         $c->export($sx);

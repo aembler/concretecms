@@ -17,8 +17,8 @@ use PageType;
 
 class ContentExporter
 {
-    protected static $mcBlockIDs = array();
-    protected static $ptComposerOutputControlIDs = array();
+    protected static $mcBlockIDs = [];
+    protected static $ptComposerOutputControlIDs = [];
 
     /**
      * @deprecated
@@ -64,8 +64,9 @@ class ContentExporter
     {
         if ($cID > 0) {
             $c = Page::getByID($cID);
-
-            return '{ccm:export:page:' . $c->getCollectionPath() . '}';
+            if ($c && !$c->isError()) {
+                return '{ccm:export:page:' . $c->getCollectionPath() . '}';
+            }
         }
     }
 

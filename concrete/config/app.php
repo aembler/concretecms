@@ -119,9 +119,10 @@ return [
         'core_announcement' => '\Concrete\Core\Announcement\AnnouncementServiceProvider',
         'core_form' => '\Concrete\Core\Form\FormServiceProvider',
         'core_session' => '\Concrete\Core\Session\SessionServiceProvider',
+        'core_sharing' => '\Concrete\Core\Sharing\SharingServiceProvider',
         'core_cookie' => '\Concrete\Core\Cookie\CookieServiceProvider',
         'core_http' => '\Concrete\Core\Http\HttpServiceProvider',
-        'core_whoops' => '\Concrete\Core\Error\Provider\WhoopsServiceProvider',
+        'core_error' => '\Concrete\Core\Error\Provider\ErrorHandlingServiceProvider',
         'core_element' => '\Concrete\Core\Filesystem\FilesystemServiceProvider',
         'core_notification' => '\Concrete\Core\Notification\NotificationServiceProvider',
         'core_mercure' => '\Concrete\Core\Notification\Events\MercureServiceProvider',
@@ -137,6 +138,8 @@ return [
         'core_summary' => '\Concrete\Core\Summary\ServiceProvider',
         'core_boards' => '\Concrete\Core\Board\ServiceProvider',
         'core_page' => \Concrete\Core\Page\PageServiceProvider::class,
+        'core_block' => \Concrete\Core\Block\BlockServiceProvider::class,
+        'core_area' => \Concrete\Core\Area\AreaServiceProvider::class,
 
         // Authentication
         'core_oauth' => '\Concrete\Core\Authentication\Type\OAuth\ServiceProvider',
@@ -164,8 +167,9 @@ return [
         // Symfony Components
         'core_twig' => 'Concrete\Core\Twig\TwigServiceProvider',
         'core_symfony_form' => 'Concrete\Core\Providers\SymfonyFormServiceProvider',
-        'core_serializer' => 'Concrete\Core\Providers\SerializerServiceProvider'
+        'core_serializer' => 'Concrete\Core\Providers\SerializerServiceProvider',
 
+        'core_marketplace' => \Concrete\Core\Marketplace\MarketplaceServiceProvider::class
     ],
 
     /*
@@ -600,6 +604,13 @@ return [
             ['css', 'css/translator.css', ['minify' => false]],
         ],
 
+        // Todo: remove this when jQuery UI is fully removed from concrete/js/cms.js. This is a separate
+        // asset because we need the dynamic endpoint to load translations for jQuery UI
+        // See (https://github.com/concretecms/concretecms/issues/11901)
+        'jquery/ui' => [
+            ['javascript-localized', '/ccm/assets/localization/jquery/ui/js'],
+        ],
+
         'htmldiff' => [
             ['css', 'css/htmldiff.css'],
         ],
@@ -641,6 +652,7 @@ return [
                 ['javascript', 'ckeditor'],
                 ['javascript', 'ckeditor/concrete'],
                 ['css', 'ckeditor/concrete'],
+                ['javascript-localized', 'core/cms'],
             ],
         ],
         'ace' => [
@@ -658,6 +670,7 @@ return [
                 ['javascript', 'core/cms'],
                 ['javascript-localized', 'core/cms'],
                 ['css', 'core/cms'],
+                ['javascript-localized', 'jquery/ui'],
             ],
         ],
         'fullcalendar' => [

@@ -4,8 +4,11 @@ namespace Concrete\Core\Block;
 use Concrete\Core\Area\Area;
 use Concrete\Core\Backup\ContentExporter;
 use Concrete\Core\Backup\ContentImporter;
-use Concrete\Core\Entity\Block\BlockType\BlockType;
 use Concrete\Core\Block\View\BlockViewTemplate;
+use Concrete\Core\Database\Connection\Connection;
+use Concrete\Core\Editor\LinkAbstractor;
+use Concrete\Core\Entity\Block\BlockType\BlockType;
+use Concrete\Core\Error\ErrorList\ErrorList;
 use Concrete\Core\File\Tracker\FileTrackableInterface;
 use Concrete\Core\Legacy\BlockRecord;
 use Concrete\Core\Page\Controller\PageController;
@@ -19,7 +22,6 @@ use Database;
 use Events;
 use Package;
 use Page;
-use Concrete\Core\Error\ErrorList\ErrorList;
 
 class BlockController extends \Concrete\Core\Controller\AbstractController
 {
@@ -49,12 +51,49 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     protected $btCacheBlockOutputOnPost = false;
     protected $btCacheBlockOutputForRegisteredUsers = false;
     protected $bActionCID;
+
+    /**
+     * The names of the columns that contain a page ID.
+     *
+     * @var string[]
+     */
     protected $btExportPageColumns = [];
+
+    /**
+     * The names of the columns that contain a file ID.
+     *
+     * @var string[]
+     */
     protected $btExportFileColumns = [];
+
+    /**
+     * The names of the columns that contain rich text (that is, HTML with possibly links to files and pages).
+     *
+     * @var string[]
+     */
     protected $btExportContentColumns = [];
+
+    /**
+     * The names of the columns that contain a page type ID.
+     *
+     * @var string[]
+     */
     protected $btExportPageTypeColumns = [];
+
+    /**
+     * The names of the columns that contain a feed ID.
+     *
+     * @var string[]
+     */
     protected $btExportPageFeedColumns = [];
+
+    /**
+     * The names of the columns that contain a file folder ID.
+     *
+     * @var string[]
+     */
     protected $btExportFileFolderColumns = [];
+
     protected $btWrapperClass = '';
     protected $btDefaultSet;
     protected $identifier;
@@ -94,6 +133,11 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         return $this->getBlockTypeName();
     }
 
+    /**
+     * Get the names of the columns that contain page IDs.
+     *
+     * @return string[]
+     */
     public function getBlockTypeExportPageColumns()
     {
         return $this->btExportPageColumns;
@@ -132,7 +176,7 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
      *
      * @return mixed boolean or object having ->result (boolean) and ->message (string) properties
      */
-    public function install($path)
+    public function install($path, string $importMode = ContentImporter::IMPORT_MODE_UPGRADE)
     {
         // passed path is the path to this block (try saying that ten times fast)
         // create the necessary table
@@ -143,7 +187,7 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
 
             return $r;
         }
-        $ret = Package::installDB($path . '/' . FILENAME_BLOCK_DB);
+        $ret = Package::installDB($path . '/' . FILENAME_BLOCK_DB, $importMode);
 
         return $ret;
     }
@@ -371,7 +415,7 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         } else {
             $tables = [$this->getBlockTypeDatabaseTable()];
         }
-        $db = Database::connection();
+        $db = $this->app->make(Connection::class);
 
         $xml = $this->app->make(Xml::class);
         foreach ($tables as $tbl) {
@@ -383,12 +427,13 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
             $columns = $db->MetaColumns($tbl);
             // remove columns we don't want
             unset($columns['bid']);
-            $r = $db->Execute('select * from ' . $tbl . ' where bID = ?', [$this->bID]);
-            while ($record = $r->fetch()) {
+            $r = $db->executeQuery('select * from ' . $tbl . ' where bID = ?', [$this->bID]);
+            $btExportPageColumns = $this->getBlockTypeExportPageColumns();
+            while (($record = $r->fetchAssociative()) !== false) {
                 $tableRecord = $data->addChild('record');
                 foreach ($record as $key => $value) {
                     if (isset($columns[strtolower($key)])) {
-                        if (in_array($key, $this->btExportPageColumns)) {
+                        if (in_array($key, $btExportPageColumns)) {
                             $tableRecord->addChild($key, ContentExporter::replacePageWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportFileColumns)) {
                             $tableRecord->addChild($key, ContentExporter::replaceFileWithPlaceHolder($value));
@@ -398,6 +443,8 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
                             $tableRecord->addChild($key, ContentExporter::replacePageFeedWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportFileFolderColumns)) {
                             $tableRecord->addChild($key, ContentExporter::replaceFileFolderWithPlaceHolder($value));
+                        } elseif (in_array($key, $this->btExportContentColumns)) {
+                            $tableRecord->addChild($key, LinkAbstractor::export((string) $value));
                         } else {
                             $xml->createChildElement($tableRecord, $key, $value);
                         }
@@ -412,6 +459,13 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         return $this->btTable;
     }
 
+    /**
+     * @param \Concrete\Core\Page\Page $page
+     * @param string $arHandle
+     * @param \SimpleXMLElement $blockNode
+     *
+     * @return \Concrete\Core\Block\Block
+     */
     public function import($page, $arHandle, \SimpleXMLElement $blockNode)
     {
         $xml = $this->app->make(Xml::class);
@@ -467,6 +521,8 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
             $blockController = $b->getController(); // We have to do this because we need it loaded with the right block object, data.
             $this->app->make(AggregateTracker::class)->track($blockController);
         }
+
+        return $b;
     }
 
     /**
@@ -479,11 +535,12 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         $args = [];
         $inspector = \Core::make('import/value_inspector');
         if (isset($blockNode->data)) {
+            $btExportPageColumns = $this->getBlockTypeExportPageColumns();
             foreach ($blockNode->data as $data) {
                 if ($data['table'] == $this->getBlockTypeDatabaseTable()) {
                     if (isset($data->record)) {
                         foreach ($data->record->children() as $key => $node) {
-                            if (in_array($key, $this->btExportPageColumns)
+                            if (in_array($key, $btExportPageColumns)
                                 || in_array($key, $this->btExportFileColumns)
                                 || in_array($key, $this->btExportPageTypeColumns)
                                 || in_array($key, $this->btExportPageFeedColumns)
@@ -509,6 +566,7 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     {
         $inspector = \Core::make('import/value_inspector');
         if (isset($blockNode->data)) {
+            $btExportPageColumns = $this->getBlockTypeExportPageColumns();
             foreach ($blockNode->data as $data) {
                 if (strtoupper((string) $data['table']) != strtoupper((string) $this->getBlockTypeDatabaseTable())) {
                     $table = (string) $data['table'];
@@ -518,7 +576,7 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
                             $aar->bID = $b->getBlockID();
                             foreach ($record->children() as $key => $node) {
                                 $nodeName = $node->getName();
-                                if (in_array($key, $this->btExportPageColumns)
+                                if (in_array($key, $btExportPageColumns)
                                     || in_array($key, $this->btExportFileColumns)
                                     || in_array($key, $this->btExportPageTypeColumns)
                                     || in_array($key, $this->btExportPageFeedColumns)
@@ -686,9 +744,10 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         }
 
         // This block is new for 9.0.2 – we need this because we're passing around blocks with page objects in them
-        // for file trackability, but without this code we lose the reference to the proper collection + collection version
+        // for file trackability, but without this code we lose the reference to the proper collection + collection version.
+        // We ignore blocks on system pages because they are stacks.
         $blockPage = $this->block->getBlockCollectionObject();
-        if ($blockPage) {
+        if ($blockPage && !$blockPage->isSystemPage()) {
             return $blockPage;
         }
 

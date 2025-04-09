@@ -310,7 +310,8 @@ class PageListTest extends PageTestCase
         $nl = new \Concrete\Core\Page\PageList();
         $nl->includeAliases();
         $nl->ignorePermissions();
-        $nl->sortByName();
+        $nl->getQueryObject()->addOrderBy('cv.cvName', 'asc');
+        $nl->getQueryObject()->addOrderBy('p.cID', 'asc');
         $total = $nl->getPagination()->getTotalResults();
         $results = $nl->getPagination()->setMaxPerPage(10)->getCurrentPageResults();
         $this->assertEquals(18, $total);
@@ -365,6 +366,34 @@ class PageListTest extends PageTestCase
         $nl->filterByPath('/test-page-1', false);
         $pagination = $nl->getPagination();
         $this->assertEquals(1, $pagination->getNBResults());
+    }
+
+    public function testFilterByMultiplePaths()
+    {
+        $this->createPage('More Fun', '/test-page-1/foobler');
+        $this->createPage('Extreme Fun', '/test-page-2');
+
+        $this->list->filterByPath('/test-page-1');
+        $this->list->filterByPath('/test-page-2');
+        $totalResults = $this->list->getTotalResults();
+        $this->assertEquals(4, $totalResults);
+    }
+
+    public function testFilterByPathWithArray()
+    {
+        $this->createPage('More Fun', '/test-page-1/foobler');
+
+        $this->list->filterByPath(['/test-page-1']);
+        $totalResults = $this->list->getTotalResults();
+        $this->assertEquals(18, $totalResults);
+    }
+
+    public function testFilterByPagesWithCustomStyles()
+    {
+        $this->list->filterByPagesWithCustomStyles();
+        $this->list->filterByPagesWithCustomStyles();
+        $totalResults = $this->list->getTotalResults();
+        $this->assertEquals(0, $totalResults);
     }
 
     public function testBasicFeedSave()
