@@ -1,162 +1,153 @@
 <template>
-    <form class="w-100" ref="environmentForm">
-        <div class="text-center">
-            <img :src="logo" style="max-height: 48px" class="bg-primary rounded-circle">
-        </div>
-        <div>
-            <h3 class="text-center mb-4 mt-3">{{  lang.stepEnvironment }}</h3>
-        </div>
-        <div class="card card-default mb-5">
-            <div class="card-header">{{ lang.site }}</div>
-            <div id="site" class="">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">{{  lang.siteName }}</label>
-                                <input type="text" class="form-control form-control-lg" v-model="site.name" autofocus="autofocus" required="required">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">{{  lang.email }}</label>
-                                <input type="email" class="form-control form-control-lg" v-model="adminUser.email" required="required">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">{{  lang.password }}</label>
-                                <input type="password" class="form-control form-control-lg" v-model="adminUser.password" required="required">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">{{  lang.confirmPassword }}</label>
-                                <input type="password" class="form-control form-control-lg" v-model="adminUser.confirmPassword" required="required">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card card-default mb-5">
-            <div class="card-header">{{ lang.database }}</div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">{{  lang.dbServer }}</label>
-                            <input type="text" class="form-control form-control-lg" v-model="database.server" required="required">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">{{  lang.dbUsername }}</label>
-                            <input type="text" class="form-control form-control-lg" v-model="database.username">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">{{  lang.dbPassword }}</label>
-                            <input type="password" class="form-control form-control-lg" v-model="database.password">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">{{  lang.dbDatabase }}</label>
-                            <input type="text" class="form-control form-control-lg" v-model="database.database" required="required">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card card-default mb-5">
-            <div class="card-header">
-                {{lang.privacyPolicy}}
-            </div>
-            <div class="card-body">
-                <p class="text-muted">{{lang.privacyPolicyExplanation}}</p>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" required v-model="site.privacyPolicy" id="privacyPolicy">
-                    <label class="form-check-label" for="privacyPolicy"><span v-html="lang.privacyPolicyLabel"></span></label>
-                </div>
-            </div>
-        </div>
-        <div class="card card-default">
-            <div class="card-header">{{ lang.advancedOptions }}</div>
-            <div class="card-body container">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <div class="form-label">
-                                <input type="checkbox" class="form-check-input" id="canonicalUrlChecked" v-model="site.hasCanonicalUrl">
-                                <label class="form-check-label" for="canonicalUrlChecked">
-                                    {{lang.mainCanonicalUrl}}
-                                </label>
-                            </div>
-                            <input v-model="site.canonicalUrl" class="form-control form-control-lg" type="url" pattern="https?:.+" :placeholder="lang.urlPlaceholder" :disabled="!site.hasCanonicalUrl">
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-label">
-                                <input type="checkbox" class="form-check-input" id="alternativeCanonicalUrlChecked" v-model="site.hasAlternativeCanonicalUrl">
-                                <label class="form-check-label" for="alternativeCanonicalUrlChecked">
-                                    {{lang.alternativeCanonicalUrl}}
-                                </label>
-                            </div>
-                            <input v-model="site.alternativeCanonicalUrl" class="form-control form-control-lg" type="url" pattern="https?:.+" :placeholder="lang.urlPlaceholder" :disabled="!site.hasAlternativeCanonicalUrl">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{lang.sessionHandler}}</label>
-                            <select class="form-control form-control-lg" v-model="session.handler">
-                                <option value="">{{lang.sessionHandlerDefault}}</option>
-                                <option value="database">{{lang.sessionHandlerDatabase}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">{{lang.language}}</label>
-                            <select v-model="localization.siteLocaleLanguage" class="form-select form-select-lg">
-                                <option v-for="(language, code) in languages" :value="code">{{ language }}</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{lang.country}}</label>
-                            <select v-model="localization.siteLocaleCountry" class="form-select form-select-lg">
-                                <option v-for="(country, code) in countries" :value="code">{{ country }}</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{lang.timezone}}</label>
-                            <select v-model="localization.timezone" class="form-select form-select-lg">
-                                <option v-for="(timezone, code) in timezones" :value="code">{{ timezone }}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <form class="w-full" ref="environmentForm">
+    <div class="text-center mb-6">
+      <img :src="logo" class="rounded-full bg-primary mx-auto" style="max-height: 48px;" />
+    </div>
 
-        <div class="ccm-install-actions">
-            <button class="me-auto btn btn-secondary" type="button" @click="$emit('previous')">
-                {{lang.back}}
-            </button>
+    <h3 class="text-center mb-6 text-2xl font-semibold">{{ lang.stepEnvironment }}</h3>
 
-            <button class="ms-auto btn btn-primary" type="button" @click="next">
-                {{lang.next}}
-            </button>
+    <!-- Site & Admin Info -->
+    <div class="card bg-base-100 shadow-md mb-8">
+      <div class="card-body">
+        <div class="card-title">{{ lang.site }}</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="label"><span class="label-text">{{ lang.siteName }}</span></label>
+            <input type="text" class="input input-lg input-bordered w-full" v-model="site.name" required autofocus />
+          </div>
+          <div>
+            <label class="label"><span class="label-text">{{ lang.email }}</span></label>
+            <input type="email" class="input input-lg input-bordered w-full" v-model="adminUser.email" required />
+          </div>
+          <div>
+            <label class="label"><span class="label-text">{{ lang.password }}</span></label>
+            <input type="password" class="input input-lg input-bordered w-full" v-model="adminUser.password" required />
+          </div>
+          <div>
+            <label class="label"><span class="label-text">{{ lang.confirmPassword }}</span></label>
+            <input type="password" class="input input-lg input-bordered w-full" v-model="adminUser.confirmPassword" required />
+          </div>
         </div>
+      </div>
+    </div>
 
-    </form>
+    <!-- Database Info -->
+    <div class="card bg-base-100 shadow-md mb-8">
+      <div class="card-body">
+        <div class="card-title">{{ lang.database }}</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="label"><span class="label-text">{{ lang.dbServer }}</span></label>
+            <input type="text" class="input input-lg input-bordered w-full" v-model="database.server" required />
+          </div>
+          <div>
+            <label class="label"><span class="label-text">{{ lang.dbUsername }}</span></label>
+            <input type="text" class="input input-lg input-bordered w-full" v-model="database.username" />
+          </div>
+          <div>
+            <label class="label"><span class="label-text">{{ lang.dbPassword }}</span></label>
+            <input type="password" class="input input-lg input-bordered w-full" v-model="database.password" />
+          </div>
+          <div>
+            <label class="label"><span class="label-text">{{ lang.dbDatabase }}</span></label>
+            <input type="text" class="input input-lg input-bordered w-full" v-model="database.database" required />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy Policy -->
+    <div class="card bg-base-100 shadow-md mb-8">
+      <div class="card-body">
+        <div class="card-title">{{ lang.privacyPolicy }}</div>
+        <p class="text-sm text-gray-500 mb-4">{{ lang.privacyPolicyExplanation }}</p>
+        <div class="form-control">
+          <label class="cursor-pointer label">
+            <input type="checkbox" class="checkbox mr-2" required v-model="site.privacyPolicy" />
+            <span v-html="lang.privacyPolicyLabel"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Options -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <div class="card-title">{{ lang.advancedOptions }}</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div class="form-control mb-4">
+              <label class="cursor-pointer label">
+                <input type="checkbox" class="checkbox mr-2" v-model="site.hasCanonicalUrl" />
+                <span class="label-text">{{ lang.mainCanonicalUrl }}</span>
+              </label>
+              <input v-model="site.canonicalUrl" class="input input-lg input-bordered w-full mt-2" type="url"
+                     pattern="https?:.+" :placeholder="lang.urlPlaceholder" :disabled="!site.hasCanonicalUrl" />
+            </div>
+
+            <div class="form-control mb-4">
+              <label class="cursor-pointer label">
+                <input type="checkbox" class="checkbox mr-2" v-model="site.hasAlternativeCanonicalUrl" />
+                <span class="label-text">{{ lang.alternativeCanonicalUrl }}</span>
+              </label>
+              <input v-model="site.alternativeCanonicalUrl" class="input input-lg input-bordered w-full mt-2" type="url"
+                     pattern="https?:.+" :placeholder="lang.urlPlaceholder" :disabled="!site.hasAlternativeCanonicalUrl" />
+            </div>
+
+            <div class="mb-4">
+              <label class="label"><span class="label-text">{{ lang.sessionHandler }}</span></label>
+              <select class="select select-lg select-bordered w-full" v-model="session.handler">
+                <option value="">{{ lang.sessionHandlerDefault }}</option>
+                <option value="database">{{ lang.sessionHandlerDatabase }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-4">
+              <label class="label"><span class="label-text">{{ lang.language }}</span></label>
+              <select v-model="localization.siteLocaleLanguage" class="select select-lg select-bordered w-full">
+                <option v-for="(language, code) in languages" :value="code">{{ language }}</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="label"><span class="label-text">{{ lang.country }}</span></label>
+              <select v-model="localization.siteLocaleCountry" class="select select-lg select-bordered w-full">
+                <option v-for="(country, code) in countries" :value="code">{{ country }}</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="label"><span class="label-text">{{ lang.timezone }}</span></label>
+              <select v-model="localization.timezone" class="select select-lg select-bordered w-full">
+                <option v-for="(timezone, code) in timezones" :value="code">{{ timezone }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <Actions>
+      <button class="btn btn-secondary mr-auto" type="button" @click="$emit('previous')">
+        {{ lang.back }}
+      </button>
+      <button class="btn btn-primary ml-auto" type="button" @click="next">
+        {{ lang.next }}
+      </button>
+    </Actions>
+  </form>
 </template>
+
 <script>
+
+import Actions from "./Actions.vue";
 
 export default {
     components: {
+      Actions
     },
     methods: {
         next() {

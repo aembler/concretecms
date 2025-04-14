@@ -9,6 +9,12 @@ class PageTheme extends \Concrete\Core\Page\Theme\Theme
 
     use BedrockThemeTrait;
 
+    public function registerAssets()
+    {
+        $this->requireAsset('jquery');
+        $this->requireAsset('vue');
+    }
+
     public function getThemeSupportedFeatures()
     {
         return [

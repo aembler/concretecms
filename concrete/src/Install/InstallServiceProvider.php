@@ -9,6 +9,7 @@ use Concrete\Core\Install\StartingPoint\Installer\Routine\InstallOptionsAwareInt
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\CustomNormalizer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
@@ -24,8 +25,8 @@ class InstallServiceProvider extends ServiceProvider
                 function () {
                     $serializer = new JsonSerializer(
                         [
+                            new CustomNormalizer(),
                             new JsonSerializableNormalizer(),
-                            new GetSetMethodNormalizer(),
                         ], [
                             new JsonEncoder()
                         ]

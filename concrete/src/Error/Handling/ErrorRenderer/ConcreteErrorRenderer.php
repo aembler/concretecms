@@ -57,10 +57,14 @@ class ConcreteErrorRenderer implements ErrorRendererInterface
      */
     protected function getSetting(): string
     {
-        if ($this->checker->canViewDebugErrorInformation()) {
-            return (string) $this->config->get('concrete.error.display.privileged', '');
+        if (app()->isInstalled()) {
+            if ($this->checker->canViewDebugErrorInformation()) {
+                return (string) $this->config->get('concrete.error.display.privileged', '');
+            }
+            return (string) $this->config->get('concrete.error.display.guests', '');
+        } else {
+            return 'debug';
         }
-        return (string) $this->config->get('concrete.error.display.guests', '');
     }
 
     protected function renderJson(\Throwable $exception): FlattenException

@@ -51,6 +51,6 @@ if ($request->matches('/login*') || $request->matches('/oauth/*')) {
 
 ?>
 </head>
-<body class="min-vh-100<?php if ($bodyClass !== '') { ?> <?=$bodyClass?><?php } ?>">
+<body class="min-h-screen <?php if ($bodyClass !== '') { ?> <?=$bodyClass?><?php } ?>">
 
-<div class="ccm-ui min-vh-100">
+<div class="min-h-screen">

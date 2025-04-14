@@ -9,15 +9,9 @@ html.ccm-toolbar-visible {
 
   .ui-dialog {
     box-shadow: $modal-content-box-shadow-sm-up;
-    max-width: 100vw;
     padding: 0;
-    z-index: $index-level-dialog;
-    @media only screen and (max-width: 768px) {
-      display: flex;
-      flex-direction: column;
-      max-height: 100vh;
-    }
 
+    z-index: $index-level-dialog;
     /* hide section titles for panels when those panels are shown in dialogs */
     section {
       header {
@@ -113,15 +107,15 @@ html.ccm-toolbar-visible {
   }
 
   .ui-widget {
-    font-family: var(--bs-body-font-family); // Should inherit this variable from a wrapping .ccm-ui class.
+    font-family: inherit;
   }
 
   .ui-widget-header {
-    color: var(--bs-body-color); // Should inherit this variable from a wrapping .ccm-ui class.
+    color: inherit;
   }
 
   .ui-widget-content {
-    color: var(--bs-body-color); // Should inherit this variable from a wrapping .ccm-ui class.
+    color: inherit; // These inherits ensure that this comes from bootstrap not jQuery UI
   }
 
   .ui-widget-overlay {
@@ -150,5 +144,6 @@ html.ccm-toolbar-visible {
     button {
       margin: $modal-footer-margin-between / 2;
     }
+
   }
 }

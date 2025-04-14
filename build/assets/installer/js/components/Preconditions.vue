@@ -1,32 +1,32 @@
 <template>
     <form>
-    <div class="text-center">
-        <img :src="logo" style="max-height: 48px" class="bg-primary rounded-circle">
+    <div>
+      <img :src="logo" style="max-height: 48px" class="mx-auto bg-primary rounded-full">
     </div>
     <div>
-        <h3 class="text-center mb-4 mt-3">{{  i18n.stepRequirements }}</h3>
+      <h1 class="text-center mb-4 mt-4 text-4xl font-extrabold leading-none tracking-tight">{{  i18n.stepRequirements }}</h1>
     </div>
-    <div class="card mb-5" v-if="requiredPreconditionsLeft.length">
-        <div class="card-header">{{ i18n.requiredPreconditions }}</div>
+    <div class="card border border-base-200 mb-5" v-if="requiredPreconditionsLeft.length">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <preconditions-list @precondition-failed="preconditionFailed" :preconditions="requiredPreconditionsLeft" />
-                </div>
-                <div class="col-md-6">
-                    <preconditions-list @precondition-failed="preconditionFailed" :preconditions="requiredPreconditionsRight" />
-                </div>
-            </div>
+          <h2 class="card-title">{{ i18n.requiredPreconditions }}</h2>
+          <div class="grid grid-cols-2">
+              <div>
+                  <preconditions-list @precondition-failed="preconditionFailed" :preconditions="requiredPreconditionsLeft" />
+              </div>
+              <div>
+                  <preconditions-list @precondition-failed="preconditionFailed" :preconditions="requiredPreconditionsRight" />
+              </div>
+          </div>
         </div>
     </div>
     <div class="card" v-if="optionalPreconditionsLeft.length">
-        <div class="card-header">{{ i18n.optionalPreconditions }}</div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
+          <h2 class="card-title">{{ i18n.optionalPreconditions }}</h2>
+          <div class="grid grid-cols-2">
+                <div>
                     <preconditions-list @precondition-failed="preconditionFailed" :preconditions="optionalPreconditionsLeft" />
                 </div>
-                <div class="col-md-6">
+                <div>
                     <preconditions-list @precondition-failed="preconditionFailed" :preconditions="optionalPreconditionsRight" />
                 </div>
             </div>
@@ -43,7 +43,7 @@
             {{i18n.runTestsAgain}}
         </button>
     </div>
-    <div v-else class="ccm-install-actions">
+      <Actions v-else>
         <button class="me-auto btn btn-secondary" type="button" @click="$emit('previous')">
             {{i18n.back}}
         </button>
@@ -51,14 +51,16 @@
         <button class="ms-auto btn btn-primary" type="button" @click="$emit('next')">
             {{i18n.next}}
         </button>
-    </div>
+    </Actions>
 
 </form>
 </template>
 <script>
 import PreconditionsList from "./PreconditionsList";
+import Actions from "./Actions.vue";
 export default {
     components: {
+      Actions,
         PreconditionsList
     },
     methods: {

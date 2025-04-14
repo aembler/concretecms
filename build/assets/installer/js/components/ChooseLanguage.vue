@@ -1,15 +1,15 @@
 <template>
-    <form>
-        <div class="text-center">
-            <img :src="logo" style="max-height: 144px" class="bg-primary rounded-circle">
+    <form class="w-full my-auto">
+        <div>
+            <img :src="logo" style="max-height: 144px" class="mx-auto bg-primary rounded-full">
         </div>
         <div>
-            <h1 class="text-center mb-4 mt-4">{{  lang.title }}</h1>
+            <h1 class="text-center mb-4 mt-4 text-4xl font-extrabold leading-none tracking-tight">{{  lang.title }}</h1>
         </div>
         <div class="form-group">
-            <h5>{{ i18n.chooseLanguage }}</h5>
-            <div class="input-group-lg input-group">
-                <select v-model="selectedLocale" class="form-select form-select-lg">
+            <h5 class="text-center text-xl mb-4">{{ i18n.chooseLanguage }}</h5>
+            <div class="join w-full">
+                <select v-model="selectedLocale" class="join-item col-start-1 row-start-1 w-full appearance-none rounded-md rounded-e-none bg-white py-1.5 pr-8 pl-3 text-xl text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600">
                     <optgroup :label="i18n.installedLanguages" v-if="Object.entries(locales).length">
                         <option v-for="(locale, code) in locales" :value="code">{{ locale }}</option>
                     </optgroup>
@@ -17,22 +17,26 @@
                         <option v-for="(locale, code) in onlineLocales" :value="code">{{ locale }}</option>
                     </optgroup>
                 </select>
-                <button type="button" class="btn btn-primary" @click="setLanguage">
-                    <i class="fas fa-arrow-right"></i>
+                <button type="button" class="join-item btn btn-primary" @click="setLanguage">
+                    <ArrowRightIcon class="size-4" />
                 </button>
             </div>
         </div>
     </form>
 </template>
 <script>
+import NProgress from 'nprogress'
+import {ArrowRightIcon} from '@heroicons/vue/24/solid'
+
 
 export default {
     components: {
+      ArrowRightIcon
     },
     methods: {
         setLanguage() {
             var my = this
-            $.fn.dialog.showLoader()
+            NProgress.start()
             $.ajax({
                 cache: false,
                 dataType: 'json',
@@ -46,7 +50,7 @@ export default {
                     my.$emit('next')
                 },
                 complete() {
-                    $.fn.dialog.hideLoader()
+                    NProgress.done()
                 }
             })
         }

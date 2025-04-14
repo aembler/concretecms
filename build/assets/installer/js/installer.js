@@ -1,12 +1,9 @@
-import '@concretecms/bedrock/assets/cms/js/ajax-request/base';
 
+import { createApp } from 'vue'
 import ConcreteInstaller from './components/Installer'
 
-$(function() {
-    new Vue({
-        el: '#ccm-page-install',
-        components: {
-            ConcreteInstaller
-        }
-    })
+document.addEventListener('DOMContentLoaded', () => {
+    const app = createApp()
+    app.component('concrete-installer', ConcreteInstaller)
+    app.mount('#ccm-page-install')
 })

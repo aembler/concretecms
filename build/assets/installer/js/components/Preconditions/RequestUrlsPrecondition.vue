@@ -1,74 +1,78 @@
 <template>
-    <tr>
-        <td>
-            <i v-if="requestUrlsSuccess === null" class="fas fa-spinner fa-spin"></i>
-            <i v-else-if="requestUrlsSuccess" class="text-success fas fa-check"></i>
-            <i v-else class="text-danger fas fa-exclamation-circle"></i>
-        </td>
-        <td class="w-100"><span :class="{'text-danger': requestUrlsSuccess === false || ajaxFailed}">{{precondition.precondition.name}}</span></td>
-        <td><i v-if="requestUrlsSuccess === false || ajaxFailed" class="fas fa-question-circle launch-tooltip" :title="failureMessage"></i></td>
-    </tr>
+  <tr>
+    <td>
+      <ArrowPathIcon v-if="requestUrlsSuccess === null" class="w-4 h-4 animate-spin text-gray-400" />
+      <CheckIcon v-else-if="requestUrlsSuccess" class="w-4 h-4 text-green-500" />
+      <ExclamationCircleIcon v-else class="w-4 h-4 text-red-500" />
+    </td>
+    <td class="w-full">
+            <span :class="{ 'text-red-500': requestUrlsSuccess === false || ajaxFailed }">
+                {{ precondition.precondition.name }}
+            </span>
+    </td>
+    <td>
+      <div
+          v-if="requestUrlsSuccess === false || ajaxFailed"
+          class="tooltip"
+          :data-tip="failureMessage"
+      >
+        <QuestionMarkCircleIcon class="w-4 h-4 text-gray-400 cursor-pointer" />
+      </div>
+    </td>
+  </tr>
 </template>
-<script>
-export default {
-    components: {
-    },
-    props: {
-        precondition: {
-            type: Object,
-            required: true
-        }
-    },
-    mounted() {
-        var my = this
-        $.ajax({
-            cache: false,
-            dataType: 'json',
-            method: 'GET',
-            url: my.precondition.precondition.ajax_url
-        })
-            .done(function(data) {
-                if (data.response === 400) {
-                    my.requestUrlsSuccess = true
-                } else {
-                    my.requestUrlsSuccess = false
-                }
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                my.requestUrlsSuccess = false
-                my.ajaxFailed = true
-            });
 
-    },
-    computed: {
-        failureMessage() {
-            if (this.ajaxFailed) {
-                return this.precondition.precondition.ajax_fail_message
-            } else if (!this.requestUrlsSuccess) {
-                return this.precondition.precondition.error_message
-            }
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+import {
+  ArrowPathIcon,
+  CheckIcon,
+  ExclamationCircleIcon,
+  QuestionMarkCircleIcon
+} from '@heroicons/vue/24/outline'
+
+const props = defineProps({
+  precondition: {
+    type: Object,
+    required: true
+  }
+})
+
+const emit = defineEmits(['precondition-failed'])
+const requestUrlsSuccess = ref(null)
+const ajaxFailed = ref(false)
+
+const failureMessage = computed(() => {
+  if (ajaxFailed.value) {
+    return props.precondition.precondition.ajax_fail_message
+  } else if (!requestUrlsSuccess.value) {
+    return props.precondition.precondition.error_message
+  }
+})
+
+watch(requestUrlsSuccess, (value) => {
+  if (value === false) {
+    emit('precondition-failed', props.precondition)
+  }
+})
+
+onMounted(() => {
+  $.ajax({
+    cache: false,
+    dataType: 'json',
+    method: 'GET',
+    url: props.precondition.precondition.ajax_url
+  })
+      .done((data) => {
+        if (data.response === 400) {
+          requestUrlsSuccess.value = true
+        } else {
+          requestUrlsSuccess.value = false
         }
-    },
-    watch: {
-        requestUrlsSuccess: function(value) {
-            if (value === false) {
-                this.createTooltips()
-                this.$emit('precondition-failed', this.precondition)
-            }
-        }
-    },
-    methods: {
-        createTooltips() {
-            this.$nextTick(() => {
-                this.$el.querySelectorAll('.launch-tooltip').forEach((o) => {
-                    new bootstrap.Tooltip(o)
-                })
-            })
-        }
-    },
-    data: () => ({
-        requestUrlsSuccess: null,
-        ajaxFailed: false
-    })
-}
+      })
+      .fail(() => {
+        requestUrlsSuccess.value = false
+        ajaxFailed.value = true
+      })
+})
 </script>

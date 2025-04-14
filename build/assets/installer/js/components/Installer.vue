@@ -4,17 +4,21 @@
             <small>{{ concreteVersion }}</small>
         </div>
 
-        <div class="alert alert-danger mb-5" v-if="environmentErrors.length > 0">
-            <span v-html="environmentErrors.join('<br>')"></span>
+        <!-- Error Alert -->
+        <div class="alert alert-error mb-5" v-if="environmentErrors.length > 0">
+          <span v-html="environmentErrors.join('<br>')"></span>
         </div>
 
-        <div class="alert alert-warning mb-5" v-if="environmentWarnings.length > 0">
-            <span v-html="environmentWarnings.join('<br>')"></span>
-            <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="ignoreWarnings" v-model="ignoreWarnings">
-                <label class="form-check-label" for="ignoreWarnings">{{ i18n.ignoreWarnings }}</label>
-            </div>
+        <!-- Warning Alert -->
+        <div class="alert alert-warning mb-5 flex flex-col space-y-4" v-if="environmentWarnings.length > 0">
+          <span v-html="environmentWarnings.join('<br>')"></span>
+
+          <label class="label cursor-pointer">
+            <input type="checkbox" class="checkbox mr-2" id="ignoreWarnings" v-model="ignoreWarnings" />
+            <span class="label-text">{{ i18n.ignoreWarnings }}</span>
+          </label>
         </div>
+
 
         <transition name="install-step" mode="out-in">
             <choose-language
@@ -95,6 +99,7 @@
     </div>
 </template>
 <script>
+import NProgress from "nprogress"
 import ChooseLanguage from "./ChooseLanguage"
 import Preconditions from "./Preconditions"
 import Environment from "./Environment"
@@ -153,7 +158,7 @@ export default {
         },
         validateInstallOptions(proceedToNextStep) {
             var my = this
-            $.fn.dialog.showLoader()
+            NProgress.start()
 
             $.ajax({
                 cache: false,
@@ -162,7 +167,7 @@ export default {
                 data: this.installOptions,
                 url: my.validateEnvironmentUrl,
                 success(r) {
-                    $.fn.dialog.hideLoader()
+                    NProgress.done()
                     if (r.error && r.error.error) {
                         my.environmentErrors = r.error.errors
                     } else {

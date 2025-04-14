@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="ccm-install-actions">
+        <Actions>
             <button class="me-auto btn btn-secondary" type="button" @click="$emit('previous')">
                 {{lang.back}}
             </button>
@@ -29,13 +29,15 @@
             <button class="ms-auto btn btn-primary" type="button" @click="selectStartingPoint">
                 {{lang.next}}
             </button>
-        </div>
+        </Actions>
     </form>
 </template>
 <script>
+import Actions from "./Actions.vue"
 
 export default {
     components: {
+      Actions
     },
     methods: {
         selectStartingPoint() {

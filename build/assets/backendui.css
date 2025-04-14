@@ -1,0 +1,2 @@
+@config "../tailwind.config.js";
+@import "../node_modules/@concretecms/backendui/src/css/backend.css";

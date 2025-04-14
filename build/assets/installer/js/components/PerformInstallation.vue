@@ -1,140 +1,129 @@
 <template>
-    <div>
-        <div class="text-center position-relative">
-            <div class="position-absolute w-100" style="top: -8px">
-                <div class="spinner-border text-primary" style="width: 64px; height: 64px;" role="status">
-                </div>
-            </div>
-            <img :src="logo" style="max-height: 48px" class="bg-primary rounded-circle">
-        </div>
-        <div>
-            <h3 class="text-center mb-4 mt-3">{{  lang.stepPerformInstallation }}</h3>
-        </div>
-        <div id="interstitial-message">
-            <div class="mb-3" v-if="installError || currentProgress">
-                <div class="alert alert-danger" v-if="installError">
-                    <span v-html="installError"></span>
-                </div>
-                <div v-else>
-                    <div class="lead text-center">
-                        {{currentProgress}}
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">{{ lang.interstitial.whileYouWait }}</div>
-                <div class="card-body">
-                    <h4 class="">{{ lang.interstitial.forums }}</h4>
-                    <p>
-                        <span v-html="lang.interstitial.forumsMessage"></span>
-                    </p>
-
-                    <h4 class="">{{ lang.interstitial.userDocumentation }}</h4>
-                    <p>
-                        <span v-html="lang.interstitial.userDocumentationMessage"></span>
-                    </p>
-
-                    <h4 class="">{{ lang.interstitial.screencasts }}</h4>
-                    <p>
-                        <span v-html="lang.interstitial.screencastsMessage"></span>
-                    </p>
-
-                    <h4 class="">{{ lang.interstitial.developerDocumentation }}</h4>
-                    <p>
-                        <span v-html="lang.interstitial.developerDocumentationMessage"></span>
-                    </p>
-                </div>
-            </div>
-        </div>
+  <div>
+    <!-- Spinner over logo -->
+    <div class="relative text-center">
+      <div class="absolute inset-x-0 -top-2 flex justify-center">
+        <div class="w-16 h-16 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <img
+          :src="logo"
+          class="bg-primary rounded-full mx-auto max-h-12 mt-4"
+      />
     </div>
+
+    <!-- Heading -->
+    <div>
+      <h3 class="text-center mt-4 mb-6 text-xl font-semibold">{{ lang.stepPerformInstallation }}</h3>
+    </div>
+
+    <!-- Interstitial content -->
+    <div id="interstitial-message">
+      <div v-if="installError || currentProgress" class="mb-4">
+        <div v-if="installError" class="alert alert-error shadow">
+          <span v-html="installError" />
+        </div>
+        <div v-else class="text-center text-lg">
+          {{ currentProgress }}
+        </div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="card bg-base-100 shadow">
+        <div class="card-title p-4 border-b border-base-300">
+          {{ lang.interstitial.whileYouWait }}
+        </div>
+        <div class="card-body space-y-4">
+          <div>
+            <h4 class="font-semibold">{{ lang.interstitial.forums }}</h4>
+            <p v-html="lang.interstitial.forumsMessage"></p>
+          </div>
+          <div>
+            <h4 class="font-semibold">{{ lang.interstitial.userDocumentation }}</h4>
+            <p v-html="lang.interstitial.userDocumentationMessage"></p>
+          </div>
+          <div>
+            <h4 class="font-semibold">{{ lang.interstitial.screencasts }}</h4>
+            <p v-html="lang.interstitial.screencastsMessage"></p>
+          </div>
+          <div>
+            <h4 class="font-semibold">{{ lang.interstitial.developerDocumentation }}</h4>
+            <p v-html="lang.interstitial.developerDocumentationMessage"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
-<script>
 
-export default {
-    components: {},
-    methods: {
-        initProgressBar() {
-            NProgress.configure({showSpinner: false});
-        }
-    },
-    computed: {},
-    props: {
-        logo: {
-            type: String,
-            required: true
-        },
-        startingPointRoutineUrl: {
-            type: String,
-            required: true
-        },
-        beginInstallationUrl: {
-            type: String,
-            required: true
-        },
-        installOptions: {
-            type: Object,
-            required: true
-        },
-        lang: {
-            type: Object,
-            required: true
-        }
-    },
-    data: () => ({
-        routines: null,
-        currentProgress: null,
-        currentRoutine: null,
-        installError: null
-    }),
-    watch: {
-        currentRoutine: function(routineIndex) {
-            var my = this
-            if (this.routines.length > routineIndex) {
-                var startingPoint = this.installOptions.startingPoint
-                var routine = this.routines[routineIndex]
-                var url = this.startingPointRoutineUrl + '/' + startingPoint
-                my.currentProgress = routine.text
+<script setup>
+import { ref, watch, onMounted } from 'vue'
 
-                $.ajax({
-                    cache: false,
-                    dataType: 'json',
-                    method: 'post',
-                    data: {
-                        routine: routine,
-                        options: this.installOptions,
-                    },
-                    url: url,
-                    success(r) {
-                        if (r.error) {
-                            my.installError = r.message
-                        } else {
-                            my.currentRoutine++
-                            NProgress.set(my.currentRoutine / my.routines.length)
-                        }
-                    }
-                })
-            } else {
-                NProgress.done();
-                my.currentProgress = my.lang.installationComplete
-                my.$emit('installation-complete')
-            }
-        }
-    },
-    mounted() {
-        this.initProgressBar()
-        var my = this
-        my.currentProgress = this.lang.loadingInstallationRoutines
-        $.ajax({
-            cache: false,
-            dataType: 'json',
-            method: 'post',
-            data: this.installOptions,
-            url: my.beginInstallationUrl,
-            success(r) {
-                my.routines = r
-                my.currentRoutine = 0
-            }
-        })
-    }
+const props = defineProps({
+  logo: { type: String, required: true },
+  startingPointRoutineUrl: { type: String, required: true },
+  beginInstallationUrl: { type: String, required: true },
+  installOptions: { type: Object, required: true },
+  lang: { type: Object, required: true }
+})
+
+const routines = ref(null)
+const currentRoutine = ref(null)
+const currentProgress = ref(null)
+const installError = ref(null)
+
+const emit = defineEmits(['installation-complete'])
+
+function initProgressBar() {
+  NProgress.configure({ showSpinner: false })
 }
+
+watch(currentRoutine, (routineIndex) => {
+  if (!routines.value || routineIndex === null) return
+
+  if (routines.value.length > routineIndex) {
+    const routine = routines.value[routineIndex]
+    const url = `${props.startingPointRoutineUrl}/${props.installOptions.startingPoint}`
+    currentProgress.value = routine.text
+
+    $.ajax({
+      cache: false,
+      dataType: 'json',
+      method: 'post',
+      data: {
+        routine,
+        options: props.installOptions
+      },
+      url,
+      success(r) {
+        if (r.error) {
+          installError.value = r.message
+        } else {
+          currentRoutine.value++
+          NProgress.set(currentRoutine.value / routines.value.length)
+        }
+      }
+    })
+  } else {
+    NProgress.done()
+    currentProgress.value = props.lang.installationComplete
+    emit('installation-complete')
+  }
+})
+
+onMounted(() => {
+  initProgressBar()
+  currentProgress.value = props.lang.loadingInstallationRoutines
+
+  $.ajax({
+    cache: false,
+    dataType: 'json',
+    method: 'post',
+    data: props.installOptions,
+    url: props.beginInstallationUrl,
+    success(r) {
+      routines.value = r
+      currentRoutine.value = 0
+    }
+  })
+})
 </script>

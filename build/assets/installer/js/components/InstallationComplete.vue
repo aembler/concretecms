@@ -1,43 +1,37 @@
 <template>
-<div>
-    <div class="text-center">
-        <img :src="logo" style="max-height: 48px" class="bg-primary rounded-circle">
-    </div>
-    <div>
-        <h3 class="text-center mb-4 mt-3">{{  lang.stepInstallationComplete }}</h3>
-    </div>
-    <div class="row">
-        <div class="col-md-6 offset-md-3 text-center">
-            <div class="mb-4 text-start"><span v-html="lang.installationCompleteMessage"></span></div>
-            <a :href="installationCompleteUrl" class="btn btn-lg btn-primary">{{ lang.editYourSite }}</a>
-        </div>
-    </div>
-</div>
-</template>
-<script>
+  <div class="flex flex-col items-center px-4 py-8">
+    <img :src="logo" alt="Logo" class="h-12 rounded-full bg-primary" />
 
-export default {
-    components: {},
-    methods: {
-    },
-    computed: {},
-    props: {
-        installationCompleteUrl: {
-            type: String,
-            required: true
-        },
-        logo: {
-            type: String,
-            required: true
-        },
-        lang: {
-            type: Object,
-            required: true
-        }
-    },
-    data: () => ({
-    }),
-    mounted() {
-    }
-}
+    <h3 class="text-center text-2xl font-semibold mt-6 mb-4">
+      {{ lang.stepInstallationComplete }}
+    </h3>
+
+    <div class="max-w-xl w-full text-center">
+      <div class="mb-6 text-left" v-html="lang.installationCompleteMessage"></div>
+
+      <a
+          :href="installationCompleteUrl"
+          class="btn btn-primary btn-lg"
+      >
+        {{ lang.editYourSite }}
+      </a>
+    </div>
+  </div>
+</template>
+
+<script setup>
+defineProps({
+  installationCompleteUrl: {
+    type: String,
+    required: true,
+  },
+  logo: {
+    type: String,
+    required: true,
+  },
+  lang: {
+    type: Object,
+    required: true,
+  },
+});
 </script>

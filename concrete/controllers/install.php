@@ -193,7 +193,9 @@ class Install extends Controller
             'select' => t('Select'),
             'selected' => t('Selected'),
             'requiredPreconditions' => t('Required'),
+            'requiredPreconditionsDescription' => t('These items are required for Concrete CMS.'),
             'optionalPreconditions' => t('Optional'),
+            'optionalPreconditionsDescription' => t('These items are optional – but will improve your experience.'),
             'installErrors' => t(
                 'There are problems with your installation environment. Please correct them and click the button below to re-run the pre-installation tests.'
             ),
