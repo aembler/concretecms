@@ -1,7 +1,7 @@
 <template>
   <form class="w-full" ref="environmentForm">
     <div class="text-center mb-6">
-      <img :src="logo" class="rounded-full bg-primary mx-auto" style="max-height: 48px;" />
+      <img :src="logo" class="rounded-full bg-primary mx-auto mb-4" height="48" width="48" />
     </div>
 
     <h3 class="text-center mb-6 text-2xl font-semibold">{{ lang.stepEnvironment }}</h3>

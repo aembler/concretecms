@@ -17,5 +17,7 @@ interface ControllerInterface
      */
     public function getDescription();
 
+    public function getPresets(): array;
+
 
 }

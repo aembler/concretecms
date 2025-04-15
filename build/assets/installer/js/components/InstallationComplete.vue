@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col items-center px-4 py-8">
-    <img :src="logo" alt="Logo" class="h-12 rounded-full bg-primary" />
+    <img :src="logo" class="rounded-full bg-primary mx-auto mb-4" height="48" width="48" />
 
     <h3 class="text-center text-2xl font-semibold mt-6 mb-4">
       {{ lang.stepInstallationComplete }}

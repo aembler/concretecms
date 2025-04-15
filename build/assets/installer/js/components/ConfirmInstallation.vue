@@ -2,7 +2,7 @@
   <div class="space-y-8">
     <!-- Logo -->
     <div class="text-center">
-      <img :src="logo" class="bg-primary rounded-full max-h-12 mx-auto" />
+      <img :src="logo" class="rounded-full bg-primary mx-auto mb-4" height="48" width="48" />
     </div>
 
     <!-- Heading -->

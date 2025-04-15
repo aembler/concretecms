@@ -7,7 +7,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
  */
 ?>
 <div class="min-h-screen flex">
-    <div v-cloak id="ccm-page-install" class="py-24 w-full mx-auto max-w-screen-lg my-auto">
+    <div v-cloak id="ccm-page-install" class="pt-8 pb-24 w-full mx-auto max-w-screen-lg my-auto">
         <concrete-installer
                 logo="<?= ASSETS_URL_IMAGES ?>/logo_hand_only.svg"
                 load-strings-url='<?= URL::to('/install/i18n') ?>'

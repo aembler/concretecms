@@ -17,4 +17,9 @@ abstract class AbstractController implements ControllerInterface
         return new Installer();
     }
 
+    public function getPresets(): array
+    {
+        return [];
+    }
+
 }

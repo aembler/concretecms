@@ -52,4 +52,9 @@ class StartingPoint extends AbstractStartingPoint
         return $this->controller->getInstaller();
     }
 
+    public function getPresets(): array
+    {
+        return $this->controller->getPresets();
+    }
+
 }

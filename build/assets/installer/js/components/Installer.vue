@@ -19,6 +19,40 @@
           </label>
         </div>
 
+      <dialog id="startingPointPresets" class="modal" v-if="selectedStartingPointObject">
+        <div class="modal-box">
+          <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <div class="mb-3 text-lg text-gray-500 font-semibold">
+            {{ i18n.installPresetsTitle.replace('%s', selectedStartingPointObject.name) }}
+          </div>
+          <div class="flex flex-col gap-2">
+            <label
+                v-for="preset in selectedStartingPointObject.presets"
+                :key="preset.contentFile"
+                class="cursor-pointer justify-start gap-2 items-start w-full"
+            >
+              <div class="flex items-start">
+                <input
+                    type="radio"
+                    name="startingPoint"
+                    class="radio radio-primary mt-1"
+                    :value="preset.contentFile"
+                    v-model="startingPointPreset"
+                />
+                <div class="mt-1 ml-3 label-text flex flex-col">
+                  <span class="font-semibold">{{ preset.name }}</span>
+                  <span class="text-sm text-gray-500 break-words">{{ preset.description }}</span>
+                </div>
+              </div>
+            </label>
+            <div class="modal-action">
+              <button class="btn btn-primary" @click="selectStartingPointPreset">{{ i18n.next}}</button>
+            </div>
+          </div>
+        </div>
+      </dialog>
 
         <transition name="install-step" mode="out-in">
             <choose-language
@@ -126,12 +160,21 @@ export default {
             if (warnings.length) {
                 window.scrollTo(0, 0)
             }
+        },
+        selectedStartingPointObject: function() {
+          if (this.selectedStartingPointObject !== null && this.startingPointPreset === null) {
+            this.startingPointPreset = this.selectedStartingPointObject.presets[0]?.contentFile;
+          }
         }
     },
     methods: {
         selectStartingPoint(startingPoint) {
             this.startingPoint = startingPoint
-            this.next()
+            this.loadStartingPointPresetModal()
+        },
+        selectStartingPointPreset() {
+          document.querySelector('#startingPointPresets').close()
+          this.next()
         },
         translateOptionPreconditionsToErrorsAndWarnings() {
             this.environmentWarnings = []
@@ -150,6 +193,14 @@ export default {
                     }
                 }
             })
+        },
+        loadStartingPointPresetModal() {
+          if (this.selectedStartingPointObject && this.selectedStartingPointObject.presets.length) {
+            const modal = document.querySelector('#startingPointPresets')
+            modal.showModal()
+          } else {
+            this.next()
+          }
         },
         updateInstallOptions(options) {
             this.installOptions = options
@@ -268,6 +319,17 @@ export default {
             if (this.step === 'environment') {
                 return this.i18n.stepEnvironment
             }
+        },
+        selectedStartingPointObject() {
+          let selectedStartingPointObject = null;
+          if (this.loadedStartingPoints && this.startingPoint) {
+            this.loadedStartingPoints.forEach((startingPoint) => {
+              if (startingPoint.handle === this.startingPoint) {
+                selectedStartingPointObject = startingPoint
+              }
+            })
+          }
+          return selectedStartingPointObject
         }
     },
     props: {
@@ -368,6 +430,7 @@ export default {
         optionsPreconditions: [],
         ignoreWarnings: false,
         startingPoint: null,
+        startingPointPreset: null,
         installOptions: {}
     }),
     mounted() {
@@ -378,9 +441,6 @@ export default {
         }
         if (this.startingPoints) {
             this.loadedStartingPoints = this.startingPoints
-        }
-        if (this.otherStartingPoints) {
-            this.loadedOtherStartingPoints = this.otherStartingPoints
         }
         if (this.defaultStartingPoint) {
             this.startingPoint = this.defaultStartingPoint

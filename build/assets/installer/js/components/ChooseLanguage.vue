@@ -1,7 +1,7 @@
 <template>
     <form class="w-full my-auto">
         <div>
-            <img :src="logo" style="max-height: 144px" class="mx-auto bg-primary rounded-full">
+          <img :src="logo" class="rounded-full bg-primary mx-auto mb-4" height="48" width="48" />
         </div>
         <div>
             <h1 class="text-center mb-4 mt-4 text-4xl font-extrabold leading-none tracking-tight">{{  lang.title }}</h1>

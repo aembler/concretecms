@@ -1,7 +1,7 @@
 <template>
   <form>
     <div class="text-center">
-      <img :src="logo" class="rounded-full bg-primary mx-auto mb-4" style="max-height: 48px;"/>
+      <img :src="logo" class="rounded-full bg-primary mx-auto mb-4" height="48" width="48" />
     </div>
 
     <h2 class="text-center mb-4 mt-4 text-4xl font-extrabold leading-none tracking-tight">
@@ -16,7 +16,7 @@
       <div v-for="startingPoint in featuredStartingPoints" :key="startingPoint.handle">
         <div class="card bg-base-100 shadow-md">
           <figure>
-            <img :src="startingPoint.thumbnail" class="w-full"/>
+            <img :src="startingPoint.thumbnail" width="600" height="300" class="w-full"/>
           </figure>
           <div class="card-body items-center text-center">
             <h2 class="card-title">{{ startingPoint.name }}</h2>

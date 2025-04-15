@@ -229,6 +229,7 @@ class Install extends Controller
             'installationComplete' => t('Installation complete.'),
             'startingPoint' => t('Starting Point'),
             'otherStartingPoints' => t('Other Starting Points'),
+            'installPresetsTitle' => t('What kind of %s website would you like?'),
             'advancedOptions' => t('Advanced Options'),
             'urls' => t('URLS & Session'),
             'urlPlaceholder' => t('%s or %s', 'http://...', 'https://...'),

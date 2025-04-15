@@ -27,6 +27,7 @@ abstract class AbstractStartingPoint implements StartingPointInterface
             'providesThumbnails' => $this->providesThumbnails(),
             'description' => $this->getDescription(),
             'thumbnail' => $this->getThumbnail(),
+            'presets' => $this->getPresets(),
         ];
     }
 

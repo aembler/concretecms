@@ -50,4 +50,9 @@ class LegacyStartingPoint extends AbstractStartingPoint
         return new Installer();
     }
 
+    public function getPresets(): array
+    {
+        return [];
+    }
+
 }
