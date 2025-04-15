@@ -3742,6 +3742,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"canvas-confetti@npm:^1.9.3":
+  version: 1.9.3
+  resolution: "canvas-confetti@npm:1.9.3"
+  checksum: 10c0/94c6f16591660d5ed4a48afb8da65902826ce6b38edc7644d62521aa9bf9ef5b950aa4396e980e7fe0a38e5f41a991a6d984721412a54c9fba4de3682c1eead0
+  languageName: node
+  linkType: hard
+
 "chalk@npm:^4.1.0, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -4014,6 +4021,7 @@ __metadata:
   dependencies:
     "@concretecms/backendui": "npm:0.0.0"
     "@concretecms/bedrock": "npm:0.0.0"
+    canvas-confetti: "npm:^1.9.3"
     laravel-mix: "npm:^6.0.49"
     mix: "npm:^0.0.1"
     sass: "npm:^1.86.3"

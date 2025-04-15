@@ -65,6 +65,7 @@ mix-manifest.json
 /build/release
 /build/Gruntfile.parameters.js
 /build/npm-debug.log
+.yarn
 
 # ignore PHP symbol map
 __IDE_SYMBOLS__.php

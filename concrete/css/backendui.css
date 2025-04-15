@@ -35,8 +35,6 @@
     --text-2xl--line-height: calc(2 / 1.5);
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
-    --font-weight-light: 300;
-    --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --font-weight-extrabold: 800;
@@ -1867,9 +1865,6 @@
   .my-2 {
     margin-block: calc(var(--spacing) * 2);
   }
-  .my-3 {
-    margin-block: calc(var(--spacing) * 3);
-  }
   .my-auto {
     margin-block: auto;
   }
@@ -2277,9 +2272,6 @@
   .h-4 {
     height: calc(var(--spacing) * 4);
   }
-  .h-12 {
-    height: calc(var(--spacing) * 12);
-  }
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
@@ -2340,14 +2332,8 @@
   .max-w-xl {
     max-width: var(--container-xl);
   }
-  .min-w-0 {
-    min-width: calc(var(--spacing) * 0);
-  }
   .min-w-32 {
     min-width: calc(var(--spacing) * 32);
-  }
-  .flex-1 {
-    flex: 1;
   }
   .flex-shrink-0 {
     flex-shrink: 0;
@@ -2592,9 +2578,6 @@
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
   }
-  .py-4 {
-    padding-block: calc(var(--spacing) * 4);
-  }
   .py-6 {
     padding-block: calc(var(--spacing) * 6);
   }
@@ -2697,14 +2680,6 @@
   .font-extrabold {
     --tw-font-weight: var(--font-weight-extrabold);
     font-weight: var(--font-weight-extrabold);
-  }
-  .font-light {
-    --tw-font-weight: var(--font-weight-light);
-    font-weight: var(--font-weight-light);
-  }
-  .font-medium {
-    --tw-font-weight: var(--font-weight-medium);
-    font-weight: var(--font-weight-medium);
   }
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
