@@ -5,6 +5,8 @@ namespace Concrete\Core\Install;
 use Concrete\Core\Cache\OpCache;
 use Concrete\Core\Config\Renderer;
 use Concrete\Core\Error\UserMessageException;
+use Concrete\Core\Install\StartingPoint\Controller\ControllerInterface;
+use Concrete\Core\Install\StartingPoint\PresetInterface;
 use DateTimeZone;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
@@ -69,6 +71,13 @@ class InstallerOptions
      * @var string
      */
     protected $startingPointHandle = '';
+
+    /**
+     * The optional starting point preset.
+     *
+     * @var null
+     */
+    protected ?string $startingPointPresetHandle = null;
 
     /**
      * The name of the site.
@@ -279,6 +288,18 @@ class InstallerOptions
         return $this;
     }
 
+    public function getStartingPointPresetHandle(): ?string
+    {
+        return $this->startingPointPresetHandle;
+    }
+
+    public function setStartingPointPresetHandle(?string $startingPointPresetHandle): self
+    {
+        $this->startingPointPresetHandle = $startingPointPresetHandle;
+        return $this;
+    }
+
+
     /**
      * Get the name of the site.
      *
@@ -436,6 +457,7 @@ class InstallerOptions
         if (is_array($siteInstallUser)) {
             $siteInstallUser += [
                 'startingPointHandle' => '',
+                'startingPointPresetHandle' => '',
                 'uiLocaleId' => '',
                 'serverTimeZone' => '',
             ];
@@ -464,6 +486,7 @@ class InstallerOptions
             ->setUserEmail($siteInstallUser['userEmail'])
             ->setUserPasswordHash($siteInstallUser['userPasswordHash'])
             ->setStartingPointHandle($siteInstallUser['startingPointHandle'])
+            ->setStartingPointPresetHandle($siteInstallUser['startingPointPresetHandle'] ?? null)
             ->setSiteName($siteInstallUser['siteName'])
             ->setSiteLocaleId($siteInstallUser['siteLocaleId'])
             ->setUiLocaleId($siteInstallUser['uiLocaleId'])
@@ -484,6 +507,7 @@ class InstallerOptions
             'userEmail' => $this->getUserEmail(),
             'userPasswordHash' => $this->getUserPasswordHash(),
             'startingPointHandle' => $this->getStartingPointHandle(),
+            'startingPointPresetHandle' => $this->getStartingPointPresetHandle(),
             'siteName' => $this->getSiteName(),
             'siteLocaleId' => $this->getSiteLocaleId(),
             'uiLocaleId' => $this->getUiLocaleId(),
@@ -499,6 +523,16 @@ class InstallerOptions
             throw new UserMessageException(t('Failed to write to file %s', DIRNAME_APPLICATION . '/' . DIRNAME_CONFIG . '/site_install_user.php'));
         }
         OpCache::clear(DIR_CONFIG_SITE . '/site_install_user.php');
+    }
+
+    public function getSelectedStartingPointPreset(ControllerInterface $controller): ?PresetInterface
+    {
+        foreach ($controller->getPresets() as $preset) {
+            if ($preset->getHandle() == $this->getStartingPointPresetHandle()) {
+                return $preset;
+            }
+        }
+        return null;
     }
 
     /**

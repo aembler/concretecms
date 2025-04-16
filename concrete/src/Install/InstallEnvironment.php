@@ -22,6 +22,11 @@ class InstallEnvironment
     protected $startingPoint;
 
     /**
+     * @var ?string
+     */
+    protected $startingPointPreset = null;
+
+    /**
      * @var string
      */
     protected $siteName;
@@ -254,6 +259,16 @@ class InstallEnvironment
     public function setStartingPoint(string $startingPoint): void
     {
         $this->startingPoint = $startingPoint;
+    }
+
+    public function getStartingPointPreset(): ?string
+    {
+        return $this->startingPointPreset;
+    }
+
+    public function setStartingPointPreset(?string $startingPointPreset): void
+    {
+        $this->startingPointPreset = $startingPointPreset;
     }
 
     /**

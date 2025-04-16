@@ -127,6 +127,10 @@
           <div class="md:col-span-4 text-end font-semibold">{{ lang.startingPoint }}</div>
           <div class="md:col-span-8">{{ selectedStartingPointName }}</div>
         </div>
+        <div class="grid md:grid-cols-12 gap-4 items-start" v-if="installOptions.startingPointPreset">
+          <div class="md:col-span-4 text-end font-semibold">{{ lang.startingPointPreset }}</div>
+          <div class="md:col-span-8">{{ selectedStartingPointPresetName }}</div>
+        </div>
       </div>
     </div>
 
@@ -157,7 +161,20 @@ const props = defineProps({
 const showPassword = ref(false)
 const showDatabasePassword = ref(false)
 
+const getSelectedStartingPoint = () => {
+  return props.startingPoints.find(sp => sp.handle === props.installOptions.startingPoint)
+}
 const selectedStartingPointName = computed(() => {
-  return props.startingPoints.find(sp => sp.handle === props.installOptions.startingPoint)?.name || ''
+  return getSelectedStartingPoint()?.name || ''
 })
+
+const selectedStartingPointPresetName = computed(() => {
+  if (props.installOptions.startingPointPreset) {
+    return getSelectedStartingPoint().presets.find(
+        preset => preset.handle === props.installOptions.startingPointPreset
+    )?.name
+  }
+  return null
+})
+
 </script>

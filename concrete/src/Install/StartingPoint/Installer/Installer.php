@@ -3,6 +3,7 @@ namespace Concrete\Core\Install\StartingPoint\Installer;
 
 use Concrete\Core\Feature\Features;
 use Concrete\Core\Install\InstallerOptions;
+use Concrete\Core\Install\StartingPoint\Controller\ControllerInterface;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Backend\CreateBackendNavigationRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Backend\ReorderBackendRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Backend\SetupBackendPermissionsRoutine;
@@ -22,11 +23,12 @@ use Concrete\Core\Install\StartingPoint\Installer\Routine\Base\SetupSitePermissi
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Frontend\ImportStartingPointContentRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Frontend\ImportStartingPointFilesRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\InstallFeatureContentRoutine;
+use Concrete\Core\Install\StartingPoint\PresetInterface;
 
 class Installer implements InstallerInterface
 {
 
-    protected function getBaseRoutines(): array
+    protected function getBaseRoutines(?PresetInterface $preset = null): array
     {
         return [
             new CreateDirectoriesRoutine(),
@@ -73,7 +75,7 @@ class Installer implements InstallerInterface
         return $routines;
     }
 
-    protected function getCmsRoutines(): array
+    protected function getCmsRoutines(?PresetInterface $preset = null): array
     {
 
         $routines = [];
@@ -91,7 +93,7 @@ class Installer implements InstallerInterface
         return $routines;
     }
 
-    protected function getBackendRoutines(): array
+    protected function getBackendRoutines(?PresetInterface $preset = null): array
     {
         $routines = [];
         $routines[] = new InstallFeatureContentRoutine(
@@ -110,7 +112,7 @@ class Installer implements InstallerInterface
         return $routines;
     }
 
-    protected function getFinishRoutines(): array
+    protected function getFinishRoutines(?PresetInterface $preset = null): array
     {
         return [
             new SetupSitePermissionsRoutine(),
@@ -118,7 +120,7 @@ class Installer implements InstallerInterface
         ];
     }
 
-    public function getFrontendRoutines(): array
+    public function getFrontendRoutines(?PresetInterface $preset = null): array
     {
         $routines = $this->getBaseFrontendRoutines();
         $routines[] = new ImportStartingPointFilesRoutine();
@@ -126,7 +128,7 @@ class Installer implements InstallerInterface
         return $routines;
     }
 
-    protected function getBaseFrontendRoutines(): array
+    protected function getBaseFrontendRoutines(?PresetInterface $preset = null): array
     {
         $routines = [];
         $routines[] = new InstallFeatureContentRoutine(
@@ -143,13 +145,14 @@ class Installer implements InstallerInterface
         return $routines;
     }
 
-    public function getInstallCommands(InstallerOptions $options): array
+    public function getInstallCommands(ControllerInterface $startingPointController, InstallerOptions $options): array
     {
-        $baseRoutines = $this->getBaseRoutines();
-        $cmsRoutines = $this->getCmsRoutines();
-        $backendRoutines = $this->getBackendRoutines();
-        $frontendRoutines = $this->getFrontendRoutines();
-        $finishRoutines = $this->getFinishRoutines();
+        $preset = $options->getSelectedStartingPointPReset($startingPointController);
+        $baseRoutines = $this->getBaseRoutines($preset);
+        $cmsRoutines = $this->getCmsRoutines($preset);
+        $backendRoutines = $this->getBackendRoutines($preset);
+        $frontendRoutines = $this->getFrontendRoutines($preset);
+        $finishRoutines = $this->getFinishRoutines($preset);
         return array_merge($baseRoutines, $cmsRoutines, $backendRoutines, $frontendRoutines, $finishRoutines);
     }
 }

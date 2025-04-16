@@ -47,7 +47,11 @@ class ImportStartingPointContentRoutineHandler implements InstallOptionsAwareInt
     {
         $handle = $this->installOptions->getStartingPointHandle();
         $startingPoint = $this->startingPointService->getByHandle($handle);
-        $contentXmlFilename = FILENAME_CONTENT_XML;
+        if ($this->installOptions->getStartingPointHandle()) {
+            $contentXmlFilename = $this->installOptions->getStartingPointPresetHandle() . '.xml';
+        } else {
+            $contentXmlFilename = FILENAME_CONTENT_XML;
+        }
         if ($startingPoint instanceof ThemeStartingPoint) {
             $package = $this->packageService->install($startingPoint->getPackage(), []);
             $contentXmlFilename = array_key_first($package->getContentSwapFiles());

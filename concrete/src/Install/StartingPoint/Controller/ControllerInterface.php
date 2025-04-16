@@ -1,6 +1,8 @@
 <?php
 namespace Concrete\Core\Install\StartingPoint\Controller;
 
+use Concrete\Core\Install\StartingPoint\PresetInterface;
+
 interface ControllerInterface
 {
 
@@ -17,6 +19,9 @@ interface ControllerInterface
      */
     public function getDescription();
 
+    /**
+     * @return PresetInterface[]
+     */
     public function getPresets(): array;
 
 

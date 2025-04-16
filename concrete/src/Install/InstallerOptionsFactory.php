@@ -13,6 +13,9 @@ class InstallerOptionsFactory implements ApplicationAwareInterface
 
     public function createFromEnvironment(InstallEnvironment $environment): InstallerOptions
     {
+        /**
+         * @var $options InstallerOptions
+         */
         $options = $this->app->make(InstallerOptions::class);
         $config = $this->app->make('config');
         $configuration = [];
@@ -42,6 +45,7 @@ class InstallerOptionsFactory implements ApplicationAwareInterface
             ->setUserPasswordHash($hasher->hashPassword($environment->getPassword()))
             ->setSiteName($environment->getSiteName())
             ->setStartingPointHandle($environment->getStartingPoint())
+            ->setStartingPointPresetHandle($environment->getStartingPointPreset())
             ->setSiteLocaleId($environment->getSiteLocaleLanguage() . '_' . $environment->getSiteLocaleCountry())
             ->setUiLocaleId($environment->getLocale())
             ->setServerTimeZoneId($environment->getTimezone());

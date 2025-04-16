@@ -30,7 +30,7 @@
           <div class="flex flex-col gap-2">
             <label
                 v-for="preset in selectedStartingPointObject.presets"
-                :key="preset.contentFile"
+                :key="preset.handle"
                 class="cursor-pointer justify-start gap-2 items-start w-full"
             >
               <div class="flex items-start">
@@ -38,7 +38,7 @@
                     type="radio"
                     name="startingPoint"
                     class="radio radio-primary mt-1"
-                    :value="preset.contentFile"
+                    :value="preset.handle"
                     v-model="startingPointPreset"
                 />
                 <div class="mt-1 ml-3 label-text flex flex-col">
@@ -163,7 +163,7 @@ export default {
         },
         selectedStartingPointObject: function() {
           if (this.selectedStartingPointObject !== null && this.startingPointPreset === null) {
-            this.startingPointPreset = this.selectedStartingPointObject.presets[0]?.contentFile;
+            this.startingPointPreset = this.selectedStartingPointObject.presets[0]?.handle;
           }
         }
     },
@@ -206,6 +206,7 @@ export default {
             this.installOptions = options
             this.installOptions.locale = this.selectedLocale
             this.installOptions.startingPoint = this.startingPoint
+            this.installOptions.startingPointPreset = this.startingPointPreset
         },
         validateInstallOptions(proceedToNextStep) {
             var my = this
@@ -233,7 +234,7 @@ export default {
                     }
                 },
                 complete() {
-                    $.fn.dialog.hideLoader()
+                  NProgress.done()
                 }
             })
         },
@@ -454,8 +455,7 @@ export default {
             localization: {
                 siteLocaleLanguage: this.siteLocaleLanguage,
                 siteLocaleCountry: this.siteLocaleCountry,
-//                timezone: this.timezone
-                timezone: 'America/Los_Angeles'
+                timezone: this.timezone
             }
         }
     }

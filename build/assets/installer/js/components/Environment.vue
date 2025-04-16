@@ -208,9 +208,9 @@ export default {
             confirmPassword: 'password'
         },
         database: {
-            server: 'localhost',
+            server: 'mysql',
             username: 'root',
-            password: '',
+            password: 'root',
             database: 'concrete'
         },
         session: {
@@ -238,6 +238,8 @@ export default {
         if (this.installOptions.localization) {
             this.localization = this.installOptions.localization
         }
+        this.site.privacyPolicy = true
+        this.localization.timezone = 'UTC'
     }
 }
 </script>

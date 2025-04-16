@@ -132,7 +132,7 @@ class Install extends Controller
         $installer->setOptions($options);
         $startingPoint = $installer->getStartingPoint(true);
 
-        $commands = $startingPoint->getInstaller()->getInstallCommands($options);
+        $commands = $startingPoint->getInstaller()->getInstallCommands($startingPoint, $options);
         return $installer->sendCommandsToClient($commands);
     }
 
@@ -228,6 +228,7 @@ class Install extends Controller
             'editYourSite' => t('Edit Your Site'),
             'installationComplete' => t('Installation complete.'),
             'startingPoint' => t('Starting Point'),
+            'startingPointPreset' => t('Content Preset'),
             'otherStartingPoints' => t('Other Starting Points'),
             'installPresetsTitle' => t('What kind of %s website would you like?'),
             'advancedOptions' => t('Advanced Options'),
@@ -287,6 +288,7 @@ class Install extends Controller
         $environment = new InstallEnvironment();
         $environment->setLocale($data['locale']);
         $environment->setStartingPoint($data['startingPoint']);
+        $environment->setStartingPointPreset($data['startingPointPreset'] ?? null);
         $environment->setSiteName($data['site']['name'] ?? '');
         $environment->setEmail($data['adminUser']['email'] ?? '');
         $environment->setPassword($data['adminUser']['password'] ?? '');

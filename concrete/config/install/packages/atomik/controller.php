@@ -3,6 +3,7 @@
 namespace Concrete\StartingPointPackage\Atomik;
 
 use Concrete\Core\Install\StartingPoint\Controller\AbstractController;
+use Concrete\Core\Install\StartingPoint\StandardPreset;
 use Concrete\Core\Install\StartingPoint\StartingPointPreset;
 
 class Controller extends AbstractController
@@ -37,8 +38,8 @@ class Controller extends AbstractController
     public function getPresets(): array
     {
         return [
-            new StartingPointPreset('content.xml', t('Full Services Website'), t('A full creative services website with a blog, support for a calendar and more.')),
-            new StartingPointPreset('empty.xml', T('Empty Site'), t('An empty website featuring the Atomik theme.')),
+            new StandardPreset('full', t('Full Services Website'), t('A full creative services website with a blog, support for a calendar and more.')),
+            new StandardPreset('empty', T('Empty Site'), t('An empty website featuring the Atomik theme.')),
         ];
     }
 
