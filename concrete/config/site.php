@@ -9,8 +9,8 @@ return [
             'user' => [
                 'profiles_enabled' => false,
                 'gravatar' => [
-                    'enabled' => false,
-                    'max_level' => 0,
+                    'enabled' => true,
+                    'max_level' => 'g',
                     'image_set' => 0,
                 ],
                 /*

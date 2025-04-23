@@ -12,8 +12,24 @@ mix.override((config) => {
 
 mix.webpackConfig({
     /* cache: false,*/ // Uncomment if you're working with changes in node_modules like developing bedrock
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: "ts-loader",
+                options: {
+                    appendTsSuffixTo: [/\.vue$/],
+
+                    // https://laracasts.com/discuss/channels/elixir/wabpack-cli-error-on-reload-watch
+                    transpileOnly: true,
+                },
+                exclude: /node_modules/
+            }
+        ]
+    },
     resolve: {
-        symlinks: false
+        symlinks: false,
+        extensions: ["*", ".js", ".jsx", ".vue", ".ts", ".tsx"]
     },
     externals: {
         jquery: 'jQuery',
@@ -27,7 +43,6 @@ mix.options({
     processCssUrls: false
 });
 
-mix.setPublicPath('../concrete');
 
 /********************************************************/
 /* IMPORTANT: when you add/remove a generated asset,    */
@@ -40,11 +55,19 @@ mix.setPublicPath('../concrete');
 if (mix.inProduction()) {
     mix.copy('node_modules/jquery/dist/jquery.min.js', '../concrete/js/jquery.js');
     mix.copy('node_modules/vue/dist/vue.global.prod.js', '../concrete/js/vue.js');
+    mix.copy('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js', '../concrete/js/bootstrap.js');
+    mix.copy('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map', '../concrete/js/bootstrap.bundle.min.js.map');
+    // Moment JS
+    mix.copy('node_modules/moment/min/moment.min.js', '../concrete/js/moment.js');
+    mix.copy('node_modules/moment/min/moment.min.js.map', '../concrete/js/moment.min.js.map');
 } else {
     mix.copy('node_modules/vue/dist/vue.global.js', '../concrete/js/vue.js');
 }
 
-/* Core Concrete Theme for Install and Other Things */
+// Now let's proceed with public entrypoints
+mix.setPublicPath('../concrete');
+
+// Core Concrete Theme for Install and Other Things
 mix
     .sass('assets/themes/concrete/scss/main.scss', 'themes/concrete', {
         sassOptions: {
@@ -66,11 +89,80 @@ mix
     })
     .js('assets/installer/js/installer.js', 'js/installer.js').vue()
 
-    mix.postCss('assets/backendui.css', 'css/backendui.css', [
-        tailwindcss(),
-        require('autoprefixer'),
-    ])
-    .version()
+// BackendUI (CMS and Dashboard)
+mix.postCss('assets/backendui.css', 'css/backendui.css', [
+    tailwindcss(),
+    require('autoprefixer'),
+])
+.version()
+
+// CMS
+mix
+    .sass('assets/cms.scss', 'css/cms.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+mix
+    .js('assets/cms.js', 'concrete/js/cms.js')
+    .vue({version: 3, customElement: true})
+
+// Atomik Theme
+mix
+    .sass('../concrete/themes/atomik/css/presets/default/main.scss', 'themes/atomik/css/skins/default.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    // currently commenting these out just to make the build process faster while we're implementing novaui
+    /*
+    .sass('../concrete/themes/atomik/css/presets/rustic-elegance/main.scss', 'themes/atomik/css/skins/rustic-elegance.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/coastal-breeze/main.scss', 'themes/atomik/css/skins/coastal-breeze.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/golden-meadow/main.scss', 'themes/atomik/css/skins/golden-meadow.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/misty-sage/main.scss', 'themes/atomik/css/skins/misty-sage.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/amber-twilight/main.scss', 'themes/atomik/css/skins/amber-twilight.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/midnight-velvet/main.scss', 'themes/atomik/css/skins/midnight-velvet.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })*/
+    .js('assets/themes/atomik/js/main.js', 'themes/atomik').vue()
 
 // Turn off notifications
 mix

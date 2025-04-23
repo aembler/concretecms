@@ -213,6 +213,7 @@ if ($cp) {
         }
     }
 }
+
 $v->markHeaderAssetPosition();
 if (empty($disableTrackingCode)) {
     echo $config->get('seo.tracking.code.header');

@@ -175,14 +175,24 @@ class UserInterface
      */
     public function getToolbarLogoSRC()
     {
-        $alt = false;
-        $src = false;
+        $src = $this->getToolbarLogoRealSrc();
         if (Config::get('concrete.white_label.name')) {
             $alt = Config::get('concrete.white_label.name');
         }
         if (!$alt) {
             $alt = 'Concrete';
         }
+        return '<img id="ccm-logo" src="' . $src . '" alt="' . $alt . '" title="' . $alt . '">';
+    }
+
+    /**
+     * So stupid. We named the above method wrong but let's not worry about that. Instead let's make a *real* method
+     * that returns only the src here.
+     * @return string
+     */
+    public function getToolbarLogoRealSrc(): string
+    {
+        $src = false;
         if (Config::get('concrete.white_label.logo')) {
             $src = Config::get('concrete.white_label.logo');
         }
@@ -196,8 +206,7 @@ class UserInterface
                 $src = ASSETS_URL_IMAGES . '/' . $filename . '.svg';
             }
         }
-
-        return '<img id="ccm-logo" src="' . $src . '" alt="' . $alt . '" title="' . $alt . '">';
+        return $src;
     }
 
     /**

@@ -6,10 +6,11 @@ use Concrete\Core\Notification\Events\MercureService;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
 
 defined('C5_EXECUTE') or die("Access Denied.");
+/* NOVAUI
 $valt = Loader::helper('validation/token');
 $token = '&' . $valt->getParameter();
 $dh = Loader::helper('concrete/dashboard');
-
+*/
 if (isset($cp)) {
     if ($cp->canViewToolbar()) {
         ?>
@@ -26,6 +27,8 @@ if (isset($cp)) {
             ?>
         </script>
 
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
         <?php
         $dh = Loader::helper('concrete/dashboard');
         $v = View::getInstance();
@@ -33,6 +36,7 @@ if (isset($cp)) {
 
         $v->requireAsset('core/cms');
 
+        /*
         $editMode = $c->isEditMode();
         $htmlTagClasses = 'ccm-toolbar-visible';
 
@@ -101,6 +105,6 @@ EOL;
                     '<script type="text/javascript">$(function() { ConcreteQueueConsumer.consume(\'' . $valt->generate('consume_messages') . '\') });</script>'
                 );
             }
-        }
+        }*/
     }
 }

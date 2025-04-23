@@ -25,20 +25,7 @@ if (
     echo $gf->getPageThemeGridFrameworkContainerEndHTML();
 }
 
-$p = new Permissions($b);
-$showMenu = false;
-if ($a->showControls() && $p->canViewEditInterface() && $view->showControls()) {
-    ?>
-<?php if (is_object($blockStyle)) {
-    ?>
-    </div>
-<?php 
-}
-    ?>
-    </div>
-    </div>
-<?php 
-} elseif (is_object($blockStyle)) {
+if (is_object($blockStyle)) {
     ?>
     </div>
 <?php 

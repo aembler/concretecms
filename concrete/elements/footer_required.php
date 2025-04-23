@@ -38,7 +38,6 @@ if (!$dh->inDashboard()) {
 if (empty($disableTrackingCode)) {
     echo $config->get('seo.tracking.code.footer');
 }
-
 View::getInstance()->markFooterAssetPosition();
 
 if (!isset($display_account_menu)) {

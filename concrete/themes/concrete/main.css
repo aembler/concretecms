@@ -1,3 +1,108 @@
-@import url(//fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700);
 @import url(https://fonts.cdnfonts.com/css/basier);
-#nprogress{pointer-events:none}#nprogress .bar{background:#29d;height:2px;left:0;position:fixed;top:0;width:100%;z-index:10000}#nprogress .peg{box-shadow:0 0 10px #29d,0 0 5px #29d;display:block;height:100%;opacity:1;position:absolute;right:0;transform:rotate(3deg) translateY(-4px);width:100px}#nprogress .spinner{display:none}.nprogress-custom-parent{overflow:hidden;position:relative}.nprogress-custom-parent #nprogress .bar,.nprogress-custom-parent #nprogress .spinner{position:absolute}@keyframes nprogress-spinner{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}div.ccm-ui [v-cloak]{display:none}
+@charset "UTF-8";
+/* gradients and shadows */
+/* colors */
+/* typography */
+/* horizontal rules */
+/* borders */
+/* buttons */
+/* forms */
+/* cards */
+/* transitions */
+/* dialogs */
+/* breadcrumbs */
+/* tabs */
+/* badges */
+/* Dropdowns */
+/* 10px @ 16px base */
+/* These variable names don't quite match up to their value */
+/* Usage: padding: $dropdown-item-padding-y $dropdown-item-padding-x; */
+/* popovers - these are used for in page menus, help menus */
+/* Links */
+/* panels */
+/* colors */
+/* headings */
+/* special dialog variables */
+/* additional tab colors */
+/* selectize */
+/* file manager image cell */
+/** --- Zindexes --- **/
+/* Base page */
+/* Dashboard form actions wrapper */
+/* Menus In Page */
+/* Checkboxes and stars in search results above menus */
+/* Inline Editing in Page */
+/* Inline Editing with Editable Fields */
+/* Dropdown Menus */
+/* Status Bar (below toolbar and panels) */
+/* Page alert (blue boxes) –similar to dashboard help but at the page level. Should come below the dialog overlay and the intelligent search */
+/* Panels */
+/* this is the overlay over the main content. must come below the panel z-index */
+/* Draggables */
+/* Main toolbar */
+/* Disable Toolbar (over toolbar) */
+/* dashboard privacy policy */
+/* Inline Editing Toolbar - has to come above disabled toolbar */
+/* Main toolbar - has to come above dashboard help notifications because of stupid webkit compositing */
+/* Intelligent Search */
+/* Dialogs */
+/* Editor dropdown –can be either inline OR in a dialog box so we have to come above dialog. Hopefully this doesn't
+cause other problems */
+/* Dialog Content */
+/* Search Checkboxes */
+/* Dialog Chrome */
+/* Tooltips and hovers in dialogs */
+/* tooltips that live on the same plane as menus */
+/* Edit Response HUDs - should come above modal dialog stuff. */
+/* Dashboard panels */
+/* Sitemap Icons */
+/* Help Tours */
+/* Form Group */
+/* stylelint-disable property-no-vendor-prefix, at-rule-no-vendor-prefix */
+/* Make clicks pass-through */
+#nprogress {
+  pointer-events: none;
+}
+#nprogress .bar {
+  background: #29d;
+  height: 2px;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10000;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px #29d, 0 0 5px #29d;
+  display: block;
+  height: 100%;
+  opacity: 1;
+  position: absolute;
+  right: 0;
+  transform: rotate(3deg) translate(0, -4px);
+  width: 100px;
+}
+#nprogress .spinner {
+  display: none;
+}
+
+.nprogress-custom-parent {
+  overflow: hidden;
+  position: relative;
+}
+
+.nprogress-custom-parent #nprogress .spinner,
+.nprogress-custom-parent #nprogress .bar {
+  position: absolute;
+}
+@keyframes nprogress-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+div.ccm-ui [v-cloak] {
+  display: none;
+}

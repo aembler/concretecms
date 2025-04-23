@@ -3,16 +3,30 @@ namespace Concrete\Controller\Dialog\Help;
 
 use Concrete\Controller\Backend\UserInterface;
 use Concrete\Core\Announcement\Item\Factory\WelcomeItemFactory;
+use Concrete\Core\Application\ApplicationAwareInterface;
+use Concrete\Core\Application\ApplicationAwareTrait;
+use Concrete\Core\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class Help extends UserInterface
+class Help implements ApplicationAwareInterface
 {
-    protected $viewPath = '/dialogs/help/help';
+    use ApplicationAwareTrait;
 
     public function view()
     {
+        $sidebar = '';
+        ob_start();
+        View::element('help/resources');
+        $sidebar .= ob_get_clean();
+        ob_end_clean();
+
         $welcomeItemFactory = $this->app->make(WelcomeItemFactory::class);
-        $this->set('items', $welcomeItemFactory->getItems());
+        return new JsonResponse(
+            [
+                'items' => $welcomeItemFactory->getItems(),
+                'sidebar' => $sidebar
+            ]
+        );
     }
 
     /**

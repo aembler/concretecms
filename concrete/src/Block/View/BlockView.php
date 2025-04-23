@@ -12,6 +12,7 @@ use Concrete\Core\Localization\Localization;
 use Concrete\Core\Logging\Channels;
 use Concrete\Core\Logging\LoggerFactory;
 use Concrete\Core\Page\Theme\Theme;
+use Concrete\Core\Permission\Checker;
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\View\AbstractView;
 use Concrete\Core\Area\Area;
@@ -150,8 +151,14 @@ class BlockView extends AbstractView
         switch ($view) {
             case 'view':
                 if (is_object($this->block) && is_object($this->area)) {
-                    $this->setBlockViewHeaderFile(DIR_FILES_ELEMENTS_CORE . '/block_header_view.php');
-                    $this->setBlockViewFooterFile(DIR_FILES_ELEMENTS_CORE . '/block_footer_view.php');
+                    $checker = new Checker($this->block);
+                    if ($this->area->showControls() && $checker->canViewEditInterface() && $this->showControls) {
+                        $this->setBlockViewHeaderFile(DIR_FILES_ELEMENTS_CORE . '/block_header_view_edit.php');
+                        $this->setBlockViewFooterFile(DIR_FILES_ELEMENTS_CORE . '/block_footer_view_edit.php');
+                    } else {
+                        $this->setBlockViewHeaderFile(DIR_FILES_ELEMENTS_CORE . '/block_header_view.php');
+                        $this->setBlockViewFooterFile(DIR_FILES_ELEMENTS_CORE . '/block_footer_view.php');
+                    }
                 }
                 if ($this->controller->blockViewRenderOverride) {
                     $template = DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
