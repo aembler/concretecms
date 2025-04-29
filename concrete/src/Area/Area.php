@@ -840,9 +840,9 @@ class Area extends ConcreteObject implements \Concrete\Core\Permission\ObjectInt
         // now, we iterate through these block groups (which are actually arrays of block objects), and display them on the page
         $loc->pushActiveContext(Localization::CONTEXT_UI);
         if ($this->showControls && $c->isEditMode() && $ap->canViewAreaControls()) {
-            View::element('block_area_header', array('a' => $this));
+            View::element('block_area_header', array('a' => $this, 'blocks' => $blocksToDisplay));
         } else {
-            View::element('block_area_header_view', array('a' => $this));
+            View::element('block_area_header_view', array('a' => $this, 'blocks' => $blocksToDisplay));
         }
         $loc->popActiveContext();
 

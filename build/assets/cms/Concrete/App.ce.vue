@@ -21,10 +21,12 @@
     />
     <slot />
   </div>
+  <MouseObserver />
 </template>
 
 <script setup>
 import Toolbar from './Toolbar/Toolbar.ce.vue'
+import MouseObserver from "./Support/MouseObserver.vue";
 
 // Define all the props explicitly
 const props = defineProps({

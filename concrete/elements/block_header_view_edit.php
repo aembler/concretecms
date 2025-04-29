@@ -16,5 +16,6 @@ View::element('block_header_view', ['a' => $a, 'b' => $b, 'c' => $c, 'pt' => $pt
 ?>
 
 <concrete-block
+    id="b<?=$b->getBlockID()?>"
     name="<?=t($blockType->getBlockTypeName())?>"
 >
