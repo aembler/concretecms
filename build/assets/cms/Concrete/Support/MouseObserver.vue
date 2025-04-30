@@ -30,23 +30,22 @@ function handleGlobalClick(event: MouseEvent) {
   }
 }
 
+function handleScroll() {
+  uiStore.updateScroll(window.scrollY)
+}
+
 
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
   document.addEventListener('click', handleGlobalClick, true) // useCapture=true catches early
+  window.addEventListener('scrollend', handleScroll, { passive: true })
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', handleMouseMove)
   document.removeEventListener('click', handleGlobalClick, true)
+  window.removeEventListener('scrollend', handleScroll)
 })
-
-watch(
-    () => uiStore.clickProxy.hoverElementId,
-    function (newVal, oldVal) {
-      console.log('[Hover Watcher] hoverElementId changed from', oldVal, 'to', newVal)
-    }
-)
 
 </script>
 

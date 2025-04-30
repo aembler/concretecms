@@ -8,12 +8,17 @@
     <template #badge>
       {{ name }}
     </template>
+    <template #menu>
+      <Menu>
+      </Menu>
+    </template>
     <slot />
   </HotSpot>
 </template>
 
 <script setup>
 import HotSpot from "./Ui/HotSpot.vue"
+import Menu from "./Block/Menu.vue";
 
 const props = defineProps({
   id: String,
