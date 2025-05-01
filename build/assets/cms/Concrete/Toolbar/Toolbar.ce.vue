@@ -1,5 +1,6 @@
 <template>
   <div id="ccm-page-controls-wrapper" :data-theme="resolvedTheme" class="w-full fixed top-0 left-0 z-50">
+    <div ref="teleportTarget"></div>
     <div id="ccm-toolbar" class="flex flex-row justify-between items-center px-6 py-4 bg-base-100 shadow-[inset_-2px_-2px_10px_rgba(0,0,0,0.1)]">
       <div class="flex items-center space-x-1">
         <!-- Logo -->
@@ -146,7 +147,7 @@ import {
   LayoutDashboard as DashboardIcon,
   Map as SitemapIcon,
 } from 'lucide-vue-next'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, useTemplateRef } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
 import { useUiStore } from '@concretecms/backendui'
@@ -174,6 +175,7 @@ const props = defineProps({
 
 
 const resolvedTheme = ref('light')
+const teleportTarget = useTemplateRef('teleportTarget')
 
 onMounted(() => {
   if (props.colorScheme === 'auto') {
@@ -182,6 +184,7 @@ onMounted(() => {
     resolvedTheme.value = props.colorScheme
   }
 
+  ui.menuContainer = teleportTarget
   document.querySelector('html').classList.add('ccm-toolbar-visible')
 
 })

@@ -18,11 +18,17 @@ function handleMouseMove(event: MouseEvent) {
 function handleGlobalClick(event: MouseEvent) {
   if (uiStore.clickProxy.activeElementId) {
     const path = event.composedPath() as HTMLElement[]
-    const firstElementWithId = path.find(el => (el as HTMLElement).id) as HTMLElement | undefined
-    if (
-        (firstElementWithId && firstElementWithId.id !== uiStore.clickProxy.activeElementId) ||
-        (!firstElementWithId)
-    ) {
+    let foundActive = false
+    path.forEach((element) => {
+        if (element.id && (
+            element.id === uiStore.clickProxy.activeElementId ||
+            element.id === uiStore.clickProxy.activeElementMenuId
+        )) {
+          foundActive = true
+        }
+    })
+
+    if (!foundActive) {
       uiStore.clickProxy.hoverElementId = ''
       uiStore.clickProxy.activeElementId = ''
       event.stopPropagation()
@@ -37,14 +43,14 @@ function handleScroll() {
 
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('click', handleGlobalClick, true) // useCapture=true catches early
-  window.addEventListener('scrollend', handleScroll, { passive: true })
+  document.addEventListener('click', handleGlobalClick) // useCapture=true catches early
+  window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', handleMouseMove)
-  document.removeEventListener('click', handleGlobalClick, true)
-  window.removeEventListener('scrollend', handleScroll)
+  document.removeEventListener('click', handleGlobalClick)
+  window.removeEventListener('scroll', handleScroll)
 })
 
 </script>
