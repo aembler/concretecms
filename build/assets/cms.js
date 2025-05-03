@@ -15,6 +15,7 @@ import { defineCustomElement, createApp } from 'vue'
 import ConcreteApp from './cms/Concrete/App.ce.vue'
 import ConcreteArea from './cms/Concrete/Area.ce.vue'
 import ConcreteBlock from './cms/Concrete/Block.ce.vue'
+import ConcreteContainer from './cms/Concrete/Container.ce.vue'
 
 import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
 import postcss from 'postcss'
@@ -69,7 +70,12 @@ const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
     styles: [cleanedCss],
     plugins: [pinia]
 })
+const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {
+    styles: [cleanedCss],
+    plugins: [pinia]
+})
 
 customElements.define('concrete-app', ConcreteAppElement)
 customElements.define('concrete-area', ConcreteAreaElement)
 customElements.define('concrete-block', ConcreteBlockElement)
+customElements.define('concrete-container', ConcreteContainerElement)

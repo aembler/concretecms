@@ -13,9 +13,17 @@ $pt = $c->getCollectionThemeObject();
 
 View::element('block_header_view', ['a' => $a, 'b' => $b, 'c' => $c, 'pt' => $pt]);
 
-?>
+if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
+
+<concrete-container>
+
+<?php } else { ?>
 
 <concrete-block
     id="b<?=$b->getBlockID()?>"
     name="<?=t($blockType->getBlockTypeName())?>"
+    selected-variant="<?=$b->getBlockFilename()?>"
+    variants='<?=json_encode($blockType->getBlockTypeCustomTemplates($b))?>'
 >
+
+<?php } ?>

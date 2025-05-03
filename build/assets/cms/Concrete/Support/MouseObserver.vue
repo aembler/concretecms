@@ -16,16 +16,15 @@ function handleMouseMove(event: MouseEvent) {
 }
 
 function handleGlobalClick(event: MouseEvent) {
+  const path = event.composedPath() as HTMLElement[]
   if (uiStore.clickProxy.activeElementId) {
-    const path = event.composedPath() as HTMLElement[]
     let foundActive = false
     path.forEach((element) => {
-        if (element.id && (
-            element.id === uiStore.clickProxy.activeElementId ||
-            element.id === uiStore.clickProxy.activeElementMenuId
-        )) {
-          foundActive = true
-        }
+      if (element.id && (
+          element.id === uiStore.clickProxy.activeElementMenuId
+      )) {
+        foundActive = true
+      }
     })
 
     if (!foundActive) {
@@ -33,6 +32,8 @@ function handleGlobalClick(event: MouseEvent) {
       uiStore.clickProxy.activeElementId = ''
       event.stopPropagation()
     }
+  } else if (uiStore.clickProxy.hoverElementId) {
+    uiStore.clickProxy.activeElementId = uiStore.clickProxy.hoverElementId
   }
 }
 

@@ -1,9 +1,8 @@
 <template>
   <div
       ref="rootEl"
-      @click="activateHotSpot"
       :class="[
-      'select-none z-10 relative cursor-pointer outline-3 transition-all duration-200',
+      'select-none z-1 relative cursor-pointer outline-3 transition-all duration-200',
       outlineColor,
     ]"
   >
@@ -13,7 +12,7 @@
         :class="[
         'absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none',
         isVisible ? 'animate-hotSpotBadge' : 'opacity-0',
-        'z-50 shadow-sm text-xs font-semibold uppercase rounded-full py-1 px-2 inline-block bg-concrete-green'
+        'z-3 shadow-sm text-xs font-semibold uppercase rounded-full py-1 px-2 inline-block bg-concrete-green'
       ]"
     >
       <slot name="badge" />
@@ -22,17 +21,26 @@
     <!-- Menu: stays absolutely positioned, with dynamic top -->
     <!-- need data-theme=light for daisyUI variables -->
     <teleport :to="uiStore.menuContainer">
-      <div
-          v-if="$slots.menu"
-          ref="menuEl"
-          :class="[
-      'flex absolute z-500 pointer-events-auto transition-opacity duration-200 -translate-x-1/2',
-      isStoreActiveMatch ? 'opacity-100' : 'opacity-0'
-    ]"
-          :style="{ top: menuTop, left: menuLeft }"
+      <Transition
+          enter-active-class="transition-opacity duration-200"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition-opacity duration-200"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
       >
-        <slot name="menu" />
-      </div>
+        <div
+            v-show="true"
+            :class="[
+        'flex absolute z-50 pointer-events-auto -translate-x-1/2 transition-opacity duration-200',
+        isStoreActiveMatch ? 'opacity-100 visible' : 'opacity-0 invisible'
+      ]"
+            ref="menuEl"
+            :style="{ top: menuTop, left: menuLeft }"
+        >
+          <slot name="menu" />
+        </div>
+      </Transition>
     </teleport>
 
 
@@ -44,7 +52,7 @@
         isStoreActiveMatch && activeBgClass
       ]"
     ></div>
-    <div class="absolute inset-0 cursor-pointer z-20"></div>
+    <div class="absolute inset-0 cursor-pointer z-2"></div>
   </div>
 </template>
 
@@ -88,12 +96,9 @@ const outlineColor = computed(() => {
   return 'outline-transparent'
 })
 
-function activateHotSpot() {
-  uiStore.clickProxy.activeElementId = props.itemId
-}
-
 const toolbarHeight = 72
-const verticalDifference = 10
+const verticalDifferenceAbove = 10
+const verticalDifferenceBelow = 10
 
 async function updateMenuTop() {
   if (!rootEl.value || !menuEl.value || !isStoreActiveMatch.value) return
@@ -106,9 +111,9 @@ async function updateMenuTop() {
   const elementWidth = rect.width
 
   const menuLeftTmp = xOnPage + elementWidth / 2
-  let menuTopTmp = yOnPage - menuHeight - verticalDifference
+  let menuTopTmp = yOnPage - menuHeight - verticalDifferenceAbove
   if (menuTopTmp < toolbarHeight) {
-    menuTopTmp = toolbarHeight + verticalDifference
+    menuTopTmp = toolbarHeight + verticalDifferenceBelow
   }
   menuTop.value = menuTopTmp + 'px'
   menuLeft.value = menuLeftTmp + 'px'

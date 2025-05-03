@@ -3,7 +3,7 @@ namespace Concrete\Core\Filesystem;
 
 use Loader;
 
-class TemplateFile
+class TemplateFile implements \JsonSerializable
 {
     /** Stores the parent object of this template file
      * @var \BlockType
@@ -95,5 +95,13 @@ class TemplateFile
     protected static function sortTemplateFileListSorter($a, $b)
     {
         return strcasecmp($a->getTemplateFileDisplayName('text'), $b->getTemplateFileDisplayName('text'));
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'file' => $this->getTemplateFileFilename(),
+            'name' => $this->getTemplateFileDisplayName('text'),
+        ];
     }
 }
