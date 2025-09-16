@@ -3105,7 +3105,7 @@ Nam massa mauris, euismod vel tortor vel, finibus accumsan sem. Sed varius vulpu
                 </blocks>
             </area>
         </stack>
-        <stack name="Blog Sidebar" path="/blog-sidebar">
+        <stack name="Blog Sidebar" path="">
             <area name="Main">
                 <blocks>
                     <block type="topic_list" name="">
