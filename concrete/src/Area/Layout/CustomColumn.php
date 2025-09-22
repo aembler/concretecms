@@ -89,9 +89,9 @@ class CustomColumn extends Column
         return $element;
     }
 
-    public function getColumnHtmlObject()
+    public function getColumnHtmlObject(bool $disableControls = false)
     {
-        $contents = $this->getContents();
+        $contents = $this->getContents($disableControls);
 
         return $this->getColumnElement($contents);
     }

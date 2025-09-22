@@ -53,6 +53,7 @@ if (isset($cp)) {
             }
             $panelDashboard = URL::to('/ccm/system/panels/dashboard');
             $panelPage = URL::to('/ccm/system/panels/page');
+            $panelStack = URL::to('/ccm/system/panels/stack');
             $panelSitemap = URL::to('/ccm/system/panels/sitemap');
             $panelHelp = URL::to('/ccm/system/panels/help');
             $panelAdd = URL::to('/ccm/system/panels/add');
@@ -64,6 +65,7 @@ if (isset($cp)) {
 	$('html').addClass('$htmlTagClasses');
 	ConcretePanelManager.register({'identifier': 'dashboard', 'position': 'right', url: '{$panelDashboard}'});
 	ConcretePanelManager.register({'identifier': 'page', url: '{$panelPage}'});
+	ConcretePanelManager.register({'identifier': 'stack', url: '{$panelStack}'});
 	ConcretePanelManager.register({'identifier': 'sitemap', 'position': 'right', url: '{$panelSitemap}'});
     ConcretePanelManager.register({'identifier': 'help', 'position': 'right', url: '{$panelHelp}'});
 	ConcretePanelManager.register({'identifier': 'page_relations', 'position': 'right', url: '{$panelRelations}'});

@@ -70,11 +70,11 @@ class PresetColumn extends Column
         return new Element('div');
     }
 
-    public function getColumnHtmlObject()
+    public function getColumnHtmlObject(bool $disableControls = false)
     {
         $column = $this->getPresetColumnObject();
         if ($column) {
-            $inner = $column->getColumnHtmlObject();
+            $inner = $column->getColumnHtmlObject($disableControls);
             $inner->setValue($this->getContents());
 
             return $inner;

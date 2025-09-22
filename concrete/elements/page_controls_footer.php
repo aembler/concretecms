@@ -19,6 +19,7 @@ if (isset($cp) && $cp->canViewToolbar() && (!$dh->inDashboard()) && !$view->isEd
     $dateHelper = $app->make('helper/date');
     $token = '&' . $valt->getParameter();
     $cID = $c->getCollectionID();
+    $pagetype = $c->getPageTypeObject();
     $permissions = new Permissions($c);
     $resolver = $app->make(ResolverManagerInterface::class);
 
@@ -66,13 +67,24 @@ if (isset($cp) && $cp->canViewToolbar() && (!$dh->inDashboard()) && !$view->isEd
             </script>
         <?php } ?>
         <div id="ccm-toolbar" class="<?= $show_titles ? 'titles' : '' ?> <?= $large_font ? 'large-font' : '' ?>">
-						<?php
+            <?php
               $mobileMenu = Element::get('dashboard/navigation/mobile', ['section' => $c, 'currentPage' => $c]);
               $mobileMenu->render();
             ?> 
             <ul class="ccm-toolbar-item-list">
                 <li class="ccm-logo float-start"><span><?= $cih->getToolbarLogoSRC() ?></span></li>
+                <?php if ($pagetype && $pagetype->getPageTypeHandle() === STACKS_PAGE_TYPE) {
+                    $parent = \Concrete\Core\Page\Page::getByID($c->getCollectionParentID());
+                    $backToStacksLink = URL::to('/dashboard/blocks/stacks', 'view_details', $parent->getCollectionID());
+                    ?>
+                <li class="float-start ccm-toolbar-button-with-text">
+                    <a href="<?=$backToStacksLink; ?>">
+                        <svg><use xlink:href="#icon-arrow-left" /></svg>
+                        <span><?=t('Back to Stacks'); ?></span>
+                    </a>
+                </li>
                 <?php
+                }
                 if ($c->isMasterCollection()) {
                     ?>
                     <li class="float-start">
@@ -131,28 +143,43 @@ if (isset($cp) && $cp->canViewToolbar() && (!$dh->inDashboard()) && !$view->isEd
                         )
                     ) {
                         $hasComposer = isset($pagetype) && is_object($pagetype) && $cp->canEditPageContents();
+                        if (isset($pagetype) && $pagetype->getPageTypeHandle() === STACKS_PAGE_TYPE) {
                         ?>
-                        <li data-guide-toolbar-action="page-settings" class="float-start d-none d-md-block">
-                            <a <?php if ($show_tooltips) { ?>class="launch-tooltip"<?php } ?> data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                href="#"
-                                data-launch-panel="page"
-                                data-panel-url="<?= URL::to('/ccm/system/panels/page') ?>"
-                                <?php
-                                if ($hasComposer) {
-                                    ?>title="<?= t('Composer, Page Design, Location, Attributes and Settings') ?>"><?php
-                                } else {
-                                    ?>title="<?= t('Page Design, Location, Attributes and Settings') ?>"><?php
-                                }
-                                ?>
-
-                                <svg><use xlink:href="#icon-cog" /></svg><span class="ccm-toolbar-accessibility-title ccm-toolbar-accessibility-title-settings"><?php
+                            <li data-guide-toolbar-action="page-settings" class="float-start d-none d-md-block">
+                                <a <?php if ($show_tooltips) { ?>class="launch-tooltip"<?php } ?> data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                   href="#"
+                                   data-launch-panel="stack"
+                                   data-panel-url="<?= URL::to('/ccm/system/panels/stack') ?>"
+                                   <?php
+                                   ?>title="<?= t('Stack Information and Management') ?>"><?php
+                                    ?>
+                                    <svg><use xlink:href="#icon-cog" /></svg><span class="ccm-toolbar-accessibility-title ccm-toolbar-accessibility-title-settings"><?php
+                                        ?><?= tc('toolbar', 'Stack Management') ?></span>
+                                </a>
+                            </li>
+                        <?php } else { ?>
+                            <li data-guide-toolbar-action="page-settings" class="float-start d-none d-md-block">
+                                <a <?php if ($show_tooltips) { ?>class="launch-tooltip"<?php } ?> data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                    href="#"
+                                    data-launch-panel="page"
+                                    data-panel-url="<?= URL::to('/ccm/system/panels/page') ?>"
+                                    <?php
                                     if ($hasComposer) {
-                                        ?><?= tc('toolbar', 'Composer') ?> / <?php
+                                        ?>title="<?= t('Composer, Page Design, Location, Attributes and Settings') ?>"><?php
+                                    } else {
+                                        ?>title="<?= t('Page Design, Location, Attributes and Settings') ?>"><?php
                                     }
-                                    ?><?= tc('toolbar', 'Page Settings') ?></span>
-                            </a>
-                        </li>
+                                    ?>
+
+                                    <svg><use xlink:href="#icon-cog" /></svg><span class="ccm-toolbar-accessibility-title ccm-toolbar-accessibility-title-settings"><?php
+                                        if ($hasComposer) {
+                                            ?><?= tc('toolbar', 'Composer') ?> / <?php
+                                        }
+                                        ?><?= tc('toolbar', 'Page Settings') ?></span>
+                                </a>
+                            </li>
                         <?php
+                        }
                     }
                 }
 

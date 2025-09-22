@@ -8,6 +8,10 @@ defined('C5_EXECUTE') or die('Access Denied.');
  */
 $container = $container ?? null;
 $fileToRender = $fileToRender ?? null;
+$disableControls = false;
+if (!$a->showControls()) {
+    $disableControls = true;
+}
 $c = $c ?? \Concrete\Core\Page\Page::getCurrentPage();
 if ($container) {
     $container->startRender();

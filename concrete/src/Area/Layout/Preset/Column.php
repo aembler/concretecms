@@ -32,7 +32,7 @@ class Column implements ColumnInterface
         $this->column = $column;
     }
 
-    public function getColumnHtmlObject()
+    public function getColumnHtmlObject(bool $disableControls = false)
     {
         return $this->column;
     }

@@ -520,6 +520,8 @@ class Page extends Collection implements CategoryMemberInterface,
                 }
                 $r = $env->getRecord(DIRNAME_CONTROLLERS . '/' . DIRNAME_PAGE_CONTROLLERS . $path . '.php', $this->getPackageHandle());
                 $prefix = $r->override ? true : $this->getPackageHandle();
+                // Handle weird cases like !stacks now
+                $path = str_replace('!', '', $path);
                 $class = core_class('Controller\\SinglePage\\' . str_replace('/', '\\', camelcase($path, true)), $prefix);
             }
 
@@ -558,13 +560,6 @@ class Page extends Collection implements CategoryMemberInterface,
      */
     public function isEditMode()
     {
-        if ($this->getCollectionPath() == STACKS_LISTING_PAGE_PATH) {
-            return true;
-        }
-        if ($this->getPageTypeHandle() == STACKS_PAGE_TYPE) {
-            return true;
-        }
-
         return $this->isCheckedOutByMe();
     }
 

@@ -148,9 +148,9 @@ class ThemeGridColumn extends Column
         }
     }
 
-    public function getColumnHtmlObject()
+    public function getColumnHtmlObject(bool $disableControls = false)
     {
-        $contents = $this->getContents();
+        $contents = $this->getContents($disableControls);
 
         return $this->getColumnElement($contents);
     }

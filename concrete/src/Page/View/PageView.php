@@ -170,7 +170,8 @@ class PageView extends View
         $this->cp = $cp;
         if ($cp->canViewToolbar()) {
             $dh = Loader::helper('concrete/dashboard');
-            if (!$dh->inDashboard()
+            if (!$dh->inDashboard() &&
+                !in_array($this->c->getPageTypeHandle(), [STACKS_PAGE_TYPE])
                 && $this->c->getCollectionPath() != '/page_not_found'
                 && $this->c->getCollectionPath() != '/download_file'
                 && !$this->c->isPageDraft()

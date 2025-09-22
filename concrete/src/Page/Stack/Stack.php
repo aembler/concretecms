@@ -7,6 +7,7 @@ use Concrete\Core\Page\Cloner;
 use Concrete\Core\Page\ClonerOptions;
 use Concrete\Core\Page\Collection\Collection;
 use Concrete\Core\Page\Stack\Folder\Folder;
+use Concrete\Core\Page\Template;
 use Concrete\Core\Permission\Checker;
 use Concrete\Core\Site\Tree\TreeInterface;
 use Concrete\Core\Support\Facade\Application;
@@ -229,7 +230,11 @@ class Stack extends Page
             $data['name'] = t('No Name');
         }
         $pagetype = PageType::getByHandle(STACKS_PAGE_TYPE);
-        $page = $parent->add($pagetype, $data);
+        $pageTemplate = Template::getByHandle(STACKS_PAGE_TEMPLATE);
+        if (!$pageTemplate) {
+            $pageTemplate = false;
+        }
+        $page = $parent->add($pagetype, $data, $pageTemplate);
 
         // we have to do this because we need the area to exist before we try and add something to it.
         Area::getOrCreate($page, STACKS_AREA_NAME);

@@ -4,6 +4,10 @@ $minColumns = 1;
 $columnsNum = $columnsNum ?? 1;
 $maxColumns = $maxColumns ?? 12;
 $enableThemeGrid = $enableThemeGrid ?? false;
+$disableControls = false;
+if (!$a->showControls()) {
+    $disableControls = true;
+}
 $columns = $columns ?? [];
     /** @var \Concrete\Core\Area\Layout\Formatter\FormatterInterface $formatter */
     /** @var \Concrete\Block\CoreAreaLayout\Controller $controller */
@@ -24,7 +28,7 @@ $columns = $columns ?? [];
     }
 
     foreach ($columns as $column) {
-        $html = $column->getColumnHtmlObject();
+        $html = $column->getColumnHtmlObject($disableControls);
         if (!empty($container)) {
             $container->appendChild($html);
         } else {

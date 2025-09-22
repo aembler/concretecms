@@ -13,6 +13,7 @@ use Concrete\Core\Page\Page;
 use Concrete\Core\Page\Stack\Stack;
 use Concrete\Core\Page\Stack\StackList;
 use Concrete\Core\Permission\Checker;
+use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\Support\Facade\StackFolder;
 use Concrete\Core\User\User;
 use Concrete\Core\Workflow\Request\ApprovePageRequest;
@@ -46,71 +47,10 @@ class Stacks extends DashboardPageController
         } else {
             $locale = '';
         }
-
         $s = Stack::getByID($cID);
         if (is_object($s)) {
-            $isGlobalArea = $s->getStackType() == Stack::ST_TYPE_GLOBAL_AREA;
-            $factory->setDisplayGlobalAreasLandingPage($isGlobalArea);
-            if ($s->isNeutralStack()) {
-                $neutralStack = $s;
-                $stackToEdit = $s;
-            } else {
-                $neutralStack = $s->getNeutralStack();
-                $stackToEdit = $s;
-            }
-            $sections = $this->getMultilingualSections();
-            $this->setBreadcrumb($factory->getBreadcrumb($this->getPageObject(), $s, $sections, $locale));
-            if (!empty($sections)) {
-                if ($stackToEdit !== $neutralStack) {
-                    $section = $stackToEdit->getMultilingualSection();
-                    if ($section !== null) {
-                        $locale = $section->getLocale();
-                    }
-                }
-                if (!isset($sections[$locale])) {
-                    $locale = '';
-                }
-                if ($locale !== '') {
-                    $this->set('localeCode', $locale);
-                    $this->set('localeName', $sections[$locale]->getLanguageText());
-                    $stackToEdit = $neutralStack->getLocalizedStack($sections[$locale]);
-                }
-            }
-            if ($stackToEdit !== null) {
-                $blocks = $stackToEdit->getBlocks('Main');
-                $view = View::getInstance();
-                foreach ($blocks as $b1) {
-                    $btc = $b1->getController();
-                    // now we inject any custom template CSS and JavaScript into the header
-                    if ($btc instanceof \Concrete\Core\Block\BlockController) {
-                        $btc->outputAutoHeaderItems();
-                    }
-
-                    $btc->runAction('on_page_view', [$view]);
-                }
-
-                $this->addHeaderItem($stackToEdit->outputCustomStyleHeaderItems(true));
-                $this->set('blocks', $blocks);
-            }
-
-            $this->set('neutralStack', $neutralStack);
-            $this->set('stackToEdit', $stackToEdit);
-            $this->set('isGlobalArea', $isGlobalArea);
-            $this->addHeaderItem(
-                <<<'EOT'
-                <style>
-                #ccm-stack-container {
-                    background-color: var(--bs-body-bg);
-                }
-                #ccm-stack-container.dark {
-                    background-color: var(--bs-black);
-                } 
-                #ccm-stack-container.light {
-                    background-color: var(--bs-white);
-                } 
-                </style>
-                EOT
-            );
+            // Forward to the new element editor
+            return new RedirectResponse($s->getCollectionLink());
         } else {
             $folder = StackFolder::getByID($cID);
             if (is_object($folder)) {

@@ -292,6 +292,7 @@ const STACKS_LISTING_PAGE_PATH = '/dashboard/blocks/stacks';
 const STACKS_PAGE_PATH = '/!stacks';
 const STACKS_AREA_NAME = 'Main';
 const STACKS_PAGE_TYPE = 'core_stack';
+const STACKS_PAGE_TEMPLATE = 'core_stack';
 const STACK_CATEGORY_PAGE_TYPE = 'core_stack_category';
 
 /*

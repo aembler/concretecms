@@ -53,3 +53,4 @@ $router->post('/theme/customize/delete_skin/{pThemeID}/{skinIdentifier}', 'Theme
 $router->post('/theme/customize/save_styles/{previewPageID}/{pThemeID}/{presetIdentifier}', 'Theme\CustomizePreset::saveStyles');
 $router->all('/sitemap', 'Sitemap::view');
 $router->all('/help', 'Help::view');
+$router->all('/stack', 'Stack::view');

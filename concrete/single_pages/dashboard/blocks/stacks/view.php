@@ -540,7 +540,11 @@ if ($showGlobalAreasFolder || !empty($stacks)) {
                 $formatter = new Concrete\Core\Page\Stack\Formatter($st);
                 ?>
                 <tr class="<?= $formatter->getSearchResultsClass() ?>"
-                    data-details-url="<?= $view->action('view_details', $st->getCollectionID()) ?>"
+                    <?php if ($st->getPageTypeHandle() === STACK_CATEGORY_PAGE_TYPE) { ?>
+                        data-details-url="<?= $view->action('view_details', $st->getCollectionID()) ?>"
+                    <?php } else { ?>
+                        data-details-url="<?= $st->getCollectionLink() ?>"
+                    <?php } ?>
                     data-collection-id="<?= $st->getCollectionID() ?>">
                     <td class="ccm-search-results-icon"><?= $formatter->getIconElement() ?></td>
                     <td class="ccm-search-results-name"><?= h($st->getCollectionName()) ?></td>

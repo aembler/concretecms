@@ -1,9 +1,12 @@
 <?php
 namespace Concrete\Controller\PageType;
 
+use Concrete\Core\Filesystem\ElementManager;
 use Concrete\Core\Http\ResponseFactory;
+use Concrete\Core\Navigation\Breadcrumb\Dashboard\DashboardStacksBreadcrumbFactory;
 use Concrete\Core\Page\Controller\PageTypeController;
 use Concrete\Core\Page\Page;
+use Concrete\Core\Page\Stack\Stack;
 use Concrete\Core\Permission\Checker as Permissions;
 
 class CoreStack extends PageTypeController
@@ -12,7 +15,7 @@ class CoreStack extends PageTypeController
     /**
      * @var \Concrete\Core\Http\ResponseFactory
      */
-    private $factory;
+    protected $factory;
 
     public function __construct(\Concrete\Core\Page\Page $c, ResponseFactory $factory)
     {
@@ -24,27 +27,24 @@ class CoreStack extends PageTypeController
     {
         $stacksPage = Page::getByPath(STACKS_LISTING_PAGE_PATH);
         $stacksPerms = new Permissions($stacksPage);
-
-        // Make sure we can view the stacks page
-        if ($stacksPerms->canViewPage()) {
-            $currentPage = $this->c;
-            $currentPagePerms = new Permissions($currentPage);
-            $viewTask = $this->request->get('vtask');
-
-            // If the current user can't view this pages versions, or if vtask is not one of the available tasks
-            if (!$currentPagePerms->canViewPageVersions() || !in_array($viewTask, ['view_versions', 'compare'])) {
-                $url = $stacksPage->getPageController()->action('view_details', $currentPage->getCollectionID());
-
-                // Redirect to the stacks page
-                return $this->factory->redirect($url);
-            } else {
-                // Otherwise set the current theme and render normally
-                $this->theme = 'dashboard';
-            }
+        if (!$stacksPerms->canViewPage()) {
+            return $this->factory->notFound('');
         }
+    }
 
-        // If we can't view the stacks page, send a 404
-        return $this->factory->notFound('');
+    public function view()
+    {
+        $this->set('stack', Stack::getByID($this->c->getCollectionID()));
+        $breadcrumb =$this->app->make(
+            DashboardStacksBreadcrumbFactory::class
+        )->getBreadcrumb($this->c);
+
+        $this->set('breadcrumb', $this->app->make(ElementManager::class)
+            ->get('dashboard/navigation/breadcrumb', [
+                'breadcrumb' => $breadcrumb
+            ])
+        );
+
     }
 
 }
