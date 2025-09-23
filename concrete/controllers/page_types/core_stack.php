@@ -1,6 +1,8 @@
 <?php
 namespace Concrete\Controller\PageType;
 
+use Concrete\Core\Area\Area;
+use Concrete\Core\Feature\UsesFeatureInterface;
 use Concrete\Core\Filesystem\ElementManager;
 use Concrete\Core\Http\ResponseFactory;
 use Concrete\Core\Navigation\Breadcrumb\Dashboard\DashboardStacksBreadcrumbFactory;
@@ -32,8 +34,14 @@ class CoreStack extends PageTypeController
         }
     }
 
+    public function view_contents()
+    {
+        $this->disableEditing();
+    }
+
     public function view()
     {
+        $this->requireAsset('feature/stacks/backend');
         $this->set('stack', Stack::getByID($this->c->getCollectionID()));
         $breadcrumb =$this->app->make(
             DashboardStacksBreadcrumbFactory::class

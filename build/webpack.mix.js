@@ -96,6 +96,7 @@ if (mix.inProduction()) {
     mix.copy('node_modules/@concretecms/bedrock/assets/cms/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/cms/scss');
     mix.copy('node_modules/@concretecms/bedrock/assets/conversations/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/conversations/scss');
     mix.copy('node_modules/@concretecms/bedrock/assets/desktop/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/desktop/scss');
+    mix.copy('node_modules/@concretecms/bedrock/assets/stacks/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/stacks/scss');
     mix.copy('node_modules/@concretecms/bedrock/assets/documents/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/documents/scss');
     mix.copy('node_modules/@concretecms/bedrock/assets/express/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/express/scss');
     mix.copy('node_modules/@concretecms/bedrock/assets/faq/scss', '../concrete/bedrock/assets/@concretecms/bedrock/assets/faq/scss');
@@ -204,6 +205,15 @@ mix
         }
     })
     .js('node_modules/@concretecms/bedrock/assets/desktop/js/frontend.js', 'js/features/desktop/frontend.js').vue()
+mix
+    .sass('node_modules/@concretecms/bedrock/assets/stacks/scss/backend.scss', 'css/features/stacks/backend.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .js('node_modules/@concretecms/bedrock/assets/stacks/js/backend.js', 'js/features/stacks/backend.js').vue()
 
 
 mix

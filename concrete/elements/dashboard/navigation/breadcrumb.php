@@ -7,7 +7,7 @@ $items = $breadcrumb->getItems();
 $total = count($items);
 if ($total > 1) {
     ?>
-    <ol class="breadcrumb">
+    <ol class="breadcrumb ccm-dashboard-breadcrumb">
         <?php
         for ($i = 0; $i < $total; $i++) {
             $item = $items[$i];

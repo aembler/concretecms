@@ -498,6 +498,11 @@ return [
             ['css', 'css/features/desktop/frontend.css', ['minify' => false]],
         ],
 
+        'feature/stacks/backend' => [
+            ['javascript', 'js/features/stacks/backend.js', ['minify' => false]],
+            ['css', 'css/features/stacks/backend.css', ['minify' => false]],
+        ],
+
         'feature/boards/frontend' => [
             ['javascript', 'js/features/boards/frontend.js', ['minify' => false]],
             ['css', 'css/features/boards/frontend.css', ['minify' => false]],
@@ -714,6 +719,13 @@ return [
             [
                 ['javascript', 'feature/desktop/frontend'],
                 ['css', 'feature/desktop/frontend'],
+            ],
+        ],
+
+        'feature/stacks/backend' => [
+            [
+                ['javascript', 'feature/stacks/backend'],
+                ['css', 'feature/stacks/backend'],
             ],
         ],
 
