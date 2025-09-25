@@ -48,6 +48,18 @@ if ($view->controller->getAction() === 'view_contents') {
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
+            <?php
+            if (!empty($error)) { ?>
+                ConcreteAlert.error({
+                    'message': <?= json_encode($error) ?>,
+                })
+            <?php } elseif (!empty($success)) { ?>
+                ConcreteAlert.notify({
+                    'message': <?= json_encode($success) ?>,
+                })
+            <?php } ?>
+
             const editorColumn = document.getElementById("editorColumn");
             const controls = document.getElementById("editorControls");
             const frame = document.getElementById("ccm-stack-editor-frame");

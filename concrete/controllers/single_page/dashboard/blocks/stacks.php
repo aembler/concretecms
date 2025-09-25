@@ -70,8 +70,9 @@ class Stacks extends DashboardPageController
         }
 
         switch ($msg) {
+            /*
             case 'stack_added':
-                $this->set('flashMessage', t('Stack added successfully.'));
+                $this->flash('success', t('Stack added successfully.'));
                 break;
             case 'localized_stack_added':
                 $this->set('flashMessage', t('Localized version of stack added successfully.'));
@@ -118,6 +119,7 @@ class Stacks extends DashboardPageController
             case 'stack_renamed':
                 $this->set('flashMessage', t('Stack renamed successfully'));
                 break;
+            */
             case 'folder_renamed':
                 $this->set('flashMessage', t('Stack Folder renamed successfully'));
                 break;
@@ -160,7 +162,7 @@ class Stacks extends DashboardPageController
 
                 if (!$this->error->has()) {
                     $stack = Stack::addStack($stackName, $folder);
-
+                    $this->flash('success', t('Stack added successfully.'));
                     return $this->buildRedirect($this->action('view_details', $stack->getCollectionID(), 'stack_added'));
                 }
             } else {
