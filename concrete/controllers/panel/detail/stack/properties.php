@@ -4,6 +4,7 @@ namespace Concrete\Controller\Panel\Detail\Stack;
 use Concrete\Controller\Backend\UserInterface\Page as BackendInterfacePageController;
 use Concrete\Core\Page\EditResponse;
 use Concrete\Core\Page\Page;
+use Concrete\Core\Page\Stack\Stack;
 use Concrete\Core\Permission\Key\Key;
 use Concrete\Core\User\User;
 use Concrete\Core\Workflow\Request\ApproveStackRequest;
@@ -16,12 +17,18 @@ class Properties extends BackendInterfacePageController
 
     protected $assignment;
 
+    protected $canEditName = false;
+
     public function on_start()
     {
         parent::on_start();
+        $stack = Stack::getByID($this->page->getCollectionID());
+        $isGlobalArea = $stack->getStackType() === Stack::ST_TYPE_GLOBAL_AREA;
+
         $pk = Key::getByHandle('edit_page_properties');
         $pk->setPermissionObject($this->page);
         $this->assignment = $pk->getMyAssignment();
+        $this->canEditName = $this->assignment->allowEditName() && !$isGlobalArea;
         $this->set('assignment', $this->assignment);
     }
 
@@ -32,12 +39,13 @@ class Properties extends BackendInterfacePageController
 
     public function view()
     {
+        $this->set('canEditName', $this->canEditName);
     }
 
     public function submit(): JsonResponse
     {
         if ($this->validateAction()) {
-            if ($this->assignment->allowEditName()) {
+            if ($this->canEditName) {
                 $name = $this->request->request->get('stackName');
                 $nvc = $this->page->getVersionToModify();
                 $nvc->update(['cName' => $name]);
@@ -60,8 +68,6 @@ class Properties extends BackendInterfacePageController
                     $r->setMessage(t('The stack rename request has been submitted to workflow.'));
                 }
                 return new JsonResponse($r);
-            } else {
-                throw new \UserMessageException(t('Access Denied.'));
             }
         }
     }

@@ -4,10 +4,6 @@ defined('C5_EXECUTE') or die("Access Denied."); ?>
 use Concrete\Core\Attribute\Set as AttributeSet;
 
 $cp = new Permissions($c);
-$pk = PermissionKey::getByHandle('edit_page_properties');
-$pk->setPermissionObject($c);
-$asl = $pk->getMyAssignment();
-$seoSet = AttributeSet::getByHandle('seo');
 ?>
 <section>
     <header><h5><?= t('Stack Settings') ?></h5></header>
@@ -22,7 +18,36 @@ $seoSet = AttributeSet::getByHandle('seo');
                 </a>
             </li>
             <?php
+        }
+        if ($cp->canViewPageVersions()) {
+            ?>
+            <li>
+                <a href="#" data-launch-sub-panel-url="<?= URL::to('/ccm/system/panels/page/versions') ?>">
+                    <?= t('Versions') ?>
+                </a>
+            </li>
+            <?php
+        }
+        if ($canEditPagePermissions) {
+            ?>
+            <li>
+                <a href="#" data-launch-panel-detail="page-permissions"
+                   data-panel-detail-url="<?= URL::to('/ccm/system/panels/details/page/permissions') ?>"
+                   data-panel-transition="fade">
+                    <?= t('Permissions') ?>
+                </a>
+            </li>
+        <?php
+        }
 
-        } ?>
+        if (!$isGlobalArea) { ?>
+            <li>
+                <a href="#" data-launch-panel-detail="stack-usage"
+                   data-panel-detail-url="<?= URL::to('/ccm/system/panels/details/stack/usage') ?>"
+                   data-panel-transition="fade">
+                    <?= t('Stack Usage') ?>
+                </a>
+            </li>
+        <?php } ?>
     </menu>
 </section>
