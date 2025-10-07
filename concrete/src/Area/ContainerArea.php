@@ -124,6 +124,10 @@ class ContainerArea
                 $subArea->setAreaGridMaximumColumns($this->gridMaximumColumns);
             }
 
+            $wrapperArea = $this->instance->getWrapperArea();
+            if ($wrapperArea instanceof Area && !$wrapperArea->showControls()) {
+                $subArea->disableControls();
+            }
             $subArea->display($page);
         }
     }

@@ -37,6 +37,7 @@ class CoreStack extends PageTypeController
     public function view_contents()
     {
         $this->disableEditing();
+        $this->view();
     }
 
     public function view()

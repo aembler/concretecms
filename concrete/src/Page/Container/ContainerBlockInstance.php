@@ -2,6 +2,7 @@
 
 namespace Concrete\Core\Page\Container;
 
+use Concrete\Core\Area\Area;
 use Concrete\Core\Block\Block;
 use Concrete\Core\Entity\Page\Container\Instance;
 use Doctrine\ORM\EntityManager;
@@ -23,12 +24,18 @@ class ContainerBlockInstance
      * @var EntityManager 
      */
     protected $entityManager;
-    
-    public function __construct(Block $block, Instance $instance, EntityManager $entityManager)
+
+    /**
+     * @var Area|null
+     */
+    protected $wrapperArea;
+
+    public function __construct(Block $block, Instance $instance, EntityManager $entityManager, ?Area $wrapperArea = null)
     {
         $this->instance = $instance;
         $this->block = $block;
         $this->entityManager = $entityManager;
+        $this->wrapperArea = $wrapperArea;
     }
 
     /**
@@ -45,6 +52,11 @@ class ContainerBlockInstance
     public function getInstance(): Instance
     {
         return $this->instance;
+    }
+
+    public function getWrapperArea(): ?Area
+    {
+        return $this->wrapperArea;
     }
 
     /**

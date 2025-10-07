@@ -88,7 +88,7 @@ class Controller extends BlockController implements UsesFeatureInterface
             $container = $instance->getContainer();
             $containerBlockInstance = $this->app->make(
                 ContainerBlockInstance::class,
-                ['block' => $this->getBlockObject(), 'instance' => $instance]
+                ['block' => $this->getBlockObject(), 'instance' => $instance, 'wrapperArea' => $this->getAreaObject()]
             );
             $locator = $this->app->make(TemplateLocator::class);
             // no this is not a typo. Aesthetically it looks nice to pass $container to the container area

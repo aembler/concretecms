@@ -8,7 +8,7 @@ if ($view->controller->getAction() === 'view_contents') {
     <?php
     $a = new Area('Main');
     $a->setAreaGridMaximumColumns(12);
-    $a->display($c);
+    $a->display($view->controller->getPageObject());
     ?>
 
 <?php } else { ?>
@@ -31,7 +31,7 @@ if ($view->controller->getAction() === 'view_contents') {
                                 <?php
                                 $a = new Area('Main');
                                 $a->setAreaGridMaximumColumns(12);
-                                $a->display($c);
+                                $a->display($view->controller->getPageObject());
                                 ?>
                             <?php } else { ?>
                                 <div class="text-center p-5" id="ccm-stack-editor-frame-loader">
