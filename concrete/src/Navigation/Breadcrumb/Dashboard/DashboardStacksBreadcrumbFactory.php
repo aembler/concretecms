@@ -54,7 +54,21 @@ class DashboardStacksBreadcrumbFactory implements ApplicationAwareInterface
                 $this->app->make('url')->to('/dashboard/blocks/stacks', 'view_global_areas'),
                 t('Global Areas')
             ));
+
+            if ($dashboardPage->getPageTypeHandle() === STACKS_PAGE_TYPE) {
+                // Now we need to move Global Areas between the first breadcrumb item
+                // and the global area, because otherwise in the stack in-page editor
+                // the breadcrumb is wrong.
+                $items = $breadcrumb->getItems();
+
+                $temp = $items[1];       // store the item at index 2
+                $items[1] = $items[2];   // put item 3 into position 2
+                $items[2] = $temp;       // put old item 2 into position 3
+
+                $breadcrumb->setItems($items);
+                }
         }
+
         if ($stackOrFolder) {
             if ($stackOrFolder instanceof Folder) {
                 $stackOrFolder = $stackOrFolder->getPage();

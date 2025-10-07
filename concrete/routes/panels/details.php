@@ -41,3 +41,4 @@ $router->all('/ccm/system/panels/details/theme/preview_page_legacy/{pThemeID}/{p
 $router->all('/ccm/system/panels/details/theme/preview_page_legacy_iframe/{pThemeID}/{pageID}', '\Concrete\Controller\Panel\Detail\Theme\PreviewPageLegacy::viewIframe');
 $router->all('/ccm/system/panels/details/stack/properties', 'Concrete\Controller\Panel\Detail\Stack\Properties::view');
 $router->all('/ccm/system/panels/details/stack/properties/submit', '\Concrete\Controller\Panel\Detail\Stack\Properties::submit');
+$router->all('/ccm/system/panels/details/stack/usage', 'Concrete\Controller\Panel\Detail\Stack\Usage::view');

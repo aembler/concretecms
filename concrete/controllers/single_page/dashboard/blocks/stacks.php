@@ -251,59 +251,6 @@ class Stacks extends DashboardPageController
         $this->view();
     }
 
-    public function delete_stack()
-    {
-        if ($this->token->validate('delete_stack')) {
-            $s = Stack::getByID($this->request('stackID'));
-            if (is_object($s)) {
-                $isGlobalArea = $s->getStackType() == Stack::ST_TYPE_GLOBAL_AREA;
-                $neutralStack = $s->getNeutralStack();
-                if ($neutralStack === null) {
-                    $nextID = $s->getCollectionParentID();
-                    if ($isGlobalArea) {
-                        $msg = 'global_area_cleared';
-                    } else {
-                        $msg = 'stack_deleted';
-                    }
-                } else {
-                    $msg = $isGlobalArea ? 'localized_global_area_deleted' : 'localized_stack_deleted';
-                    $nextID = $neutralStack->getCollectionID();
-                    $section = $s->getMultilingualSection();
-                    if ($section) {
-                        $nextID .= '@' . $section->getLocale();
-                    }
-                }
-
-                if (!$this->error->has()) {
-                    $sps = new Checker($s);
-                    if ($sps->canDeletePage()) {
-                        $u = $this->app->make(User::class);
-                        $pkr = new DeletePageRequest();
-                        $pkr->setRequestedPage($s);
-                        $pkr->setRequesterUserID($u->getUserID());
-                        $response = $pkr->trigger();
-                        if ($response instanceof \Concrete\Core\Workflow\Progress\Response) {
-                            // we only get this response if we have skipped workflows and jumped straight in to an approve() step.
-                            return $this->buildRedirect($this->action('view_details', rawurlencode($nextID), $msg));
-                        }
-
-                        return $this->buildRedirect($this->action('view_details', $s->getCollectionID(), $isGlobalArea ? 'global_area_delete_saved' : 'stack_delete_saved'));
-                    }
-
-                    if ($isGlobalArea) {
-                        $this->error->add(t('You do not have access to delete this stack.'));
-                    } else {
-                        $this->error->add(t('You do not have access to delete this global area.'));
-                    }
-                }
-            } else {
-                $this->error->add(t('Invalid stack'));
-            }
-        } else {
-            $this->error->add($this->token->getErrorMessage());
-        }
-    }
-
     public function approve_stack($stackID = false, $token = false)
     {
         if ($this->token->validate('approve_stack', $token)) {
@@ -598,27 +545,6 @@ class Stacks extends DashboardPageController
         }
     }
 
-    public function usage($stackId)
-    {
-        $this->set('stackId', $stackId);
-
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $this->app->make(EntityManagerInterface::class);
-        $repository = $entityManager->getRepository(StackUsageRecord::class);
-
-        $records = $repository->findBy([
-            'stack_id' => $stackId,
-        ]);
-
-        $view = new \Concrete\Core\View\DialogView('dialogs/stack/usage');
-        $view->setController($this);
-        $view->addScopeItems([
-            'records' => $this->getUsageGenerator($records),
-        ]);
-
-        return new Response($view->render());
-    }
-
     public function stack_duplicated()
     {
         $this->set('message', t('Stack duplicated successfully'));
@@ -677,33 +603,4 @@ class Stacks extends DashboardPageController
         $this->set('stacks', $list->getResults());
     }
 
-    /**
-     * Generator for transforming a list of StackUsageRecords into Collection objects
-     * This method can be used to do some interesting things with the list two sine it is ordered
-     * by Collection ID /and/ Collection Version ID.
-     *
-     * @param StackUsageRecord[] $records
-     *
-     * @return \Generator
-     */
-    protected function getUsageGenerator(array $records)
-    {
-        $last_collection = null;
-
-        foreach ($records as $record) {
-            if ($last_collection && $last_collection->getCollectionID() == $record->getCollectionId()) {
-                // This is the same collection as the last collection, lets use it again.
-                $collection = $last_collection;
-            } else {
-                /** @var \Concrete\Core\Page\Collection\Collection $collection */
-                $last_collection = $collection = Page::getByID($record->getCollectionId());
-            }
-
-            // Load in the version object
-            $collection->loadVersionObject($record->getCollectionVersionId());
-
-            // Yield the collection object
-            yield $collection;
-        }
-    }
 }

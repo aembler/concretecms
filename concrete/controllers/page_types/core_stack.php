@@ -41,11 +41,15 @@ class CoreStack extends PageTypeController
 
     public function view()
     {
+        $stack = Stack::getByID($this->c->getCollectionID());
         $this->requireAsset('feature/stacks/backend');
-        $this->set('stack', Stack::getByID($this->c->getCollectionID()));
-        $breadcrumb =$this->app->make(
-            DashboardStacksBreadcrumbFactory::class
-        )->getBreadcrumb($this->c);
+        $this->set('stack', $stack);
+
+        $factory =$this->app->make(DashboardStacksBreadcrumbFactory::class);
+        if ($stack->getStackType() === Stack::ST_TYPE_GLOBAL_AREA) {
+            $factory->setDisplayGlobalAreasLandingPage(true);
+        }
+        $breadcrumb = $factory->getBreadcrumb($this->c);
 
         $this->set('breadcrumb', $this->app->make(ElementManager::class)
             ->get('dashboard/navigation/breadcrumb', [

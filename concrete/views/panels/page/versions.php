@@ -9,6 +9,7 @@ use Concrete\Core\Support\Facade\Url;
 /** @var Concrete\Core\View\DialogView $view */
 /** @var Concrete\Core\Page\Collection\Version\EditResponse $response */
 /** @var Concrete\Core\Page\Page $c */
+/** @var bool $isStack */
 /** @var bool|null $isDialogMode  */
 /** @var \Concrete\Core\Application\Service\Composer $composer */
 $composer = Application::getFacadeApplication()->make('helper/concrete/composer');
@@ -538,7 +539,11 @@ $approveTitle = $composer->getApproveButtonTitle($c);
                 <svg>
                     <use xlink:href="#icon-arrow-left"/>
                 </svg>
-                <?php echo t('Page Settings') ?>
+                <?php if ($isStack) { ?>
+                    <?php echo t('Stack Settings') ?>
+                <?php } else { ?>
+                    <?php echo t('Page Settings') ?>
+                <?php } ?>
             </a>
 
             <h5><?php echo t('Versions') ?></h5>

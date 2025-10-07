@@ -64,6 +64,11 @@ class SystemRouteList implements RouteListInterface
             ->routes('dialogs/pages.php')
         ;
 
+        $router->buildGroup()->setNamespace('Concrete\Controller\Dialog\Stack')
+            ->setPrefix('/ccm/system/dialogs/stack')
+            ->routes('dialogs/stacks.php')
+        ;
+
         $router->buildGroup()->setNamespace('Concrete\Controller\Dialog\Logs')
             ->setPrefix('/ccm/system/dialogs/logs')
             ->routes('dialogs/logs.php')

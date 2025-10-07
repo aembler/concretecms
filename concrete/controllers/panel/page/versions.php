@@ -11,6 +11,7 @@ use Concrete\Core\Page\Collection\Version\Version as CollectionVersion;
 use Concrete\Core\Page\Collection\Version\VersionList;
 use Concrete\Core\Page\EditResponse as PageEditResponse;
 use Concrete\Core\Page\Page;
+use Concrete\Core\Page\Stack\Stack;
 use Concrete\Core\Permission\Checker;
 use Concrete\Core\Permission\Checker as Permissions;
 use Concrete\Core\Url\Resolver\Manager\ResolverManagerInterface;
@@ -41,6 +42,12 @@ class Versions extends BackendInterfacePageController
     public function view()
     {
         $r = $this->getPageVersionListResponse();
+        $isStack = false;
+        $stack = Stack::getByID($this->page->getCollectionID());
+        if ($stack) {
+            $isStack = true;
+        }
+        $this->set('isStack', $isStack);
         $this->set('response', $r);
     }
 

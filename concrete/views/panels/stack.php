@@ -1,8 +1,8 @@
 <?php
-defined('C5_EXECUTE') or die("Access Denied."); ?>
-<?php
-use Concrete\Core\Attribute\Set as AttributeSet;
-
+defined('C5_EXECUTE') or die("Access Denied.");
+/**
+ * @var bool $isGlobalArea
+ */
 $cp = new Permissions($c);
 ?>
 <section>
@@ -48,6 +48,35 @@ $cp = new Permissions($c);
                     <?= t('Stack Usage') ?>
                 </a>
             </li>
-        <?php } ?>
+        <?php }
+
+        if (!$isGlobalArea && $cp->canMoveOrCopyPage()) { ?>
+            <li>
+                <a class="dialog-launch"
+                   href="<?= URL::to('/ccm/system/dialogs/stack/duplicate') ?>?cID=<?= $c->getCollectionID() ?>"
+                   dialog-modal="true" dialog-title="<?=t('Duplicate Stack')?>" dialog-width="400" dialog-height="250">
+                    <?=t('Duplicate Stack')?>
+                </a>
+            </li>
+            <?php
+
+        }
+        if ($cp->canDeletePage()) {
+            $deleteLabel = t('Delete Stack');
+            if ($isGlobalArea) {
+                $deleteLabel = t('Clear Global Area');
+            }
+            ?>
+            <li>
+                <a class="dialog-launch"
+                   href="<?= URL::to('/ccm/system/dialogs/stack/delete') ?>?cID=<?= $c->getCollectionID() ?>"
+                   dialog-modal="true" dialog-title="<?= $deleteLabel ?>" dialog-width="400" dialog-height="250">
+                    <?=$deleteLabel?>
+                </a>
+            </li>
+            <?php
+
+        }
+        ?>
     </menu>
 </section>
