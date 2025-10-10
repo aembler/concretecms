@@ -9,6 +9,15 @@ $blockPreviewUrl = URL::to('/ccm/system/block/preview');
     foreach ($blocks as $block) {
         $type = $block->getBlockTypeObject();
         $icon = $ci->getBlockTypeIconURL($type);
+        if ($block->getAreaHandle() !== STACKS_AREA_NAME) {
+            // This block is not in the main area of the stack, we can't add it.
+            // The CollectionVersionBlocks table includes all blocks even those
+            // that might be contained within area layouts or containers. We
+            // Don't want to show those individually so let's skip those that
+            // don't have the area handle set to the main area (which is how we
+            // know that they're nested in a layout or container.)
+            continue;
+        }
         ?>
         <div
             class="block ccm-panel-add-block-draggable-block-type"

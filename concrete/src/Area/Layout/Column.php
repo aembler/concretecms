@@ -128,6 +128,13 @@ abstract class Column extends ConcreteObject implements ColumnInterface
         return $newAreaLayoutColumnID;
     }
 
+    public function updateColumnDisplayID(): void
+    {
+        $db = Database::connection();
+        $this->arLayoutColumnDisplayID = Layout::getNewAreaLayoutColumnDisplayID();
+        $db->executeQuery('update AreaLayoutColumns set arLayoutColumnDisplayID = ? where arLayoutColumnID = ?', array($this->arLayoutColumnDisplayID, $this->arLayoutColumnID));
+    }
+
     /**
      * @return Area|null
      */

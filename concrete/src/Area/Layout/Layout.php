@@ -161,16 +161,22 @@ abstract class Layout extends ConcreteObject
     public function addLayoutColumn()
     {
         $db = Database::connection();
+        $arLayoutColumnDisplayID = $this->getNewAreaLayoutColumnDisplayID();
+        $index = $db->GetOne('select count(arLayoutColumnID) from AreaLayoutColumns where arLayoutID = ?', [$this->arLayoutID]);
+        $db->Execute('insert into AreaLayoutColumns (arLayoutID, arLayoutColumnIndex, arLayoutColumnDisplayID) values (?, ?, ?)', [$this->arLayoutID, $index, $arLayoutColumnDisplayID]);
+        return $db->Insert_ID();
+    }
+
+    public static function getNewAreaLayoutColumnDisplayID(): int
+    {
+        $db = Database::connection();
         $arLayoutColumnDisplayID = $db->GetOne('select max(arLayoutColumnDisplayID) as arLayoutColumnDisplayID from AreaLayoutColumns');
         if ($arLayoutColumnDisplayID) {
             $arLayoutColumnDisplayID++;
         } else {
             $arLayoutColumnDisplayID = 1;
         }
-        $index = $db->GetOne('select count(arLayoutColumnID) from AreaLayoutColumns where arLayoutID = ?', [$this->arLayoutID]);
-        $db->Execute('insert into AreaLayoutColumns (arLayoutID, arLayoutColumnIndex, arLayoutColumnDisplayID) values (?, ?, ?)', [$this->arLayoutID, $index, $arLayoutColumnDisplayID]);
-
-        return $db->Insert_ID();
+        return $arLayoutColumnDisplayID;
     }
 
     abstract public function duplicate();

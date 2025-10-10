@@ -166,6 +166,19 @@ class Controller extends BlockController implements UsesFeatureInterface
      */
     public function duplicate($newBID)
     {
+        [$arLayoutID, $newAreaLayoutID, $record] = $this->duplicateAreaLayout($newBID);
+        return $record;
+    }
+
+    /**
+     * Duplicates the area layout when duplicating a block
+     * and return an array containing the new block ID, the old area layout ID
+     * and the new area layout ID.
+     * @param $newBID
+     * @return array
+     */
+    protected function duplicateAreaLayout($newBID): array
+    {
         /** @var Connection $db */
         $db = $this->app->make(Connection::class);
         $record = parent::duplicate($newBID);
@@ -177,9 +190,37 @@ class Controller extends BlockController implements UsesFeatureInterface
                 [$nr->getAreaLayoutID(), $newBID]
             );
         }
-
-        return $record;
+        return [$this->arLayoutID, $nr->getAreaLayoutID(), $record];
     }
+
+    public function duplicate_clipboard($newBID)
+    {
+        // We need to run essentially the same duplicate logic as above,
+        // but we also need to duplicate all the blocks in the sub-areas
+        // and move them to the new sub-areas.
+        [$arLayoutID, $newAreaLayoutID, $record] = $this->duplicateAreaLayout($newBID);
+        $layout = AreaLayout::getByID($arLayoutID);
+        $newLayout = AreaLayout::getByID($newAreaLayoutID);
+        $newLayout->setAreaObject($this->getBlockObject()->getBlockAreaObject());
+        $newLayoutColumns = $newLayout->getAreaLayoutColumns();
+        foreach ($newLayoutColumns as $newLayoutColumn) {
+            $newLayoutColumn->updateColumnDisplayID();
+        }
+        $nvc = $this->getCollectionObject();
+        $i = 0;
+        foreach ($layout->getAreaLayoutColumns() as $column) {
+            $area = $column->getAreaObject();
+            if ($area) {
+                foreach ($area->getAreaBlocksArray() as $b) {
+                    $newArea = $newLayoutColumns[$i]->getSubAreaObject();
+                    $nb = $b->duplicate($nvc, 'duplicate_clipboard');
+                    $nb->move($nvc, $newArea);
+                }
+            }
+            $i++;
+        }
+    }
+
 
     /**
      * @return \Concrete\Core\Area\Layout\CustomLayout|\Concrete\Core\Area\Layout\PresetLayout|\Concrete\Core\Area\Layout\ThemeGridLayout|null

@@ -104,16 +104,22 @@ class Process extends AbstractController
             }
             $b->delete(true);
         } else {
+            /*
+             * Let's stop creating these weird proxy blocks. Intead, let's do what every other system does:
+             * when you copy a block from one place to another, you get a duplicate of that block.
+             * If you want to reference a block, you can add the stack itself into the page, same as always.
+             */
+            /*
             if (!$bt->isCopiedWhenPropagated()) {
                 $btx = BlockType::getByHandle(BLOCK_HANDLE_SCRAPBOOK_PROXY);
                 $nb = $nvc->addBlock($btx, $ax, ['bOriginalID' => $bID]);
-            } else {
+            } else {*/
                 $nb = $b->duplicate($nvc, 'duplicate_clipboard');
                 $nb->move($nvc, $ax);
                 if (!$nb) {
                     throw new UserMessageException(t('Unable to find the specified block'));
                 }
-            }
+            //}
         }
         $nb->refreshCache();
         $dragAreaBlockID = (int) $dragAreaBlockID;
