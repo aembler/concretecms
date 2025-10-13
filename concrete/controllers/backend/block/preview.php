@@ -59,6 +59,7 @@ class Preview extends BackendInterfacePageController
 
         $this->block = $b;
         $this->stack = $stack;
+        $this->page = $stack;
     }
 
     public function render()

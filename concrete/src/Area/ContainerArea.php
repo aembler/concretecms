@@ -62,7 +62,7 @@ class ContainerArea
         $this->gridMaximumColumns = $columns;
     }
 
-    public function getSubAreaObject(Page $page): ?SubArea
+    public function getSubAreaObject(?Page $page = null): ?SubArea
     {
         $block = $this->instance->getBlock();
         $area = $block->getBlockAreaObject();
@@ -74,8 +74,8 @@ class ContainerArea
                 $area->getAreaHandle(),
                 $area->getAreaID()
             );
+            $page = $page ?: $area->getAreaCollectionObject();
             $subArea->setAreaDisplayName($this->areaDisplayName);
-            $page = $area->getAreaCollectionObject();
             $subArea->load($page);
             $subArea->setSubAreaBlockObject($block);
             $this->refreshInstanceAreas($subArea);
@@ -115,7 +115,7 @@ class ContainerArea
 
     public function display(Page $page)
     {
-        $subArea = $this->getSubAreaObject($page);
+        $subArea = $this->getSubAreaObject();
         if ($subArea) {
             if ($this->gridContainerEnabled) {
                 $subArea->enableGridContainer();

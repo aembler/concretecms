@@ -164,6 +164,62 @@ class Controller extends BlockController implements UsesFeatureInterface
     }
 
     /**
+     * Run when we copy a container from the stack/clipboard into the page
+     * We want to fully duplicate the container.
+     * @return void
+     */
+    public function duplicate_clipboard($newBID, $nc)
+    {
+        $block = $this->getBlockObject();
+        $originalPage = $block->getOriginalCollection();
+        $entityManager = $this->app->make(EntityManager::class);
+        $db = $entityManager->getConnection();
+        parent::duplicate($newBID);
+        $existingInstance = $this->getContainerInstanceObject();
+        if ($existingInstance) {
+            $newInstance = new Container\Instance();
+            $newInstance->setContainer($existingInstance->getContainer());
+            $entityManager->persist($newInstance);
+            $entityManager->flush();
+            $data['containerInstanceID'] = $newInstance->getContainerInstanceID();
+            $this->containerInstanceID = $data['containerInstanceID'];
+            $db->executeStatement(
+                'update btCoreContainer set containerInstanceID = ? where bID = ?',
+                [$newInstance->getContainerInstanceID(), $newBID]
+            );
+
+            $existingContainerBlockInstance = new ContainerBlockInstance(
+                $block,
+                $existingInstance,
+                $entityManager
+            );
+
+            $newContainerBlockInstance = new ContainerBlockInstance(
+                $block,
+                $newInstance,
+                $entityManager
+            );
+
+            $existingInstanceAreas = $existingInstance->getInstanceAreas();
+            foreach ($existingInstanceAreas as $existingInstanceArea) {
+                $existingContainerArea = new ContainerArea($existingContainerBlockInstance, $existingInstanceArea->getContainerAreaName());
+                $existingContainerAreaBlocks = [];
+                foreach ($existingContainerArea->getAreaBlocksArray($originalPage) as $subBlock) {
+                    $existingContainerAreaBlocks[] = $subBlock;
+                }
+
+                $newContainerArea = new ContainerArea($newContainerBlockInstance, $existingInstanceArea->getContainerAreaName());
+                $newContainerSubArea = $newContainerArea->getSubAreaObject($nc);
+
+                foreach ($existingContainerAreaBlocks as $subBlock) {
+                    $nb = $subBlock->duplicate($nc, 'duplicate_clipboard');
+                    $nb->move($nc, $newContainerSubArea);
+                }
+            }
+        }
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
