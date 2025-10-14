@@ -2,6 +2,7 @@
 
 namespace Concrete\Block\CoreContainer;
 
+use Concrete\Core\Area\Area;
 use Concrete\Core\Area\ContainerArea;
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockController;
@@ -172,6 +173,9 @@ class Controller extends BlockController implements UsesFeatureInterface
     {
         $block = $this->getBlockObject();
         $originalPage = $block->getOriginalCollection();
+        $newArea = $block->getBlockAreaObject();
+        $originalArea = Area::get($originalPage, STACKS_AREA_NAME);
+        $block->setBlockAreaObject($originalArea);
         $entityManager = $this->app->make(EntityManager::class);
         $db = $entityManager->getConnection();
         parent::duplicate($newBID);
@@ -194,24 +198,29 @@ class Controller extends BlockController implements UsesFeatureInterface
                 $entityManager
             );
 
+            $existingInstanceAreas = $existingInstance->getInstanceAreas();
+            $existingContainerAreaBlocks = [];
+            foreach ($existingInstanceAreas as $existingInstanceArea) {
+                $existingContainerArea = new ContainerArea($existingContainerBlockInstance, $existingInstanceArea->getContainerAreaName());
+                foreach ($existingContainerArea->getAreaBlocksArray($originalPage) as $subBlock) {
+                    $existingContainerAreaBlocks[$existingInstanceArea->getContainerAreaName()][] = $subBlock;
+                }
+            }
+
+            // Set the area object back. This is such a horrible hack but we have to do it because
+            // the old code sets things by reference.
+            $block->setBlockAreaObject($newArea);
+
             $newContainerBlockInstance = new ContainerBlockInstance(
                 $block,
                 $newInstance,
                 $entityManager
             );
 
-            $existingInstanceAreas = $existingInstance->getInstanceAreas();
             foreach ($existingInstanceAreas as $existingInstanceArea) {
-                $existingContainerArea = new ContainerArea($existingContainerBlockInstance, $existingInstanceArea->getContainerAreaName());
-                $existingContainerAreaBlocks = [];
-                foreach ($existingContainerArea->getAreaBlocksArray($originalPage) as $subBlock) {
-                    $existingContainerAreaBlocks[] = $subBlock;
-                }
-
                 $newContainerArea = new ContainerArea($newContainerBlockInstance, $existingInstanceArea->getContainerAreaName());
                 $newContainerSubArea = $newContainerArea->getSubAreaObject($nc);
-
-                foreach ($existingContainerAreaBlocks as $subBlock) {
+                foreach ($existingContainerAreaBlocks[$existingInstanceArea->getContainerAreaName()] as $subBlock) {
                     $nb = $subBlock->duplicate($nc, 'duplicate_clipboard');
                     $nb->move($nc, $newContainerSubArea);
                 }

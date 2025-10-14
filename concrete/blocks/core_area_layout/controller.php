@@ -193,7 +193,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         return [$this->arLayoutID, $nr->getAreaLayoutID(), $record];
     }
 
-    public function duplicate_clipboard($newBID)
+    public function duplicate_clipboard($newBID, $nvc)
     {
         // We need to run essentially the same duplicate logic as above,
         // but we also need to duplicate all the blocks in the sub-areas
@@ -206,7 +206,6 @@ class Controller extends BlockController implements UsesFeatureInterface
         foreach ($newLayoutColumns as $newLayoutColumn) {
             $newLayoutColumn->updateColumnDisplayID();
         }
-        $nvc = $this->getCollectionObject();
         $i = 0;
         foreach ($layout->getAreaLayoutColumns() as $column) {
             $area = $column->getAreaObject();
