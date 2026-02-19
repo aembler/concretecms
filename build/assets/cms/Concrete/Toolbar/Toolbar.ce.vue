@@ -108,27 +108,39 @@
         </div>
 
         <!-- User Menu -->
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="c-toolbar-button">
-            <div class="avatar">
-              <div class="w-6 h-6 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1">
-                <img src="https://robohash.org/user123.png?size=48x48" alt="User Avatar" />
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <button type="button" class="c-toolbar-button">
+              <div class="avatar">
+                <div class="w-6 h-6 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1">
+                  <img src="https://robohash.org/user123.png?size=48x48" alt="User Avatar" />
+                </div>
               </div>
-            </div>
-            <svg class="w-4 h-4 text-base-content" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-          <ul tabindex="0" class="dropdown-content menu mt-2 p-2 shadow bg-base-100 rounded-box w-52 z-[60]">
-            <li><a href="/waiting-for-me">Waiting For Me</a></li>
-            <li><a href="/private-messages">Private Messages</a></li>
-            <li><div class="divider my-1" /></li>
-            <li><a href="/profile/edit">Edit Profile</a></li>
-            <li><a href="/profile/picture">Profile Picture</a></li>
-            <li><div class="divider my-1" /></li>
-            <li><a href="/logout">Sign Out</a></li>
-          </ul>
-        </div>
+              <svg class="w-4 h-4 text-base-content" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="w-52">
+            <DropdownMenuItem as-child>
+              <a href="/waiting-for-me">Waiting For Me</a>
+            </DropdownMenuItem>
+            <DropdownMenuItem as-child>
+              <a href="/private-messages">Private Messages</a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem as-child>
+              <a href="/profile/edit">Edit Profile</a>
+            </DropdownMenuItem>
+            <DropdownMenuItem as-child>
+              <a href="/profile/picture">Profile Picture</a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem as-child>
+              <a href="/logout">Sign Out</a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   </div>
@@ -150,7 +162,14 @@ import {
 import { ref, onMounted, computed, useTemplateRef } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
-import { useUiStore } from '@concretecms/backendui'
+import {
+  useUiStore,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from '@concretecms/backendui'
 const ui = useUiStore()
 
 const props = defineProps({
