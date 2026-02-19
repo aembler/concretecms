@@ -16,7 +16,7 @@
       </DropdownMenuContent>
     </DropdownMenu>
     <InlineToolbarGroup>
-      <InlineToolbarButton>
+      <InlineToolbarButton @click="$emit('edit')">
         <PencilIcon class="size-4" />
       </InlineToolbarButton>
 
@@ -58,7 +58,6 @@ import {
   InlineToolbar,
   InlineToolbarSeparator,
   InlineToolbarButton,
-  InlineToolbarSelect,
   InlineToolbarGroup,
   DropdownMenu,
   DropdownMenuContent,
@@ -67,8 +66,11 @@ import {
   DropdownMenuTriggerButton
 } from '@concretecms/backendui';
 
+const emit = defineEmits(['edit'])
+
 const props = defineProps({
   variants: Array<{ file: String; name: String }>,
+  blocktype: Object,
   selectedVariant: String
 })
 

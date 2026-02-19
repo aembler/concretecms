@@ -210,6 +210,7 @@ const FILENAME_PAGE_ICON = 'icon.png';
 const FILENAME_PACKAGE_CONTROLLER = 'controller.php';
 const FILENAME_PACKAGE_DB = 'db.xml';
 const FILENAME_LOCAL_DB = 'site_db.xml';
+const FILENAME_BLOCK_MANIFEST = 'manifest.xml';
 const FILENAME_ATTRIBUTE_CONTROLLER = 'controller.php';
 const FILENAME_ATTRIBUTE_DB = 'db.xml';
 const FILENAME_AUTHENTICATION_CONTROLLER = 'controller.php';

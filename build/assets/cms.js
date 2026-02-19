@@ -79,3 +79,9 @@ customElements.define('concrete-app', ConcreteAppElement)
 customElements.define('concrete-area', ConcreteAreaElement)
 customElements.define('concrete-block', ConcreteBlockElement)
 customElements.define('concrete-container', ConcreteContainerElement)
+
+import { useBlockEditorRegistry } from '@concretecms/backendui';
+import ComposableEditor from './cms/Concrete/Block/Editor/ComposableEditor.vue';
+
+const registry = useBlockEditorRegistry();
+registry.registerEditorComponent('ComposableEditor', ComposableEditor);

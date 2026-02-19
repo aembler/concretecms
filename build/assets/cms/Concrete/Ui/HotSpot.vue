@@ -83,6 +83,7 @@ const menuTop = ref('0px')
 const menuLeft = ref('0px')
 
 const isStoreActiveMatch = computed(() => uiStore.clickProxy.activeElementId === props.itemId)
+const isStoreDoubleClickMatch = computed(() => uiStore.clickProxy.doubleClickedElementId === props.itemId)
 const isStoreHoverMatch = computed(() => {
   if (!uiStore.clickProxy.activeElementId) {
     return uiStore.clickProxy.hoverElementId === props.itemId
@@ -119,12 +120,19 @@ async function updateMenuTop() {
   menuLeft.value = menuLeftTmp + 'px'
 }
 
+const emit = defineEmits(['dblclick'])
+
 onMounted(() => {
   updateMenuTop()
 })
 watch([() => uiStore.scroll.y, () => isStoreActiveMatch.value], updateMenuTop)
 watch(() => isStoreActiveMatch.value, () => {
   uiStore.clickProxy.activeElementMenuId = props.menuId
+})
+watch(() => isStoreDoubleClickMatch.value, (value) => {
+  if (value) {
+    emit('dblclick')
+  }
 })
 </script>
 

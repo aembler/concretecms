@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<concrete-bdf version="0.7">
+    <blocktype handle="hero_image" name="Hero Image" package="">
+        <icon>
+            <svg>...</svg>
+        </icon>
+        <fields>
+            <field id="image" type="image" label="Image" />
+            <field id="title" type="title" label="Title" /> <!-- includes heading selector dropdown //-->
+            <field id="content" type="rich_text" label="Content" />
+            <field id="link" type="destination" label="Link" />
+            <field id="button" type="button" label="Button" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+
+            </tab>
+            <tab id="design" name="Design">
+
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
