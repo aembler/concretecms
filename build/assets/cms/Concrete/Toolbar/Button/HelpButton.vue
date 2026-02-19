@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
-import { useAjax } from '@concretecms/backendui'
-import { useUiStore } from '@concretecms/backendui'
+import {
+  useAjax,
+  useUiStore,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@concretecms/backendui'
 const ui = useUiStore()
 
 const props = defineProps<{
   helpUrl: string
 }>()
 
-const modal = ref<HTMLDialogElement | null>(null)
+const helpDialogOpen = ref(false)
 const sidebarContent = ref<string>()
 
 function showModal(event: MouseEvent) {
@@ -21,11 +28,8 @@ function showModal(event: MouseEvent) {
     method: 'GET',
     skipResponseValidation: true,
     onSuccess: (data: { sidebar: string }) => {
-      console.log(data)
       sidebarContent.value = data.sidebar
-    },
-    onComplete: () => {
-      modal.value?.showModal()
+      helpDialogOpen.value = true
     },
   })
 }
@@ -47,14 +51,13 @@ function showModal(event: MouseEvent) {
     </a>
   </div>
 
-  <dialog ref="modal" class="modal">
-    <div class="modal-box max-w-3xl">
-      <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-      </form>
-      <h3 class="text-lg font-bold pb-3">Help</h3>
+  <Dialog v-model:open="helpDialogOpen">
+    <DialogContent class="max-w-3xl">
+      <DialogHeader>
+        <DialogTitle>Help</DialogTitle>
+      </DialogHeader>
       <!-- @TODO: make announcement items show up in here like in v9 //-->
-      <div class="flex flex-col gap-2" v-html="sidebarContent" />
-    </div>
-  </dialog>
+      <div class="prose flex flex-col gap-2" v-html="sidebarContent" />
+    </DialogContent>
+  </Dialog>
 </template>
