@@ -2,9 +2,12 @@
   <InlineToolbar class="flex-nowrap">
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
-        <DropdownMenuTriggerButton>
-          {{ selectedVariantName }}
-        </DropdownMenuTriggerButton>
+        <!-- Keep trigger events local to Radix; the global block click observer can
+             otherwise intercept same-trigger clicks and cause close-then-reopen. -->
+        <button type="button" class="inline-flex items-center gap-2 btn bg-base-100 btn-secondary btn-sm" @pointerdown.stop @click.stop>
+          <label class="text-nowrap">{{ selectedVariantName }}</label>
+          <ChevronDownIcon class="size-4" />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>
@@ -32,7 +35,11 @@
 
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <EllipsisVerticalIcon class="size-4 cursor-pointer hover:text-primary transition" />
+          <!-- Keep trigger events local to Radix; the global block click observer can
+               otherwise intercept same-trigger clicks and cause close-then-reopen. -->
+          <button type="button" class="inline-flex items-center justify-center btn btn-sm bg-base-100 btn-secondary px-2" @pointerdown.stop @click.stop>
+            <EllipsisVerticalIcon class="size-4 cursor-pointer hover:text-primary transition" />
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem>
@@ -54,6 +61,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { PencilIcon, ClipboardIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
+import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import {
   InlineToolbar,
   InlineToolbarSeparator,
@@ -62,8 +70,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuTriggerButton
+  DropdownMenuTrigger
 } from '@concretecms/backendui';
 
 const emit = defineEmits(['edit'])

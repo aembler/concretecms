@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useUiStore } from '@concretecms/backendui'
-import _ from 'lodash'
 
 const uiStore = useUiStore()
 
@@ -16,47 +15,62 @@ function handleMouseMove(event: MouseEvent) {
   }
 }
 
-// Store a pending click action to allow cancellation on double-click
-let pendingClick: (() => void) | null = null
-
-const triggerSingleClick = _.debounce(() => {
-  if (pendingClick) {
-    pendingClick()
-    pendingClick = null
+function isClickInsideActiveMenu(eventPath: EventTarget[], target: EventTarget | null, activeMenuId: string): boolean {
+  if (!activeMenuId) {
+    return false
   }
-}, 10)
 
-function handleGlobalClick(event: MouseEvent) {
-  // Snapshot event path synchronously because this handler executes via debounce.
-  const eventPath = event.composedPath() as HTMLElement[]
+  const activeMenuElFromPath = eventPath.find(
+    (el): el is HTMLElement => el instanceof HTMLElement && el.id === activeMenuId
+  )
 
-  pendingClick = () => {
-    const activeId = uiStore.clickProxy.activeElementId
-
-    if (activeId) {
-      const clickedInsideActive = eventPath.some((el) =>
-          (el as HTMLElement).id === uiStore.clickProxy.activeElementMenuId
-      )
-
-      if (!clickedInsideActive) {
-        uiStore.clickProxy.hoverElementId = ''
-        uiStore.clickProxy.activeElementId = ''
-        uiStore.clickProxy.doubleClickedElementId = ''
-        event.stopPropagation()
-      }
-    } else if (uiStore.clickProxy.hoverElementId) {
-      uiStore.clickProxy.activeElementId = uiStore.clickProxy.hoverElementId
+  let activeMenuEl: HTMLElement | null = activeMenuElFromPath || null
+  if (!activeMenuEl) {
+    const activeMenuSelector = `#${CSS.escape(activeMenuId)}`
+    if (typeof uiStore.menuContainer === 'string') {
+      activeMenuEl = document.querySelector(activeMenuSelector)
+    } else if (uiStore.menuContainer instanceof HTMLElement) {
+      activeMenuEl = uiStore.menuContainer.querySelector(activeMenuSelector)
     }
   }
 
-  triggerSingleClick()
+  if (!activeMenuEl) {
+    return false
+  }
+
+  if (target instanceof Node && activeMenuEl.contains(target)) {
+    return true
+  }
+
+  return eventPath.includes(activeMenuEl)
+}
+
+function handleGlobalClick(event: MouseEvent) {
+  // Ignore click events that are part of a double-click sequence.
+  if (event.detail > 1) {
+    return
+  }
+
+  const eventPath = event.composedPath()
+  const eventTarget = event.target
+  const activeId = uiStore.clickProxy.activeElementId
+
+  if (activeId) {
+    const activeMenuId = uiStore.clickProxy.activeElementMenuId
+    const clickedInsideActive = isClickInsideActiveMenu(eventPath, eventTarget, activeMenuId)
+
+    if (!clickedInsideActive) {
+      uiStore.clickProxy.hoverElementId = ''
+      uiStore.clickProxy.activeElementId = ''
+      uiStore.clickProxy.doubleClickedElementId = ''
+      event.stopPropagation()
+    }
+  } else if (uiStore.clickProxy.hoverElementId) {
+    uiStore.clickProxy.activeElementId = uiStore.clickProxy.hoverElementId
+  }
 }
 
 function handleGlobalDoubleClick(event: MouseEvent) {
-  if (pendingClick) {
-    pendingClick = null // cancel pending single click
-  }
-
   const path = event.composedPath() as HTMLElement[]
   const activeId = uiStore.clickProxy.activeElementId
 
