@@ -1,5 +1,7 @@
 <?php
+use Concrete\Controller\Dialog\Block\Delete as DeleteBlockDialogController;
 use Concrete\Core\Api\Fractal\Transformer\BlockTypeTransformer;
+use Concrete\Core\Support\Facade\Url;
 
 defined('C5_EXECUTE') or die("Access Denied.");
 $blockType = $b->getBlockTypeObject();
@@ -22,6 +24,28 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
 <?php } else {
 
     $blockTypeData = app(BlockTypeTransformer::class)->transform($blockType);
+    $isMasterCollection = $c->isMasterCollection();
+    $defaultsMessage = '';
+    if ($isMasterCollection) {
+        if ($blockType->getBlockTypeHandle() == BLOCK_HANDLE_LAYOUT_PROXY) {
+            $defaultsMessage = t('Warning! This layout is contained in the page type defaults. Anywhere this layout is used may have content deleted. This cannot be undone.');
+        } else {
+            $defaultsMessage = t('Warning! This block is contained in the page type defaults. Any blocks aliased from this block in the site will be deleted. This cannot be undone.');
+        }
+    }
+    if ($blockType->getBlockTypeHandle() == BLOCK_HANDLE_LAYOUT_PROXY) {
+        $deleteMessage = t('Are you sure you wish to delete this layout? It will remove the blocks that are contained within it.');
+    } else {
+        $deleteMessage = t('Are you sure you wish to delete this %s block?', $blockType->getBlockTypeName());
+    }
+
+    $token = app('token')->generate(DeleteBlockDialogController::class);
+    $query = '&cID=' . $c->getCollectionID()
+        . '&bID=' . $b->getBlockID()
+        . '&arHandle=' . urlencode($a->getAreaHandle())
+        . '&ccm_token=' . urlencode($token);
+    $deleteAction = (string) Url::to('/ccm/system/dialogs/block/delete/submit') . '?' . ltrim($query, '&');
+    $deleteAllAction = (string) Url::to('/ccm/system/dialogs/block/delete/submit_all') . '?' . ltrim($query, '&');
 
     ?>
 
@@ -31,6 +55,15 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     blocktype='<?=h(json_encode($blockTypeData))?>'
     selected-variant="<?=$b->getBlockFilename()?>"
     variants='<?=json_encode($blockType->getBlockTypeCustomTemplates($b))?>'
+    delete-action="<?=h($deleteAction)?>"
+    delete-all-action="<?=h($deleteAllAction)?>"
+    delete-message="<?=h($deleteMessage)?>"
+    delete-defaults-message="<?=h($defaultsMessage)?>"
+    delete-block-id="<?=$b->getBlockID()?>"
+    delete-area-handle="<?=h($a->getAreaHandle())?>"
+    delete-is-master-collection="<?=$isMasterCollection ? '1' : '0'?>"
+    delete-dialog-title="<?=h(t('Delete'))?>"
+    delete-progressive-operation-title="<?=h(t('Delete Blocks'))?>"
 >
 
 <?php } ?>

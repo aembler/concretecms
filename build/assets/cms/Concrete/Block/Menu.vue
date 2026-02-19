@@ -27,7 +27,7 @@
         <ClipboardIcon class="size-4" />
       </InlineToolbarButton>
 
-      <InlineToolbarButton>
+      <InlineToolbarButton @click="$emit('delete')">
         <TrashIcon class="size-4 text-error" />
       </InlineToolbarButton>
 
@@ -73,7 +73,7 @@ import {
   DropdownMenuTrigger
 } from '@concretecms/backendui';
 
-const emit = defineEmits(['edit'])
+const emit = defineEmits(['edit', 'delete'])
 
 const props = defineProps({
   variants: Array<{ file: String; name: String }>,
