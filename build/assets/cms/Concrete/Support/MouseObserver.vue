@@ -27,12 +27,14 @@ const triggerSingleClick = _.debounce(() => {
 }, 10)
 
 function handleGlobalClick(event: MouseEvent) {
+  // Snapshot event path synchronously because this handler executes via debounce.
+  const eventPath = event.composedPath() as HTMLElement[]
+
   pendingClick = () => {
-    const path = event.composedPath() as HTMLElement[]
     const activeId = uiStore.clickProxy.activeElementId
 
     if (activeId) {
-      const clickedInsideActive = path.some((el) =>
+      const clickedInsideActive = eventPath.some((el) =>
           (el as HTMLElement).id === uiStore.clickProxy.activeElementMenuId
       )
 

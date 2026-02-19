@@ -30,6 +30,7 @@
           leave-to-class="opacity-0"
       >
         <div
+            :id="menuId"
             v-show="true"
             :class="[
         'flex absolute z-50 pointer-events-auto -translate-x-1/2 transition-opacity duration-200',
@@ -135,4 +136,3 @@ watch(() => isStoreDoubleClickMatch.value, (value) => {
   }
 })
 </script>
-
