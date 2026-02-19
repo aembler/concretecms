@@ -19,14 +19,13 @@
           </label>
         </div>
 
-      <dialog id="startingPointPresets" class="modal" v-if="selectedStartingPointObject">
-        <div class="modal-box">
-          <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-          </form>
-          <div class="mb-3 text-lg text-gray-500 font-semibold">
-            {{ i18n.installPresetsTitle.replace('%s', selectedStartingPointObject.name) }}
-          </div>
+      <Dialog v-if="selectedStartingPointObject" v-model:open="startingPointPresetsDialogOpen">
+        <DialogContent class="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {{ i18n.installPresetsTitle.replace('%s', selectedStartingPointObject.name) }}
+            </DialogTitle>
+          </DialogHeader>
           <div class="flex flex-col gap-2">
             <label
                 v-for="preset in selectedStartingPointObject.presets"
@@ -47,12 +46,12 @@
                 </div>
               </div>
             </label>
-            <div class="modal-action">
-              <button class="btn btn-primary" @click="selectStartingPointPreset">{{ i18n.next}}</button>
-            </div>
           </div>
-        </div>
-      </dialog>
+          <DialogFooter>
+            <button type="button" class="btn btn-primary" @click="selectStartingPointPreset">{{ i18n.next }}</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
         <transition name="install-step" mode="out-in">
             <choose-language
@@ -141,6 +140,7 @@ import ChooseContent from "./ChooseContent"
 import PerformInstallation from "./PerformInstallation"
 import ConfirmInstallation from "./ConfirmInstallation"
 import InstallationComplete from "./InstallationComplete"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@concretecms/backendui'
 
 export default {
     components: {
@@ -150,7 +150,12 @@ export default {
         ChooseContent,
         PerformInstallation,
         ConfirmInstallation,
-        InstallationComplete
+        InstallationComplete,
+        Dialog,
+        DialogContent,
+        DialogHeader,
+        DialogTitle,
+        DialogFooter
     },
     watch: {
         environmentErrors: function() {
@@ -173,7 +178,7 @@ export default {
             this.loadStartingPointPresetModal()
         },
         selectStartingPointPreset() {
-          document.querySelector('#startingPointPresets').close()
+          this.startingPointPresetsDialogOpen = false
           this.next()
         },
         translateOptionPreconditionsToErrorsAndWarnings() {
@@ -196,8 +201,7 @@ export default {
         },
         loadStartingPointPresetModal() {
           if (this.selectedStartingPointObject && this.selectedStartingPointObject.presets.length) {
-            const modal = document.querySelector('#startingPointPresets')
-            modal.showModal()
+            this.startingPointPresetsDialogOpen = true
           } else {
             this.next()
           }
@@ -432,6 +436,7 @@ export default {
         ignoreWarnings: false,
         startingPoint: null,
         startingPointPreset: null,
+        startingPointPresetsDialogOpen: false,
         installOptions: {}
     }),
     mounted() {

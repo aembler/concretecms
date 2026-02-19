@@ -12,6 +12,15 @@ mix.override((config) => {
 
 mix.webpackConfig({
     /* cache: false,*/ // Uncomment if you're working with changes in node_modules like developing bedrock
+    snapshot: {
+        // Don't treat node_modules as immutable when developing portal-linked local packages.
+        managedPaths: []
+    },
+    watchOptions: {
+        followSymlinks: true,
+        // Ignore most node_modules, but keep watching @concretecms/backendui.
+        ignored: /node_modules[\\/](?!@concretecms[\\/]backendui)/
+    },
     module: {
         rules: [
             {
