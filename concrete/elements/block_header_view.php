@@ -39,10 +39,12 @@ if (
 ) {
     $gf = $pt->getThemeGridFrameworkObject();
     echo $gf->getPageThemeGridFrameworkContainerStartHTML();
-    echo $gf->getPageThemeGridFrameworkRowStartHTML();
-    printf('<div class="%s">', $gf->getPageThemeGridFrameworkColumnClassesForSpan(
-        min($a->getAreaGridMaximumColumns(), $gf->getPageThemeGridFrameworkNumColumns())
-    ));
+    if ($b->getBlockTypeHandle() !== BLOCK_HANDLE_LAYOUT_PROXY) {
+        echo $gf->getPageThemeGridFrameworkRowStartHTML();
+        printf('<div class="%s">', $gf->getPageThemeGridFrameworkColumnClassesForSpan(
+            min($a->getAreaGridMaximumColumns(), $gf->getPageThemeGridFrameworkNumColumns())
+        ));
+    }
 }
 ?>
     <?php if (is_object($css) && $b->getBlockTypeHandle() != BLOCK_HANDLE_LAYOUT_PROXY) {

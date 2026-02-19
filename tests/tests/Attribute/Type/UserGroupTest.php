@@ -9,11 +9,16 @@ class UserGroupTest extends AttributeTypeTestCase
 {
     protected $atHandle = 'user_group';
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\UserGroupSettings';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Key\Settings\UserGroupSettings',
+        ]);
     }
 
     public function testValidateFormEmptyArray(): void

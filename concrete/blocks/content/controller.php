@@ -7,6 +7,7 @@ use Concrete\Core\Editor\LinkAbstractor;
 use Concrete\Core\Feature\Features;
 use Concrete\Core\Feature\UsesFeatureInterface;
 use Concrete\Core\File\Tracker\FileTrackableInterface;
+use Concrete\Core\File\Tracker\RichTextExtractor;
 
 /**
  * The controller for the content block.
@@ -68,7 +69,12 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
     /**
      * @var bool
      */
-    protected $btCacheBlockOutputForRegisteredUsers = false;
+    protected $btCacheBlockOutputForRegisteredUsers = null;
+
+    /**
+     * @var bool
+     */
+    protected $btCacheBlockOutputOnEditMode = false;
 
     /**
      * @var int
@@ -106,6 +112,15 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
     public function getBlockTypeName()
     {
         return t('Content');
+    }
+
+    public function cacheBlockOutputForRegisteredUsers()
+    {
+        if ($this->btCacheBlockOutputForRegisteredUsers === null) {
+            $this->btCacheBlockOutputForRegisteredUsers = strrpos($this->content, 'data-scs') === false;
+        }
+
+        return $this->btCacheBlockOutputForRegisteredUsers;
     }
 
     /**
@@ -162,18 +177,17 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
     }
 
     /**
-     * @return int[]|string[]
+     * {@inheritdoc}
+     *
+     * @see \Concrete\Core\File\Tracker\FileTrackableInterface::getUsedFiles()
      */
     public function getUsedFiles()
     {
-        return array_merge(
-            $this->getUsedFilesImages(),
-            $this->getUsedFilesDownload()
-        );
+        return $this->app->make(RichTextExtractor::class)->extractFiles($this->content);
     }
 
     /**
-     * @return int[]|string[]
+     * @deprecated use \Concrete\Core\File\Tracker\RichTextExtractor
      */
     protected function getUsedFilesImages()
     {
@@ -190,7 +204,7 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
     }
 
     /**
-     * @return int[]|string[]
+     * @deprecated use \Concrete\Core\File\Tracker\RichTextExtractor
      */
     protected function getUsedFilesDownload()
     {

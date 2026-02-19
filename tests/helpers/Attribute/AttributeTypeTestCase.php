@@ -13,9 +13,9 @@ abstract class AttributeTypeTestCase extends ConcreteDatabaseTestCase
     /**
      * {@inheritdoc}
      *
-     * @see ConcreteDatabaseTestCase::$metadatas
+     * @see ConcreteDatabaseTestCase::$entityClassNames
      */
-    protected $metadatas = [
+    protected $entityClassNames = [
         'Concrete\Core\Entity\Site\Type',
         'Concrete\Core\Entity\Site\Site',
         'Concrete\Core\Entity\Site\Locale',
@@ -27,15 +27,12 @@ abstract class AttributeTypeTestCase extends ConcreteDatabaseTestCase
         'Concrete\Core\Entity\Attribute\Key\Key',
         'Concrete\Core\Entity\Attribute\Key\PageKey',
         'Concrete\Core\Entity\Attribute\Type',
-        'Concrete\Core\Entity\Attribute\Value\Value\TextareaValue',
         'Concrete\Core\Entity\Attribute\Value\Value\TextValue',
         'Concrete\Core\Entity\Attribute\Value\Value\BooleanValue',
         'Concrete\Core\Entity\Attribute\Value\Value\Value',
         'Concrete\Core\Entity\User\User',
         'Concrete\Core\Entity\User\UserSignup',
-        'Concrete\Core\Entity\Attribute\Value\Value',
         'Concrete\Core\Entity\Attribute\Value\PageValue',
-        'Concrete\Core\Entity\Attribute\Key\UserValue',
         'Concrete\Core\Entity\Attribute\Key\UserKey',
     ];
 
@@ -46,11 +43,9 @@ abstract class AttributeTypeTestCase extends ConcreteDatabaseTestCase
      */
     protected $tables = [
         'Collections',
-        'CollectionAttributeValues',
         'Pages',
         'PageSearchIndex',
         'PageTypes',
-        'CollectionSearchIndexAttributes',
         'CollectionVersions',
     ];
 

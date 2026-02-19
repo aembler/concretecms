@@ -37,19 +37,24 @@ class ExpressEntriesTest extends DashboardPageTestCase
         $project = $builder->save();
     }
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Express\Entity';
-        $this->metadatas[] = 'Concrete\Core\Entity\Express\Entry';
-        $this->metadatas[] = 'Concrete\Core\Entity\Express\Association';
-        $this->metadatas[] = 'Concrete\Core\Entity\Express\Form';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\ExpressKey';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Value\ExpressValue';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Value\Value\Value';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Value\Value\TextValue';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\TextSettings';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Express\Entity',
+            'Concrete\Core\Entity\Express\Entry',
+            'Concrete\Core\Entity\Express\Association',
+            'Concrete\Core\Entity\Express\Form',
+            'Concrete\Core\Entity\Attribute\Key\ExpressKey',
+            'Concrete\Core\Entity\Attribute\Value\ExpressValue',
+            'Concrete\Core\Entity\Attribute\Value\Value\Value',
+            'Concrete\Core\Entity\Attribute\Value\Value\TextValue',
+            'Concrete\Core\Entity\Attribute\Key\Settings\TextSettings',
+        ]);
     }
 
     public function testUnexistingFormSubmitWithoutEntity(): void

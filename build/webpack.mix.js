@@ -53,7 +53,6 @@ mix.options({
  * Copy pre-minified assets.
  */
 if (mix.inProduction()) {
-    mix.copy('node_modules/jquery/dist/jquery.min.js', '../concrete/js/jquery.js');
     mix.copy('node_modules/vue/dist/vue.global.prod.js', '../concrete/js/vue.js');
     mix.copy('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js', '../concrete/js/bootstrap.js');
     mix.copy('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map', '../concrete/js/bootstrap.bundle.min.js.map');

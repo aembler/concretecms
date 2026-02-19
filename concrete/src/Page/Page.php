@@ -38,6 +38,7 @@ use Concrete\Core\Permission\AssignableObjectInterface;
 use Concrete\Core\Permission\AssignableObjectTrait;
 use Concrete\Core\Permission\Key\PageKey as PagePermissionKey;
 use Concrete\Core\Production\Modes;
+use Concrete\Core\Search\Index\IndexManagerInterface;
 use Concrete\Core\Site\SiteAggregateInterface;
 use Concrete\Core\Site\Tree\TreeInterface;
 use Concrete\Core\StyleCustomizer\Skin\SkinInterface;
@@ -511,12 +512,7 @@ class Page extends Collection implements CategoryMemberInterface,
                 $prefix = $r->override ? true : $pt->getPackageHandle();
                 $class = core_class('Controller\\PageType\\' . camelcase($ptHandle), $prefix);
             } elseif ($this->isGeneratedCollection()) {
-                $file = $this->getCollectionFilename();
-                if (strpos($file, '/' . FILENAME_COLLECTION_VIEW) !== false) {
-                    $path = substr($file, 0, strpos($file, '/' . FILENAME_COLLECTION_VIEW));
-                } else {
-                    $path = substr($file, 0, strpos($file, '.php'));
-                }
+                $path = $this->getCollectionPath();
                 $r = $env->getRecord(DIRNAME_CONTROLLERS . '/' . DIRNAME_PAGE_CONTROLLERS . $path . '.php', $this->getPackageHandle());
                 $prefix = $r->override ? true : $this->getPackageHandle();
                 $class = core_class('Controller\\SinglePage\\' . str_replace('/', '\\', camelcase($path, true)), $prefix);
@@ -2350,7 +2346,9 @@ EOT
             while ($row = $r->fetchAssociative()) {
                 if ($row['cID'] > 0) {
                     $c = self::getByID($row['cID'], $version);
-                    $children[] = $c;
+                    if ($c && !$c->isError() && $c->getVersionID() > 0) {
+                        $children[] = $c;
+                    }
                 }
             }
         }
@@ -2616,6 +2614,9 @@ EOT
 
         // load new version object
         $this->loadVersionObject($cvID);
+
+        $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_PAGES);
+        $logger->info(t('Page updated: %s (%s)', $this->getCollectionName(), $this->getCollectionID()));
 
         $pe = new Event($this);
         Events::dispatch('on_page_update', $pe);
@@ -3056,7 +3057,7 @@ EOT
         }
 
         $app = Facade::getFacadeApplication();
-        $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_SITE_ORGANIZATION);
+        $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_PAGES);
         $logger->notice(t('Page "%s" at path "%s" deleted',
             $this->getCollectionName(),
             $this->getCollectionPath()
@@ -3108,6 +3109,9 @@ EOT
             Section::unregisterPage($this);
         }
 
+        $indexer = $app->make(IndexManagerInterface::class);
+        $indexer->forget(Page::class, $this->getCollectionID());
+
         $cache = PageCache::getLibrary();
         $cache->purge($this);
     }
@@ -3124,7 +3128,7 @@ EOT
 
         $trash = self::getByPath(Config::get('concrete.paths.trash'));
         $app = Facade::getFacadeApplication();
-        $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_SITE_ORGANIZATION);
+        $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_PAGES);
         $logger->notice(t('Page "%s" at path "%s" Moved to trash',
             $this->getCollectionName(),
             $this->getCollectionPath()
@@ -3132,6 +3136,9 @@ EOT
 
         $this->move($trash);
         $this->deactivate();
+
+        $indexer = $app->make(IndexManagerInterface::class);
+        $indexer->forget(Page::class, $this->getCollectionID());
 
         // if this page has a custom canonical path we need to clear it
         $path = $this->getCollectionPathObject();
@@ -3146,6 +3153,7 @@ EOT
         $db = Database::connection();
         foreach ($pages as $page) {
             $db->executeQuery('update Pages set cIsActive = 0 where cID = ?', [$page['cID']]);
+            $indexer->forget(Page::class, $page['cID']);
         }
     }
 

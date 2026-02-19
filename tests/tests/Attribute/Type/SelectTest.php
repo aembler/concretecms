@@ -8,12 +8,17 @@ class SelectTest extends AttributeTypeTestCase
 {
     protected $atHandle = 'select';
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\SelectSettings';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Value\Value\SelectValueOptionList';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Key\Settings\SelectSettings',
+            'Concrete\Core\Entity\Attribute\Value\Value\SelectValueOptionList',
+        ]);
     }
 
     public function testValidateFormEmptyArray(): void

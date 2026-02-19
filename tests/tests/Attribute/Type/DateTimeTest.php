@@ -8,11 +8,16 @@ class DateTimeTest extends AttributeTypeTestCase
 {
     protected $atHandle = 'date_time';
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\DateTimeSettings';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Key\Settings\DateTimeSettings'
+        ]);
     }
 
     public function testValidateFormEmptyArray(): void

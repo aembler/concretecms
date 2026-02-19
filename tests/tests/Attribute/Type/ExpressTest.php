@@ -8,11 +8,16 @@ class ExpressTest extends AttributeTypeTestCase
 {
     protected $atHandle = 'express';
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\ExpressSettings';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Key\Settings\ExpressSettings',
+        ]);
     }
 
     public function testValidateFormEmptyArray(): void

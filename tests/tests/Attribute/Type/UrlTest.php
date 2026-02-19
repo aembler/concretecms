@@ -8,11 +8,16 @@ class UrlTest extends AttributeTypeTestCase
 {
     protected $atHandle = 'url';
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\TextSettings';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Key\Settings\TextSettings',
+        ]);
     }
 
     public function testValidateFormEmptyArray(): void

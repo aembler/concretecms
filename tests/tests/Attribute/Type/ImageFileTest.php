@@ -9,11 +9,16 @@ class ImageFileTest extends AttributeTypeTestCase
 {
     protected $atHandle = 'image_file';
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Settings\ImageFileSettings';
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Key\Settings\ImageFileSettings'
+        ]);
     }
 
     public function testValidateFormEmptyArray(): void

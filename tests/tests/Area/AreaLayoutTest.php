@@ -11,12 +11,21 @@ use Request;
 
 class AreaLayoutTest extends ConcreteDatabaseTestCase
 {
-    protected $tables = ['AreaLayoutPresets', 'AreaLayouts', 'AreaLayoutColumns',
-        'AreaLayoutCustomColumns', 'AreaLayoutThemeGridColumns', 'PageThemes', 'Pages', 'Collections',
-        'CollectionVersions', 'SiteTrees'];
+    protected $tables = [
+        'AreaLayoutPresets',
+        'AreaLayouts',
+        'AreaLayoutColumns',
+        'AreaLayoutCustomColumns',
+        'AreaLayoutThemeGridColumns',
+        'PageThemes',
+        'Pages',
+        'Collections',
+        'CollectionVersions',
+    ];
+
     protected $fixtures = [];
 
-    protected $metadatas = [
+    protected $entityClassNames = [
         'Concrete\Core\Entity\Site\Locale',
         'Concrete\Core\Entity\Site\Site',
         'Concrete\Core\Entity\Site\Type',

@@ -43,27 +43,39 @@ class SearchTest extends BlockTypeTestCase
         AttributeCategory::add('collection');
     }
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getTables()
+     */
+    protected function getTables()
     {
-        parent::__construct($name, $data, $dataName);
+        return array_merge(parent::getTables(), [
+            'CollectionVersions',
+            'Pages',
+            'PageTypes',
+            'PageSearchIndex',
+            'PermissionAccessEntityTypes',
+            'PermissionKeys',
+            'PermissionKeyCategories',
+            'PagePermissionAssignments',
+            'BlockPermissionAssignments',
+        ]);
+    }
 
-        $this->tables[] = 'btSearch';
-        $this->tables[] = 'CollectionVersions';
-        $this->tables[] = 'CollectionSearchIndexAttributes';
-        $this->tables[] = 'Pages';
-        $this->tables[] = 'PageTypes';
-        $this->tables[] = 'PageSearchIndex';
-        $this->tables[] = 'PermissionAccessEntityTypes';
-        $this->tables[] = 'PermissionKeys';
-        $this->tables[] = 'PermissionKeyCategories';
-        $this->tables[] = 'PagePermissionAssignments';
-        $this->tables[] = 'BlockPermissionAssignments';
-
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Category';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\Key';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Value\Value';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Key\PageKey';
-        $this->metadatas[] = 'Concrete\Core\Entity\Attribute\Value\PageValue';
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getEntityClassNames()
+     */
+    protected function getEntityClassNames(): array
+    {
+        return array_merge(parent::getEntityClassNames(), [
+            'Concrete\Core\Entity\Attribute\Category',
+            'Concrete\Core\Entity\Attribute\Key\Key',
+            'Concrete\Core\Entity\Attribute\Key\PageKey',
+            'Concrete\Core\Entity\Attribute\Value\PageValue',
+        ]);
     }
 
     public function setUp(): void

@@ -37,7 +37,7 @@ use ScssPhp\ScssPhp\Compiler;
 class ThemeCustomizerTest extends ConcreteDatabaseTestCase
 {
 
-    protected $metadatas = [
+    protected $entityClassNames = [
         'Concrete\Core\Entity\Page\Theme\CustomSkin',
     ];
 

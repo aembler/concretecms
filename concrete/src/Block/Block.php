@@ -900,7 +900,9 @@ EOT
      */
     public function isAliasOfMasterCollection()
     {
-        return $this->getBlockCollectionObject()->isBlockAliasedFromMasterCollection($this);
+        $blockCollection = $this->getBlockCollectionObject();
+
+        return $blockCollection ? $blockCollection->isBlockAliasedFromMasterCollection($this) : false;
     }
 
     /**
@@ -1186,6 +1188,18 @@ EOT
         $settings = $this->getBlockCacheSettingsObject();
 
         return $settings->cacheBlockOutputForRegisteredUsers();
+    }
+
+    /**
+     * Should the block output be cached on the edit mode?
+     *
+     * @return bool
+     */
+    public function cacheBlockOutputOnEditMode()
+    {
+        $settings = $this->getBlockCacheSettingsObject();
+
+        return $settings->cacheBlockOutputOnEditMode();
     }
 
     /**
@@ -2019,7 +2033,9 @@ EOT
                 $style = $this->getCustomStyle();
                 if (is_object($style)) {
                     $set = $style->getStyleSet();
-                    $set->export($blockNode);
+                    if ($set) {
+                        $set->export($blockNode);
+                    }
                 }
                 if ($this->overrideBlockTypeCacheSettings()) {
                     $settings = $this->getBlockCacheSettingsObject();

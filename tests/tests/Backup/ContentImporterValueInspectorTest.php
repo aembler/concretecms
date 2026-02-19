@@ -8,12 +8,14 @@ use Concrete\TestHelpers\File\FileStorageTestCase;
 
 class ContentImporterValueInspectorTest extends FileStorageTestCase
 {
-    public function __construct($name = null, array $data = [], $dataName = '')
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Concrete\TestHelpers\Database\ConcreteDatabaseTestCase::getTables()
+     */
+    protected function getTables()
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->tables = array_merge($this->tables, [
-            'Users',
+        return array_merge(parent::getTables(), [
             'PermissionAccessEntityTypes',
         ]);
     }
@@ -39,7 +41,7 @@ class ContentImporterValueInspectorTest extends FileStorageTestCase
         $this->assertEquals(7, count($inspector->getInspectionRoutines()));
     }
 
-    public function providerMatchedSimpleValues()
+    public static function providerMatchedSimpleValues()
     {
         return [
             ['{ccm:export:page:/ok/here/we-go}', '/ok/here/we-go', '\Concrete\Core\Backup\ContentImporter\ValueInspector\Item\PageItem'],

@@ -45,50 +45,93 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     /** @var string | int  */
     protected $btInterfaceHeight = "400";
     protected $btHasRendered = false;
+    /**
+     * @var bool Defaults to true. When block caching is enabled, this means that the block's database record data will
+     *           also be cached. This can almost always be set to true.
+     */
     protected $btCacheBlockRecord = true;
+    /**
+     * @var bool Defaults to false. When block caching is enabled, enabling this boolean means that the output of the
+     *           block will be saved and delivered without rendering the view() function or hitting the database at all.
+     */
     protected $btCacheBlockOutput = false;
+    /**
+     * @var int Defaults to no time limit (0). When block caching is enabled and output caching is enabled for a block,
+     *          this is the value in seconds that the cache will last before being refreshed.
+     */
     protected $btCacheBlockOutputLifetime = 0;
+    /**
+     * @var bool Defaults to false. This determines whether a block will cache its output on POST. Some blocks can
+     *           cache their output but must serve uncached output on POST in order to show error messages, etc…
+     */
     protected $btCacheBlockOutputOnPost = false;
+    /**
+     * @var bool Defaults to false. Determines whether a block that can cache its output will continue to cache its
+     *           output even if the current user viewing it is logged in.
+     */
     protected $btCacheBlockOutputForRegisteredUsers = false;
+    /**
+     * @var bool Defaults to false. This determines whether a block will cache its output on edit mode.
+     *           If the block show messages like "This block is disabled in edit mode" for editing users but still
+     *           enable to cache it's output for other users, consider keeping this value false and set true for
+     *           $btCacheBlockOutputForRegisteredUsers.
+     */
+    protected $btCacheBlockOutputOnEditMode = false;
     protected $bActionCID;
 
     /**
-     * The names of the columns that contain a page ID.
+     * The name of the main database table where the block stores its data.
+     * If defined, the table must have at least an integer field named bID.
+     *
+     * @var string|null
+     */
+    protected $btTable = null;
+
+    /**
+     * The names of all the database tables managed by the block.
+     * Eevry table must have at least an integer field named bID.
+     *
+     * @var string[]|null
+     */
+    protected $btExportTables = null;
+
+    /**
+     * The names of the fields in the database table defined by $btTable and $btExportTables that contain the ID of a Concrete page.
      *
      * @var string[]
      */
     protected $btExportPageColumns = [];
 
     /**
-     * The names of the columns that contain a file ID.
+     * The names of the fields in the database table defined by $btTable and $btExportTables that contain the ID of a Concrete file.
      *
      * @var string[]
      */
     protected $btExportFileColumns = [];
 
     /**
-     * The names of the columns that contain rich text (that is, HTML with possibly links to files and pages).
+     * The names of the fields in the database table defined by $btTable and $btExportTables that contain Rich Text or HTML.
      *
      * @var string[]
      */
     protected $btExportContentColumns = [];
 
     /**
-     * The names of the columns that contain a page type ID.
+     * The names of the fields in the database table defined by $btTable and $btExportTables that contain the ID of a page type.
      *
      * @var string[]
      */
     protected $btExportPageTypeColumns = [];
 
     /**
-     * The names of the columns that contain a feed ID.
+     * The names of the fields in the database table defined by $btTable and $btExportTables that contain the ID of an RSS page feed.
      *
      * @var string[]
      */
     protected $btExportPageFeedColumns = [];
 
     /**
-     * The names of the columns that contain a file folder ID.
+     * The names of the fields in the database table defined by $btTable and $btExportTables that contain the ID of an Concrete folder of files.
      *
      * @var string[]
      */
@@ -97,8 +140,6 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     protected $btWrapperClass = '';
     protected $btDefaultSet;
     protected $identifier;
-    /** @var null|string  */
-    protected $btTable = null;
     protected $btID;
     /** @var array */
     protected $requestArray;
@@ -134,7 +175,7 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     }
 
     /**
-     * Get the names of the columns that contain page IDs.
+     * Get the names of the fields in the database table defined by $btTable and $btExportTables that contain the ID of a Concrete page.
      *
      * @return string[]
      */
@@ -269,6 +310,15 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         }
 
         if ($this instanceof FileTrackableInterface) {
+            $fields = array_merge(
+                $this->btExportFileColumns ?: [],
+                $this->btExportContentColumns ?: []
+            );
+            foreach ($fields as $field) {
+                if (property_exists($this, $field)) {
+                    $this->{$field} = $args[$field] ?? null;
+                }
+            }
             $this->app->make(AggregateTracker::class)->track($this);
         }
     }
@@ -408,13 +458,22 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         }
     }
 
+    /**
+     * Add to a <block /> XML node the data stored in the block database tables.
+     * In case a block uses more than one database table, we should have more <data /> elements (one for every table).
+     *
+     * @example: the Content block will add these children to $blockNode:
+     * ```
+     * <data table="btContentLocal">
+     *     <record>
+     *         <content>The Rich Text of the Content block</content>
+     *     </record>
+     * </data>
+     * ```
+     */
     public function export(\SimpleXMLElement $blockNode)
     {
-        if (isset($this->btExportTables)) {
-            $tables = $this->btExportTables;
-        } else {
-            $tables = [$this->getBlockTypeDatabaseTable()];
-        }
+        $tables = $this->btExportTables ?? [$this->getBlockTypeDatabaseTable()];
         $db = $this->app->make(Connection::class);
 
         $xml = $this->app->make(Xml::class);
@@ -433,18 +492,22 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
                 $tableRecord = $data->addChild('record');
                 foreach ($record as $key => $value) {
                     if (isset($columns[strtolower($key)])) {
-                        if (in_array($key, $btExportPageColumns)) {
-                            $tableRecord->addChild($key, ContentExporter::replacePageWithPlaceHolder($value));
+                        if ($value === null) {
+                            $tableRecord->addChild($key)->addAttribute('null', 'true');
+                        } elseif ($value === 0 || $value === '0') {
+                            $tableRecord->addChild($key, '0');
+                        } elseif (in_array($key, $btExportPageColumns)) {
+                            $xml->createChildElement($tableRecord, $key, ContentExporter::replacePageWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportFileColumns)) {
-                            $tableRecord->addChild($key, ContentExporter::replaceFileWithPlaceHolder($value));
+                            $xml->createChildElement($tableRecord, $key, ContentExporter::replaceFileWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportPageTypeColumns)) {
-                            $tableRecord->addChild($key, ContentExporter::replacePageTypeWithPlaceHolder($value));
+                            $xml->createChildElement($tableRecord, $key, ContentExporter::replacePageTypeWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportPageFeedColumns)) {
-                            $tableRecord->addChild($key, ContentExporter::replacePageFeedWithPlaceHolder($value));
+                            $xml->createChildElement($tableRecord, $key, ContentExporter::replacePageFeedWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportFileFolderColumns)) {
-                            $tableRecord->addChild($key, ContentExporter::replaceFileFolderWithPlaceHolder($value));
+                            $xml->createChildElement($tableRecord, $key, ContentExporter::replaceFileFolderWithPlaceHolder($value));
                         } elseif (in_array($key, $this->btExportContentColumns)) {
-                            $tableRecord->addChild($key, LinkAbstractor::export((string) $value));
+                            $xml->createChildElement($tableRecord, $key, LinkAbstractor::export((string) $value));
                         } else {
                             $xml->createChildElement($tableRecord, $key, $value);
                         }
@@ -460,9 +523,12 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     }
 
     /**
+     * Import a block instance extracting from an XML <block> element the data to be stored in the database.
+     * The extraction is performed by getImportData() (its returned value will be passed to the save() method).
+     * In case of more than one database table, importAdditionalData() will store in the database the data for the secondary database tables.
+     *
      * @param \Concrete\Core\Page\Page $page
-     * @param string $arHandle
-     * @param \SimpleXMLElement $blockNode
+     * @param \Concrete\Core\Area\Area|string $arHandle the area instance (or its handle) where the block should be imported into
      *
      * @return \Concrete\Core\Block\Block
      */
@@ -526,8 +592,11 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     }
 
     /**
+     * Extracts data from an XML <block> element, generating an array that will be passed to the save() method.
+     *
      * @param \SimpleXMLElement $blockNode
      * @param \Concrete\Core\Page\Page $page
+     *
      * @return array<string,mixed>
      */
     protected function getImportData($blockNode, $page)
@@ -540,18 +609,21 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
                 if ($data['table'] == $this->getBlockTypeDatabaseTable()) {
                     if (isset($data->record)) {
                         foreach ($data->record->children() as $key => $node) {
-                            if (in_array($key, $btExportPageColumns)
+                            $nodeValue = (string) $node;
+                            if ($nodeValue === '' && isset($node['null']) && filter_var((string) $node['null'], FILTER_VALIDATE_BOOLEAN)) {
+                                $args[$node->getName()] = null;
+                            } elseif (in_array($key, $btExportPageColumns)
                                 || in_array($key, $this->btExportFileColumns)
                                 || in_array($key, $this->btExportPageTypeColumns)
                                 || in_array($key, $this->btExportPageFeedColumns)
                                 || in_array($key, $this->btExportFileFolderColumns)) {
-                                    $result = $inspector->inspect((string) $node);
+                                    $result = $inspector->inspect($nodeValue);
                                     $args[$node->getName()] = $result->getReplacedValue();
                             } else if (in_array($key, $this->btExportContentColumns)) {
-                                $result = $inspector->inspect((string) $node);
+                                $result = $inspector->inspect($nodeValue);
                                 $args[$node->getName()] = $result->getReplacedContent();
                             } else {
-                                $args[$node->getName()] = (string) $node;
+                                $args[$node->getName()] = $nodeValue;
                             }
                         }
                     }
@@ -562,6 +634,12 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
         return $args;
     }
 
+    /**
+     * Save into the secondary database tables the data extracted from the <data> child elements of a an XML <block> element into the database.
+     *
+     * @param \Concrete\Core\Block\Block $b
+     * @param \SimpleXMLElement $blockNode
+     */
     protected function importAdditionalData($b, $blockNode)
     {
         $inspector = \Core::make('import/value_inspector');
@@ -576,18 +654,21 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
                             $aar->bID = $b->getBlockID();
                             foreach ($record->children() as $key => $node) {
                                 $nodeName = $node->getName();
-                                if (in_array($key, $btExportPageColumns)
+                                $nodeValue = (string) $node;
+                                if ($nodeValue === '' && isset($node['null']) && filter_var((string) $node['null'], FILTER_VALIDATE_BOOLEAN)) {
+                                    $aar->{$nodeName} = null;
+                                } elseif (in_array($key, $btExportPageColumns)
                                     || in_array($key, $this->btExportFileColumns)
                                     || in_array($key, $this->btExportPageTypeColumns)
                                     || in_array($key, $this->btExportPageFeedColumns)
                                     || in_array($key, $this->btExportFileFolderColumns)) {
-                                        $result = $inspector->inspect((string) $node);
+                                        $result = $inspector->inspect($nodeValue);
                                         $aar->{$nodeName} = $result->getReplacedValue();
                                 } else if (in_array($key, $this->btExportContentColumns)) {
-                                    $result = $inspector->inspect((string) $node);
+                                    $result = $inspector->inspect($nodeValue);
                                     $aar->{$nodeName} = $result->getReplacedContent();
                                 } else {
-                                    $aar->{$nodeName} = (string) $node;
+                                    $aar->{$nodeName} = $nodeValue;
                                 }
                             }
                             $aar->Save();
@@ -730,6 +811,11 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
     public function cacheBlockOutputOnPost()
     {
         return $this->btCacheBlockOutputOnPost;
+    }
+
+    public function cacheBlockOutputOnEditMode()
+    {
+        return $this->btCacheBlockOutputOnEditMode;
     }
 
     public function getBlockTypeCacheOutputLifetime()
