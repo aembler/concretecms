@@ -29,8 +29,8 @@
         <div ref="contentEl" />
       </div>
       <DialogFooter>
-        <button type="button" class="btn btn-secondary me-auto" @click="handleCancel">Cancel</button>
-        <button type="button" class="btn btn-primary" @click="handleSave">Save</button>
+        <button type="button" class="btn btn-secondary me-auto" :disabled="isSubmitting" @click="handleCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" :disabled="isSubmitting" @click="handleSave">Save</button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -64,7 +64,12 @@ const contentReady = ref(false)
 const contentEl = ref<HTMLElement | null>(null)
 const helpTooltipText = ref('')
 const helpTooltipOpen = ref(false)
+const isSubmitting = ref(false)
 const { request } = useAjax()
+
+const emit = defineEmits<{
+  (e: 'updated', payload: { response: any; html: string }): void
+}>()
 
 const dialogStyle = computed(() => ({
   width: normalizeDimension(props.dialogWidth),
@@ -162,22 +167,109 @@ function findPrimaryForm(): HTMLFormElement | null {
   return firstForm instanceof HTMLFormElement ? firstForm : null
 }
 
+function normalizeMethod(method: string): 'GET' | 'POST' | 'PUT' | 'DELETE' {
+  const normalized = (method || 'POST').toUpperCase()
+  if (normalized === 'GET' || normalized === 'POST' || normalized === 'PUT' || normalized === 'DELETE') {
+    return normalized
+  }
+
+  return 'POST'
+}
+
+function normalizeJsonResponse(response: any): any {
+  if (typeof response !== 'string') {
+    return response
+  }
+
+  try {
+    return JSON.parse(response)
+  } catch (error) {
+    return {}
+  }
+}
+
+function buildRenderUrl(response: any): string | null {
+  const parsedAreaId = parseInt(response?.aID, 10)
+  const parsedBlockId = parseInt(response?.bID, 10)
+  if (Number.isNaN(parsedAreaId) || Number.isNaN(parsedBlockId)) {
+    return null
+  }
+
+  const editor = (window as any).Concrete?.getEditMode?.()
+  const area = editor?.getAreaByID?.(parsedAreaId)
+  const arHandle = response?.arHandle || area?.getHandle?.()
+  if (!arHandle) {
+    return null
+  }
+
+  const cID = response?.cID || (window as any).CCM_CID || 0
+  const arEnableGridContainer = area?.getEnableGridContainer?.() ? 1 : 0
+  const params = new URLSearchParams()
+  params.set('arHandle', String(arHandle))
+  params.set('cID', String(cID))
+  params.set('bID', String(parsedBlockId))
+  params.set('arEnableGridContainer', String(arEnableGridContainer))
+  params.set('placeholder', '')
+  if (response?.tempFilename) {
+    params.set('tempFilename', String(response.tempFilename))
+  }
+
+  return `${CCM_DISPATCHER_FILENAME}/ccm/system/block/render?${params.toString()}`
+}
+
 function handleSave() {
+  if (isSubmitting.value) {
+    return
+  }
+
   const form = findPrimaryForm()
   if (!form) {
     return
   }
 
-  if (typeof form.requestSubmit === 'function') {
-    form.requestSubmit()
+  const formData = new FormData(form)
+  const url = form.getAttribute('action') || props.editAction || ''
+  const method = normalizeMethod(form.getAttribute('method') || 'POST')
+  if (!url) {
     return
   }
 
-  const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
-  const wasNotCancelled = form.dispatchEvent(submitEvent)
-  if (wasNotCancelled) {
-    form.submit()
-  }
+  isSubmitting.value = true
+  request({
+    url,
+    method,
+    body: formData,
+    skipResponseValidation: true,
+    onSuccess: (response) => {
+      const normalizedResponse: any = normalizeJsonResponse(response)
+
+      if (normalizedResponse?.error || (Array.isArray(normalizedResponse?.errors) && normalizedResponse.errors.length > 0)) {
+        return
+      }
+
+      const renderUrl = buildRenderUrl(normalizedResponse)
+      if (!renderUrl) {
+        return
+      }
+
+      request({
+        url: renderUrl,
+        method: 'GET',
+        skipResponseValidation: true,
+        onSuccess: (html: string) => {
+          emit('updated', {
+            response: normalizedResponse,
+            html: String(html || '')
+          })
+          open.value = false
+          helpTooltipOpen.value = false
+        }
+      })
+    },
+    onComplete: () => {
+      isSubmitting.value = false
+    }
+  })
 }
 
 function handleCancel() {

@@ -54,13 +54,6 @@ if (isset($headerItems) && is_array($headerItems)) {
 }
 
 ?>
-$(function() {
-	$('#ccm-block-form').concreteAjaxBlockForm({
-		task: 'edit',
-		bID: <?= is_object($b->getProxyBlock()) ? $b->getProxyBlock()->getBlockID() : $b->getBlockID() ?>,
-        btSupportsInlineEdit: <?= $supportsInlineEdit ? 'true' : 'false' ?>
-	});
-});
 </script>
 <?php
 
