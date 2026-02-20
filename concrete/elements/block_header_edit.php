@@ -28,6 +28,8 @@ if ($b->getBlockTypeHandle() === BLOCK_HANDLE_SCRAPBOOK_PROXY) {
 ?>
 <a name="_edit<?= $b->getBlockID() ?>"></a>
 
+<?php /*
+
 <script type="text/javascript">
 <?php
 
@@ -56,7 +58,7 @@ if (isset($headerItems) && is_array($headerItems)) {
 ?>
 </script>
 <?php
-
+*/
 $message = $bth->getMessage($bt->getBlockTypeHandle());
 
 if (!$message && $cont->getBlockTypeHelp()) {

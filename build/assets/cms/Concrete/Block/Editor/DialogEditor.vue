@@ -1,9 +1,18 @@
 <template>
-  <Dialog v-if="contentReady" v-model:open="open">
-    <DialogContent :style="dialogStyle" class="max-w-none flex max-h-[90vh] flex-col overflow-visible">
+  <LazyDialog
+    ref="lazyDialogRef"
+    v-model:open="open"
+    :src="props.editAction"
+    :dialog-title="props.dialogTitle || 'Edit Block'"
+    :dialog-width="props.dialogWidth"
+    :dialog-height="props.dialogHeight"
+    :allow-script-execution="true"
+    :content-transform="transformDialogHtml"
+  >
+    <template #header>
       <DialogHeader>
         <div class="flex w-full min-w-0 items-center gap-2">
-          <DialogTitle>{{ dialogTitle || 'Edit Block' }}</DialogTitle>
+          <DialogTitle>{{ props.dialogTitle || 'Edit Block' }}</DialogTitle>
           <div
             v-if="helpTooltipText"
             class="tooltip tooltip-left dialog-help-tooltip ms-auto me-1"
@@ -25,25 +34,23 @@
           </div>
         </div>
       </DialogHeader>
-      <div class="min-h-0 flex-1 overflow-auto">
-        <div ref="contentEl" />
-      </div>
+    </template>
+    <template #footer>
       <DialogFooter>
         <button type="button" class="btn btn-secondary me-auto" :disabled="isSubmitting" @click="handleCancel">Cancel</button>
         <button type="button" class="btn btn-primary" :disabled="isSubmitting" @click="handleSave">Save</button>
       </DialogFooter>
-    </DialogContent>
-  </Dialog>
+    </template>
+  </LazyDialog>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import {
-  Dialog,
-  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  LazyDialog,
   useAjax
 } from '@concretecms/backendui'
 
@@ -60,50 +67,17 @@ const props = withDefaults(defineProps<{
 })
 
 const open = ref(false)
-const contentReady = ref(false)
-const contentEl = ref<HTMLElement | null>(null)
 const helpTooltipText = ref('')
 const helpTooltipOpen = ref(false)
 const isSubmitting = ref(false)
 const { request } = useAjax()
+const lazyDialogRef = ref<any>(null)
 
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any; html: string }): void
 }>()
 
-const dialogStyle = computed(() => ({
-  width: normalizeDimension(props.dialogWidth),
-  height: normalizeDimension(props.dialogHeight),
-  maxWidth: '95vw',
-  maxHeight: '90vh',
-}))
-
-function normalizeDimension(value: string | number): string {
-  if (typeof value === 'number') {
-    return `${value}px`
-  }
-
-  const trimmed = String(value || '').trim()
-  if (!trimmed) {
-    return 'auto'
-  }
-
-  if (trimmed === 'auto') {
-    return 'auto'
-  }
-
-  if (/^\d+$/.test(trimmed)) {
-    return `${trimmed}px`
-  }
-
-  return trimmed
-}
-
-function renderDialogHtml(rawHtml: string) {
-  if (!contentEl.value) {
-    return
-  }
-
+function transformDialogHtml(rawHtml: string): string {
   const parser = document.createElement('div')
   parser.innerHTML = rawHtml
 
@@ -122,22 +96,7 @@ function renderDialogHtml(rawHtml: string) {
   )
   legacyActionButtons.forEach((node) => node.remove())
 
-  const scripts = Array.from(parser.querySelectorAll('script'))
-  scripts.forEach((script) => script.remove())
-
-  contentEl.value.innerHTML = parser.innerHTML
-
-  // Re-execute script tags returned by legacy dialog endpoints.
-  scripts.forEach((script) => {
-    const node = document.createElement('script')
-    if (script.src) {
-      node.src = script.src
-    } else {
-      node.textContent = script.textContent
-    }
-    document.body.appendChild(node)
-    node.remove()
-  })
+  return parser.innerHTML
 }
 
 function toggleHelpTooltip() {
@@ -149,21 +108,22 @@ function handleDocumentClick() {
 }
 
 function findPrimaryForm(): HTMLFormElement | null {
-  if (!contentEl.value) {
+  const contentEl = lazyDialogRef.value?.getContentElement?.()
+  if (!contentEl) {
     return null
   }
 
-  const blockForm = contentEl.value.querySelector('#ccm-block-form')
+  const blockForm = contentEl.querySelector('#ccm-block-form')
   if (blockForm instanceof HTMLFormElement) {
     return blockForm
   }
 
-  const dialogForm = contentEl.value.querySelector('[data-dialog-form]')
+  const dialogForm = contentEl.querySelector('[data-dialog-form]')
   if (dialogForm instanceof HTMLFormElement) {
     return dialogForm
   }
 
-  const firstForm = contentEl.value.querySelector('form')
+  const firstForm = contentEl.querySelector('form')
   return firstForm instanceof HTMLFormElement ? firstForm : null
 }
 
@@ -283,18 +243,7 @@ onMounted(() => {
   }
 
   document.addEventListener('click', handleDocumentClick)
-
-  request({
-    url: props.editAction,
-    method: 'GET',
-    skipResponseValidation: true,
-    onSuccess: async (html: string) => {
-      contentReady.value = true
-      open.value = true
-      await nextTick()
-      renderDialogHtml(String(html || ''))
-    }
-  })
+  open.value = true
 })
 
 onBeforeUnmount(() => {
