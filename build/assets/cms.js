@@ -82,6 +82,10 @@ customElements.define('concrete-container', ConcreteContainerElement)
 
 import { useBlockEditorRegistry } from '@concretecms/backendui';
 import ComposableEditor from './cms/Concrete/Block/Editor/ComposableEditor.vue';
+import DialogEditor from './cms/Concrete/Block/Editor/DialogEditor.vue';
+import InlineEditor from './cms/Concrete/Block/Editor/InlineEditor.vue';
 
 const registry = useBlockEditorRegistry();
 registry.registerEditorComponent('ComposableEditor', ComposableEditor);
+registry.registerEditorComponent('DialogEditor', DialogEditor);
+registry.registerEditorComponent('InlineEditor', InlineEditor);

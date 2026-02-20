@@ -22,7 +22,16 @@
       </Menu>
     </template>
     <div v-if="editMode">
-      <component :is="currentEditorComponent" :block-type-id="parseBlockType.id" v-if="editMode" />
+      <component
+        :is="currentEditorComponent"
+        v-if="currentEditorComponent"
+        :key="editorRenderKey"
+        :block-type-id="parseBlockType?.id"
+        :edit-action="editAction"
+        :dialog-title="editDialogTitle"
+        :dialog-width="editDialogWidth"
+        :dialog-height="editDialogHeight"
+      />
     </div>
     <slot />
   </HotSpot>
@@ -53,6 +62,7 @@ import { useBlockEditorRegistry } from '@concretecms/backendui'
 import { useUiStore } from '@concretecms/backendui'
 
 const editMode = ref(false)
+const editorRenderKey = ref(0)
 const isDeleted = ref(false)
 const showDeleteModal = ref(false)
 const uiStore = useUiStore()
@@ -63,6 +73,10 @@ const props = defineProps({
   variants: String | Array<{ file: String; name: String }>,
   blocktype: String | Object,
   selectedVariant: String,
+  editAction: String,
+  editDialogTitle: String,
+  editDialogWidth: Number | String,
+  editDialogHeight: Number | String,
   deleteAction: String,
   deleteAllAction: String,
   deleteMessage: String,
@@ -81,6 +95,7 @@ let menuId = computed(() => props.id + '-menu')
 
 function editBlock() {
   editMode.value = true
+  editorRenderKey.value += 1
 }
 
 function clearMenuState() {
@@ -113,7 +128,7 @@ function handleDeleted(response: any) {
 
 const registry = useBlockEditorRegistry();
 const currentEditorComponent = computed(() => {
-  return registry.getEditorComponent(parseBlockType.editor.component);
+  return registry.getEditorComponent(parseBlockType?.editor?.component);
 });
 
 </script>

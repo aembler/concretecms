@@ -40,59 +40,59 @@ $thumbnailTypes['0'] = t('Full Size');
 
 ?>
 
-<fieldset class="mb-3">
-    <legend><?=t('Text')?></legend>
-    <div class="mb-3">
-        <?php echo $form->label("title", t('Title')); ?>
-        <div class="input-group">
-            <?php echo $form->text('title', $title ?? null); ?>
-            <?php echo $form->select('titleFormat', \Concrete\Core\Block\BlockController::$btTitleFormats, $titleFormat ?? null, array('style' => 'width:105px;flex-grow:0;', 'class' => 'form-select')); ?>
+<fieldset class="mb-6 space-y-4">
+    <legend class="mb-2 text-base font-semibold"><?=t('Text')?></legend>
+    <div class="space-y-2">
+        <?php echo $form->label('title', t('Title'), ['class' => 'label-text font-medium']); ?>
+        <div class="join w-full">
+            <?php echo $form->text('title', $title ?? null, ['class' => 'input input-bordered join-item w-full']); ?>
+            <?php echo $form->select('titleFormat', \Concrete\Core\Block\BlockController::$btTitleFormats, $titleFormat ?? null, ['class' => 'select select-bordered join-item w-36']); ?>
         </div>
     </div>
-    <div class="mb-3">
-        <label class="form-label" for="body"><?=t('Body')?></label>
+    <div class="space-y-2">
+        <label class="label-text font-medium" for="body"><?=t('Body')?></label>
         <?php
         echo $editor->outputBlockEditModeEditor('body', isset($body) ? htmlspecialchars(LinkAbstractor::translateFromEditMode($body), ENT_QUOTES, APP_CHARSET) : null);
         ?>
     </div>
 </fieldset>
 
-<fieldset class="mb-3">
-<legend><?=t('Image')?></legend>
-    <div class="form-group">
+<fieldset class="mb-6 space-y-4">
+<legend class="mb-2 text-base font-semibold"><?=t('Image')?></legend>
+    <div>
         <?php
         echo $fileManager->image('ccm-b-image', 'fID', t('Choose Image'), $bf);
         ?>
     </div>
 </fieldset>
 
-<fieldset class="mb-3">
-    <legend><?=t('Button')?></legend>
-    <div class="mb-3">
-        <label class="form-label" for="buttonText"><?=t('Button Text')?></label>
-        <input type="text" name="buttonText" class="form-control" value="<?=$buttonText ?? null?>">
+<fieldset class="mb-6 space-y-4">
+    <legend class="mb-2 text-base font-semibold"><?=t('Button')?></legend>
+    <div class="space-y-2">
+        <label class="label-text font-medium" for="buttonText"><?=t('Button Text')?></label>
+        <input type="text" name="buttonText" class="input input-bordered w-full" value="<?=$buttonText ?? null?>">
     </div>
-    <div class="mb-3">
-        <?php echo $form->label("buttonSize", t("Button Size")); ?>
+    <div class="space-y-2">
+        <?php echo $form->label('buttonSize', t('Button Size'), ['class' => 'label-text font-medium']); ?>
         <?php echo $form->select("buttonSize", [
                 '' => t('Regular'),
                 'lg' => t('Large'),
                 'sm' => t('Small')
-            ], $buttonSize ?? null);
+            ], $buttonSize ?? null, ['class' => 'select select-bordered w-full']);
         ?>
     </div>
-    <div class="mb-3">
-        <?php echo $form->label("buttonStyle", t("Button Style")); ?>
+    <div class="space-y-2">
+        <?php echo $form->label('buttonStyle', t('Button Style'), ['class' => 'label-text font-medium']); ?>
         <?php echo $form->select("buttonStyle", [
             '' => t('Regular'),
             'outline' => t('Outline'),
             'link' => t('Link'),
-        ], $buttonStyle ?? null);
+        ], $buttonStyle ?? null, ['class' => 'select select-bordered w-full']);
         ?>
     </div>
     <?php if ($themeColorCollection) { ?>
-        <div class="mb-3">
-            <label class="form-label" for="buttonColor"><?=t('Button Color')?></label>
+        <div class="space-y-2">
+            <label class="label-text font-medium" for="buttonColor"><?=t('Button Color')?></label>
             <div data-vue-app="feature-link">
                 <concrete-theme-color-input
                     :color-collection='<?=json_encode($themeColorCollection)?>'
@@ -103,15 +103,15 @@ $thumbnailTypes['0'] = t('Full Size');
         </div>
     <?php } ?>
 
-    <div class="mb-3 ccm-block-select-icon">
-        <?php echo $form->label('icon', t('Icon'))?>
+    <div class="space-y-2 ccm-block-select-icon">
+        <?php echo $form->label('icon', t('Icon'), ['class' => 'label-text font-medium'])?>
         <div id="ccm-icon-selector-<?= h($bID) ?>">
             <icon-selector name="icon" selected="<?= h($icon) ?>" title="<?= t('Choose Icon') ?>" empty-option-label="<?= h(tc('Icon', '** None Selected')) ?>" />
         </div>
     </div>
 
-    <div class="mb-3">
-        <?php echo $form->label('buttonLink', t('Button Link')) ?>
+    <div class="space-y-2">
+        <?php echo $form->label('buttonLink', t('Button Link'), ['class' => 'label-text font-medium']) ?>
         <?php echo $destinationPicker->generate(
             'imageLink',
             $imageLinkPickers,
@@ -119,7 +119,7 @@ $thumbnailTypes['0'] = t('Full Size');
             $imageLinkValue
         )
         ?>
-        <div class="help-block">
+        <div class="text-sm opacity-70">
             <?=t('Set to None to omit the button.')?>
         </div>
     </div>
