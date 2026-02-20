@@ -196,6 +196,10 @@ const props = defineProps({
 const resolvedTheme = ref('light')
 const teleportTarget = useTemplateRef('teleportTarget')
 
+function handleSearch() {
+
+}
+
 onMounted(() => {
   if (props.colorScheme === 'auto') {
     resolvedTheme.value = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'

@@ -15,7 +15,6 @@
       <Menu
           :variants="parsedVariants"
           :selected-variant="selectedVariant"
-          :id="menuId"
           @edit="editBlock"
           @delete="showDeleteModal = true"
       >
