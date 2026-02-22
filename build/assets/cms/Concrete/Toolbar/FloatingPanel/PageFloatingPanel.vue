@@ -187,12 +187,12 @@ const visibleGroups = computed(() => menuGroups.value
 <template>
   <FloatingPanel
     v-model:open="modelOpen"
-    compact-width="min(92vw, 34rem)"
+    compact-width="min(92vw, 26rem)"
     teleport
     show-backdrop
     backdrop-class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
-    class="fixed left-6 top-[4.85rem] z-[var(--index-layer-panel)] justify-start"
-    menu-class="max-h-[70vh] overflow-y-auto pr-1"
+    class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)] justify-start"
+    menu-class="h-[calc(100vh-8.5rem)] pr-1"
   >
     <FloatingPanelHeader
       title="Page Settings"

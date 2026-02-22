@@ -27,6 +27,7 @@ use Concrete\Core\Validation\CSRF\Token;
 use Concrete\Core\View\View;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Support\Arr;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Add extends BackendInterfacePageController
 {
@@ -336,45 +337,93 @@ class Add extends BackendInterfacePageController
         return $responseFactory->json($editResponse);
     }
 
-    public function view()
+    public function view(): JsonResponse
     {
         $tab = $this->getSelectedTab();
 
-        switch ($tab) {
-            case 'containers':
-                $theme = $this->page->getCollectionThemeObject();
-                $containers = [];
-                if ($theme) {
-                    $containers = $this->app->make(EntityManager::class)
-                        ->getRepository(Container::class)->findBy([], ['containerName' => 'asc']);
-                }
-                $this->set('containers', $containers);
-            case 'stacks':
-                $parent = Page::getByPath(STACKS_PAGE_PATH);
-                $list = new StackList();
-                $list->filterByParentID($parent->getCollectionID());
-                $list->setFoldersFirst(true);
-                $list->excludeGlobalAreas();
-                $stacks = $list->getResults();
-                $this->set('stacks', $stacks);
-                break;
-            case 'clipboard':
-                $sp = Pile::getDefault();
-                $contents = $sp->getPileContentObjects('date_desc');
-                $this->set('contents', $contents);
-                break;
-            case 'orphaned_blocks':
-                break;
-            case 'blocks':
-            default:
-                $tab = 'blocks';
-                $this->set('blockTypesForSets', $this->buildSetsAndBlockTypes());
-                break;
+        /*
+         * Legacy server-rendered add panel flow retained for reference while Nova UI is being ported.
+         *
+         * switch ($tab) {
+         *     case 'containers':
+         *         $theme = $this->page->getCollectionThemeObject();
+         *         $containers = [];
+         *         if ($theme) {
+         *             $containers = $this->app->make(EntityManager::class)
+         *                 ->getRepository(Container::class)->findBy([], ['containerName' => 'asc']);
+         *         }
+         *         $this->set('containers', $containers);
+         *     case 'stacks':
+         *         $parent = Page::getByPath(STACKS_PAGE_PATH);
+         *         $list = new StackList();
+         *         $list->filterByParentID($parent->getCollectionID());
+         *         $list->setFoldersFirst(true);
+         *         $list->excludeGlobalAreas();
+         *         $stacks = $list->getResults();
+         *         $this->set('stacks', $stacks);
+         *         break;
+         *     case 'clipboard':
+         *         $sp = Pile::getDefault();
+         *         $contents = $sp->getPileContentObjects('date_desc');
+         *         $this->set('contents', $contents);
+         *         break;
+         *     case 'orphaned_blocks':
+         *         break;
+         *     case 'blocks':
+         *     default:
+         *         $tab = 'blocks';
+         *         $this->set('blockTypesForSets', $this->buildSetsAndBlockTypes());
+         *         break;
+         * }
+         *
+         * $this->set('tab', $tab);
+         * $this->set('ci', $this->app->make('helper/concrete/urls'));
+         * $this->set('showOrphanedBlockOption', $this->showOrphanedBlockOption());
+         */
+
+        if (!in_array($tab, ['blocks', 'clipboard', 'stacks', 'containers', 'orphaned_blocks'], true)) {
+            $tab = 'blocks';
         }
 
-        $this->set('tab', $tab);
-        $this->set('ci', $this->app->make('helper/concrete/urls'));
-        $this->set('showOrphanedBlockOption', $this->showOrphanedBlockOption());
+        $blockTypeSets = $this->serializeBlockTypesForSets($this->buildSetsAndBlockTypes());
+
+        return new JsonResponse([
+            'pageId' => (int) $this->page->getCollectionID(),
+            'selectedTab' => $tab,
+            'defaultTab' => 'blocks',
+            'showOrphanedBlockOption' => $this->showOrphanedBlockOption(),
+            'blocks' => [
+                'sets' => $blockTypeSets,
+            ],
+        ]);
+    }
+
+    /**
+     * @param array<string, BlockTypeEntity[]> $blockTypesForSets
+     * @return array<int, array{name: string, blockTypes: array<int, array{id: int, handle: string, name: string, description: string}>}>
+     */
+    protected function serializeBlockTypesForSets(array $blockTypesForSets): array
+    {
+        $serializedSets = [];
+        foreach ($blockTypesForSets as $setName => $blockTypes) {
+            $serializedSet = [
+                'name' => (string) $setName,
+                'blockTypes' => [],
+            ];
+
+            foreach ($blockTypes as $blockType) {
+                $serializedSet['blockTypes'][] = [
+                    'id' => (int) $blockType->getBlockTypeID(),
+                    'handle' => (string) $blockType->getBlockTypeHandle(),
+                    'name' => (string) $blockType->getBlockTypeInSetName(),
+                    'description' => (string) $blockType->getBlockTypeDescription(),
+                ];
+            }
+
+            $serializedSets[] = $serializedSet;
+        }
+
+        return $serializedSets;
     }
 
     public function getStackFolderContents()

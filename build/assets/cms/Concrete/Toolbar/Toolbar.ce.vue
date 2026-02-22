@@ -59,7 +59,7 @@
         <div v-if="canEditPageContents && !pageInUseBySomeoneElse"
              :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
              :data-tip="ui.toolbar.showTooltips ? 'Add Content' : null">
-          <a :href="addContentUrl" class="c-toolbar-button">
+          <a :href="addContentUrl" @click.prevent="launchAddPanel" class="c-toolbar-button">
             <PlusIcon class="w-4 h-4" />
             <span v-if="ui.toolbar.showTitles">Add</span>
           </a>
@@ -154,6 +154,13 @@
       :loading="pageSettingsLoading"
       :error="pageSettingsError"
     />
+    <AddFloatingPanel
+      v-model:open="addPanelOpen"
+      :loading="addPanelLoading"
+      :error="addPanelError"
+      :default-tab="addPanelDefaultTab"
+      :block-sets="addPanelBlockSets"
+    />
   </div>
 </template>
 
@@ -169,13 +176,15 @@ import {
   LayoutDashboard as DashboardIcon,
   Map as SitemapIcon,
 } from 'lucide-vue-next'
-import { ref, onMounted, useTemplateRef } from 'vue'
+import { computed, ref, onMounted, useTemplateRef } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
+import AddFloatingPanel from './FloatingPanel/AddFloatingPanel.vue'
 import {
   useUiStore,
   useAjax,
+  useFloatingPanelsStore,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -183,6 +192,7 @@ import {
   DropdownMenuSeparator
 } from '@concretecms/backendui'
 const ui = useUiStore()
+const floatingPanels = useFloatingPanelsStore()
 const { request } = useAjax()
 
 const props = defineProps({
@@ -208,11 +218,36 @@ const props = defineProps({
 
 const resolvedTheme = ref('light')
 const teleportTarget = useTemplateRef('teleportTarget')
-const pageSettingsOpen = ref(false)
+const pageSettingsPanelId = 'toolbar:page-settings'
+const addPanelId = 'toolbar:add'
+const pageSettingsOpen = computed({
+  get: () => floatingPanels.activePanel === pageSettingsPanelId,
+  set: (isOpen: boolean) => {
+    if (isOpen) {
+      floatingPanels.open(pageSettingsPanelId)
+      return
+    }
+    floatingPanels.close(pageSettingsPanelId)
+  },
+})
 const pageSettingsLoading = ref(false)
 const pageSettingsError = ref<string | null>(null)
 const pageSettingsPermissions = ref<Record<string, boolean> | null>(null)
 const pageSettingsPageId = ref<number | null>(null)
+const addPanelOpen = computed({
+  get: () => floatingPanels.activePanel === addPanelId,
+  set: (isOpen: boolean) => {
+    if (isOpen) {
+      floatingPanels.open(addPanelId)
+      return
+    }
+    floatingPanels.close(addPanelId)
+  },
+})
+const addPanelLoading = ref(false)
+const addPanelError = ref<string | null>(null)
+const addPanelDefaultTab = ref<'blocks' | 'clipboard' | 'library' | 'layouts'>('blocks')
+const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{ id: number, handle: string, name: string, description?: string }> }>>([])
 
 function handleSearch() {
 
@@ -240,7 +275,7 @@ const launchPageSettings = () => {
     return
   }
 
-  pageSettingsOpen.value = false
+  floatingPanels.close()
   pageSettingsLoading.value = true
   pageSettingsError.value = null
   const currentCollectionId = Number((window as any).CCM_CID ?? 0)
@@ -261,6 +296,7 @@ const launchPageSettings = () => {
 
       pageSettingsPermissions.value = data?.permissions ?? null
       pageSettingsPageId.value = Number.isInteger(data?.pageId) ? data.pageId : null
+      floatingPanels.open(pageSettingsPanelId)
       pageSettingsOpen.value = true
     },
     onError: () => {
@@ -268,6 +304,56 @@ const launchPageSettings = () => {
     },
     onComplete: () => {
       pageSettingsLoading.value = false
+    },
+  })
+}
+
+const launchAddPanel = () => {
+  if (addPanelLoading.value) {
+    return
+  }
+
+  if (addPanelOpen.value) {
+    addPanelOpen.value = false
+    return
+  }
+
+  floatingPanels.close()
+  addPanelLoading.value = true
+  addPanelError.value = null
+  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
+  const addPanelUrl = currentCollectionId > 0
+    ? `/ccm/system/panels/add?cID=${currentCollectionId}`
+    : '/ccm/system/panels/add'
+
+  request({
+    url: addPanelUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        addPanelError.value = data.error
+        addPanelBlockSets.value = []
+        return
+      }
+
+      const selectedTab = (data?.selectedTab ?? data?.defaultTab ?? 'blocks') as string
+      if (selectedTab === 'clipboard') {
+        addPanelDefaultTab.value = 'clipboard'
+      } else if (selectedTab === 'stacks' || selectedTab === 'containers') {
+        addPanelDefaultTab.value = 'layouts'
+      } else {
+        addPanelDefaultTab.value = 'blocks'
+      }
+      addPanelBlockSets.value = Array.isArray(data?.blocks?.sets) ? data.blocks.sets : []
+      floatingPanels.open(addPanelId)
+      addPanelOpen.value = true
+    },
+    onError: () => {
+      addPanelError.value = 'Unable to load add panel.'
+      addPanelBlockSets.value = []
+    },
+    onComplete: () => {
+      addPanelLoading.value = false
     },
   })
 }
