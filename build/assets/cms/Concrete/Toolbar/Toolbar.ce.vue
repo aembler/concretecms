@@ -1,7 +1,11 @@
 <template>
-  <div id="ccm-page-controls-wrapper" :data-theme="resolvedTheme" class="w-full fixed top-0 left-0 z-50">
+  <div
+    id="ccm-page-controls-wrapper"
+    :data-theme="resolvedTheme"
+    class="w-full fixed top-0 left-0 z-[var(--index-layer-toolbar-wrapper)]"
+  >
     <div ref="teleportTarget"></div>
-    <div id="ccm-toolbar" class="flex flex-row justify-between items-center px-6 py-4 bg-base-100 shadow-[inset_-2px_-2px_10px_rgba(0,0,0,0.1)]">
+    <div id="ccm-toolbar" class="relative z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center px-6 py-4 bg-base-100 shadow-[inset_-2px_-2px_10px_rgba(0,0,0,0.1)]">
       <div class="flex items-center space-x-1">
         <!-- Logo -->
         <span class="text-lg font-bold mr-4">
@@ -143,27 +147,35 @@
         </DropdownMenu>
       </div>
     </div>
+    <PageFloatingPanel
+      v-model:open="pageSettingsOpen"
+      :permissions="pageSettingsPermissions"
+      :page-id="pageSettingsPageId"
+      :loading="pageSettingsLoading"
+      :error="pageSettingsError"
+    />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 import {
   ArrowLeftIcon,
   PencilIcon,
   Cog6ToothIcon,
   PlusIcon,
-  QuestionMarkCircleIcon,
 } from '@heroicons/vue/24/outline'
 import {
   LayoutDashboard as DashboardIcon,
   Map as SitemapIcon,
 } from 'lucide-vue-next'
-import { ref, onMounted, computed, useTemplateRef } from 'vue'
+import { ref, onMounted, useTemplateRef } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
+import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
 import {
   useUiStore,
+  useAjax,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -171,6 +183,7 @@ import {
   DropdownMenuSeparator
 } from '@concretecms/backendui'
 const ui = useUiStore()
+const { request } = useAjax()
 
 const props = defineProps({
   logoSrc: String,
@@ -195,6 +208,11 @@ const props = defineProps({
 
 const resolvedTheme = ref('light')
 const teleportTarget = useTemplateRef('teleportTarget')
+const pageSettingsOpen = ref(false)
+const pageSettingsLoading = ref(false)
+const pageSettingsError = ref<string | null>(null)
+const pageSettingsPermissions = ref<Record<string, boolean> | null>(null)
+const pageSettingsPageId = ref<number | null>(null)
 
 function handleSearch() {
 
@@ -207,17 +225,57 @@ onMounted(() => {
     resolvedTheme.value = props.colorScheme
   }
 
-  ui.menuContainer = teleportTarget
+  ui.menuContainer = teleportTarget.value ?? 'body'
   document.querySelector('html').classList.add('ccm-toolbar-visible')
 
 })
 
 const launchPageSettings = () => {
-  // You'd use your SPA panel open logic here
-  console.log('Launch Page Settings Panel')
+  if (pageSettingsLoading.value) {
+    return
+  }
+
+  if (pageSettingsOpen.value) {
+    pageSettingsOpen.value = false
+    return
+  }
+
+  pageSettingsOpen.value = false
+  pageSettingsLoading.value = true
+  pageSettingsError.value = null
+  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
+  const pageSettingsUrl = currentCollectionId > 0
+    ? `/ccm/system/panels/page?cID=${currentCollectionId}`
+    : '/ccm/system/panels/page'
+
+  request({
+    url: pageSettingsUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        pageSettingsError.value = data.error
+        pageSettingsPermissions.value = null
+        pageSettingsPageId.value = null
+        return
+      }
+
+      pageSettingsPermissions.value = data?.permissions ?? null
+      pageSettingsPageId.value = Number.isInteger(data?.pageId) ? data.pageId : null
+      pageSettingsOpen.value = true
+    },
+    onError: () => {
+      pageSettingsError.value = 'Unable to load page settings.'
+    },
+    onComplete: () => {
+      pageSettingsLoading.value = false
+    },
+  })
 }
 
 const launchSitemap = () => {
   console.log('Launch Sitemap Panel')
 }
 </script>
+
+<style>
+</style>

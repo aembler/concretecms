@@ -2,4 +2,14 @@
 @import "../node_modules/@concretecms/backendui/src/css/backend.css";
 @import "../node_modules/@concretecms/backendui/dist/backendui.css";
 
+:host {
+    --index-layer-toolbar-wrapper: 310;
+    --index-layer-panel-backdrop: 300;
+    --index-layer-panel: 315;
+    --index-layer-toolbar: 320;
+
+    --index-layer-dialog-backdrop: 500;
+    --index-layer-dialog: 510;
+}
+
 @import "./backendui/toolbar.css";
