@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import {
   FloatingPanel,
+  FloatingPanelHeader,
   FloatingPanelMenuItem,
 } from '@concretecms/backendui'
 import {
@@ -193,10 +194,10 @@ const visibleGroups = computed(() => menuGroups.value
     class="fixed left-6 top-[4.85rem] z-[var(--index-layer-panel)] justify-start"
     menu-class="max-h-[70vh] overflow-y-auto pr-1"
   >
-    <div class="mb-2 px-3 pt-1 pb-2 border-b border-slate-200/70">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Page Settings</div>
-      <div class="mt-1 text-sm text-slate-700">Manage this page with role-aware controls.</div>
-    </div>
+    <FloatingPanelHeader
+      title="Page Settings"
+      description="Manage this page with role-aware controls."
+    />
 
     <div v-if="loading" class="px-3 py-3 text-sm text-slate-600">Loading page controls...</div>
     <div v-else-if="error" class="px-3 py-3 rounded-lg bg-error/10 text-error text-sm">
