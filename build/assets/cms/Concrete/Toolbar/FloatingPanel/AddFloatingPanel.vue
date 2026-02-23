@@ -2,9 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
-  FloatingPanelClose,
+  FloatingPanelBackdrop,
   FloatingPanelMenuItem,
   FloatingPanelSearch,
+  useUiStore,
   useFuzzySearch,
 } from '@concretecms/backendui'
 import {
@@ -23,6 +24,8 @@ import {
   DocumentDuplicateIcon,
   PlusCircleIcon,
   Bars3BottomLeftIcon,
+  XMarkIcon,
+  ChevronRightIcon,
 } from '@heroicons/vue/24/outline'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
@@ -64,6 +67,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
+const ui = useUiStore()
 
 const modelOpen = computed({
   get: () => props.open,
@@ -191,20 +195,23 @@ function iconForBlockHandle(handle: string) {
 </script>
 
 <template>
-  <FloatingPanel
-    v-model:open="modelOpen"
-    v-model:expanded="isExpanded"
-    compact-width="min(92vw, 32rem)"
-    show-expand-arrow
-    teleport
-    show-backdrop
-    backdrop-class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
-    class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)] justify-start"
-    menu-class="h-[calc(100vh-8.5rem)] pr-1"
-  >
-    <template #default="{ isExpanded }">
+  <div class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)]">
+    <FloatingPanel
+      v-model:open="modelOpen"
+      v-model:expanded="isExpanded"
+      width="min(92vw, 32rem)"
+      height="calc(100vh - 8.5rem)"
+    >
+      <template #backdrop>
+        <FloatingPanelBackdrop
+          :to="ui.menuContainer ?? 'body'"
+          class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
+        />
+      </template>
+
+      <template #default>
       <div class="px-1 pb-2">
-        <div class="relative flex items-center justify-center gap-1 border-b border-slate-200/70 pb-2 pe-10">
+        <div class="relative flex items-center justify-center gap-1 border-b border-slate-200/70 pb-2 pe-16">
           <button
             v-for="tab in tabs"
             :key="tab.id"
@@ -217,9 +224,23 @@ function iconForBlockHandle(handle: string) {
             <span v-if="isExpanded" class="text-sm">{{ tab.label }}</span>
           </button>
 
-          <FloatingPanelClose
-            class="absolute right-10 top-1/2 -translate-y-1/2"
-          />
+          <button
+            type="button"
+            class="absolute right-10 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-current/80 transition-colors hover:bg-gray-500/10"
+            :aria-label="isExpanded ? 'Collapse panel' : 'Expand panel'"
+            @click="isExpanded = !isExpanded"
+          >
+            <ChevronRightIcon class="h-4 w-4 transition-transform duration-300" :class="isExpanded ? 'rotate-180' : ''" />
+          </button>
+
+          <button
+            type="button"
+            class="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-current/80 transition-colors hover:bg-gray-500/10"
+            aria-label="Close panel"
+            @click="modelOpen = false"
+          >
+            <XMarkIcon class="size-6 stroke-[1.25]" />
+          </button>
         </div>
         <FloatingPanelSearch
           v-model="searchKeywords"
@@ -426,6 +447,7 @@ function iconForBlockHandle(handle: string) {
           </div>
         </template>
       </template>
-    </template>
-  </FloatingPanel>
+      </template>
+    </FloatingPanel>
+  </div>
 </template>

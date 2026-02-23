@@ -1,9 +1,14 @@
-<script setup lang="ts">
-import { computed } from 'vue'
+<script setup lang="ts" xmlns="http://www.w3.org/1999/html">
+import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
+  FloatingPanelBackdrop,
+  FloatingPanelContent,
   FloatingPanelHeader,
+  FloatingPanelMenu,
   FloatingPanelMenuItem,
+  useUiStore,
+  useAjax,
 } from '@concretecms/backendui'
 import {
   PaintBrushIcon,
@@ -18,6 +23,7 @@ import {
   TrashIcon,
   UserIcon,
 } from '@heroicons/vue/24/outline'
+import CacheSettingsContent from './Page/Content/CacheSettingsContent.vue'
 
 type PermissionKey =
   | 'composer'
@@ -51,11 +57,45 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
+const ui = useUiStore()
+const { request } = useAjax()
 
 const modelOpen = computed({
   get: () => props.open,
   set: (value: boolean) => emit('update:open', value),
 })
+
+type CachePanelPayload = {
+  pageId: number | null
+  global: {
+    cacheEnabled: boolean
+    mode: string
+    modeLabel: string
+    lifetimeMode: string
+    lifetimeLabel: string
+  }
+  form: {
+    cacheMode: string
+    lifetimeMode: string
+    customLifetimeMinutes: number | null
+  }
+  status: {
+    state: 'cached' | 'unknown' | 'not_cached'
+    message: string
+    expiresAt?: string | null
+    canPurge: boolean
+  }
+  actions: {
+    submitUrl: string
+    purgeUrl: string
+  }
+}
+
+const cacheSettingsLoading = ref(false)
+const cacheSettingsError = ref<string | null>(null)
+const cacheSettingsData = ref<CachePanelPayload | null>(null)
+const isExpanded = ref(false)
+const activeContent = ref<string | null>(null)
 
 const fallbackPermissions: PagePermissions = {
   composer: false,
@@ -182,55 +222,135 @@ const visibleGroups = computed(() => menuGroups.value
     items: group.items.filter((item) => resolvedPermissions.value[item.key]),
   }))
   .filter((group) => group.items.length > 0))
+
+const visibleItems = computed(() => visibleGroups.value.flatMap((group) => group.items))
+
+watch(
+  () => modelOpen.value,
+  (isOpen) => {
+    if (!isOpen) {
+      isExpanded.value = false
+      activeContent.value = null
+    }
+  },
+)
+
+function loadCacheSettings() {
+  if (cacheSettingsLoading.value) {
+    activeContent.value = 'caching'
+    isExpanded.value = true
+    return
+  }
+
+  const cacheUrl = withPageId('/ccm/system/panels/details/page/caching')
+  cacheSettingsLoading.value = true
+  cacheSettingsError.value = null
+  activeContent.value = 'caching'
+  isExpanded.value = true
+
+  request({
+    url: cacheUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        cacheSettingsError.value = data.error
+        cacheSettingsData.value = null
+        return
+      }
+
+      cacheSettingsData.value = data as CachePanelPayload
+    },
+    onError: () => {
+      cacheSettingsError.value = 'Unable to load cache settings.'
+      cacheSettingsData.value = null
+    },
+    onComplete: () => {
+      cacheSettingsLoading.value = false
+    },
+  })
+}
+
+function handleMenuItemClick(
+  itemKey: PermissionKey,
+  event: MouseEvent,
+) {
+  if (itemKey === 'caching') {
+    event.preventDefault()
+    loadCacheSettings()
+    return
+  }
+
+  modelOpen.value = false
+}
 </script>
 
 <template>
-  <FloatingPanel
-    v-model:open="modelOpen"
-    compact-width="min(92vw, 26rem)"
-    teleport
-    show-backdrop
-    backdrop-class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
-    class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)] justify-start"
-    menu-class="h-[calc(100vh-8.5rem)] pr-1"
-  >
-    <FloatingPanelHeader
-      title="Page Settings"
-      description="Manage this page with role-aware controls."
-    />
+  <div class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)]">
+    <FloatingPanel
+      v-model:open="modelOpen"
+      v-model:expanded="isExpanded"
+      width="min(92vw, 26rem)"
+      height="calc(100vh - 8.5rem)"
+    >
+      <template #backdrop>
+        <FloatingPanelBackdrop
+          :to="ui.menuContainer ?? 'body'"
+          class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
+        />
+      </template>
 
-    <div v-if="loading" class="px-3 py-3 text-sm text-slate-600">Loading page controls...</div>
-    <div v-else-if="error" class="px-3 py-3 rounded-lg bg-error/10 text-error text-sm">
-      {{ error }}
-    </div>
-    <div v-else-if="visibleGroups.length === 0" class="px-3 py-3 text-sm text-slate-500">
-      No page settings are available for your current permissions.
-    </div>
-    <template v-else>
-      <div
-        v-for="group in visibleGroups"
-        :key="group.label"
-        class="mb-2"
-      >
-        <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{{ group.label }}</div>
-        <FloatingPanelMenuItem
-          v-for="item in group.items"
-          :key="item.key"
-          variant="detail"
-          as="a"
-          :href="item.href"
-          :class="item.class"
-          @click="modelOpen = false"
-        >
-          <template #icon>
-            <component :is="item.icon" class="w-5 h-5" />
-          </template>
-          {{ item.title }}
-          <template #description>
-            {{ item.description }}
-          </template>
-        </FloatingPanelMenuItem>
-      </div>
-    </template>
-  </FloatingPanel>
+      <template #header>
+      <FloatingPanelHeader
+        title="Page Settings"
+        description="Manage this page with role-aware controls."
+        :closeable="true"
+        :expandable="false"
+      />
+      </template>
+
+      <template #menu>
+        <div v-if="visibleGroups.length === 0" class="px-3 py-3 text-sm text-slate-500">
+          No page settings are available for your current permissions.
+        </div>
+        <FloatingPanelMenu v-else>
+          <div
+              v-for="group in visibleGroups"
+              :key="group.label"
+              class="mb-2"
+          >
+            <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{{ group.label }}</div>
+            <FloatingPanelMenuItem
+                v-for="item in group.items"
+                :key="item.key"
+                variant="detail"
+                as="a"
+                :href="item.href"
+                :class="item.class"
+                @click="handleMenuItemClick(item.key, $event)"
+            >
+              <template #icon>
+                <component :is="item.icon" class="w-5 h-5" />
+              </template>
+              {{ item.title }}
+              <template #description>
+                {{ item.description }}
+              </template>
+            </FloatingPanelMenuItem>
+          </div>
+        </FloatingPanelMenu>
+      </template>
+
+      <template #detail>
+        <CacheSettingsContent
+          v-if="activeContent === 'caching'"
+          :loading="cacheSettingsLoading"
+          :error="cacheSettingsError"
+          :data="cacheSettingsData"
+        />
+        <div v-else class="p-6 text-sm text-slate-500">
+          Select a page setting to continue.
+        </div>
+      </template>
+    </FloatingPanel>
+  </div>
 </template>
