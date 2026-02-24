@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import {
   FloatingPanelContentForm,
   FloatingPanelContentFormActions,
+  useAjax,
 } from '@concretecms/backendui'
 
 type CachePayload = {
@@ -40,11 +41,15 @@ const props = withDefaults(defineProps<{
   error: null,
   data: null,
 })
+const emit = defineEmits<{
+  (event: 'saved', payload: { title?: string, message?: string }): void
+}>()
+const { request } = useAjax()
 
 const localCacheMode = ref('-1')
 const localLifetimeMode = ref('0')
 const localCustomMinutes = ref<number | null>(null)
-const submitted = ref(false)
+const saving = ref(false)
 
 watch(
   () => props.data,
@@ -55,7 +60,6 @@ watch(
     localCacheMode.value = data.form.cacheMode
     localLifetimeMode.value = data.form.lifetimeMode
     localCustomMinutes.value = data.form.customLifetimeMinutes
-    submitted.value = false
   },
   { immediate: true },
 )
@@ -76,7 +80,31 @@ const cacheEnabled = computed(() => {
 const customLifetimeEnabled = computed(() => cacheEnabled.value && localLifetimeMode.value === 'custom')
 
 function onSubmit() {
-  submitted.value = true
+  if (!props.data || saving.value) {
+    return
+  }
+
+  saving.value = true
+  const data = {
+    cCacheFullPageContent: localCacheMode.value,
+    cCacheFullPageContentOverrideLifetime: localLifetimeMode.value,
+    cCacheFullPageContentLifetimeCustom: localCustomMinutes.value ?? '',
+  }
+  request({
+    url: props.data.actions.submitUrl,
+    method: 'POST',
+    expectJson: true,
+    data: data,
+    onSuccess: (response: any) => {
+      emit('saved', {
+        title: response?.title,
+        message: response?.message,
+      })
+    },
+    onComplete: () => {
+      saving.value = false
+    },
+  })
 }
 </script>
 
@@ -172,14 +200,12 @@ function onSubmit() {
 
       <template #actions>
         <FloatingPanelContentFormActions>
-          <template #dismiss="{ cancel }">
-            <button type="button" class="btn btn-ghost btn-sm" @click="cancel()">Cancel</button>
-          </template>
-          <template #confirm="{ save }">
-            <button type="submit" class="btn btn-primary btn-sm" @click="save()">Save Changes</button>
+          <template #confirm>
+            <button type="submit" class="btn btn-primary btn-sm" :disabled="saving">
+              {{ saving ? 'Saving…' : 'Save Changes' }}
+            </button>
           </template>
         </FloatingPanelContentFormActions>
-        <p v-if="submitted" class="px-5 pb-3 text-xs text-success">Saved (stub UI only).</p>
       </template>
     </FloatingPanelContentForm>
 

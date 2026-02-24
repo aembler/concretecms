@@ -7,6 +7,12 @@ import {
   FloatingPanelHeader,
   FloatingPanelMenu,
   FloatingPanelMenuItem,
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
   useUiStore,
   useAjax,
 } from '@concretecms/backendui'
@@ -96,6 +102,9 @@ const cacheSettingsError = ref<string | null>(null)
 const cacheSettingsData = ref<CachePanelPayload | null>(null)
 const isExpanded = ref(false)
 const activeContent = ref<string | null>(null)
+const toastOpen = ref(false)
+const toastTitle = ref('Page Updated')
+const toastMessage = ref('Full page caching settings saved.')
 
 const fallbackPermissions: PagePermissions = {
   composer: false,
@@ -282,6 +291,14 @@ function handleMenuItemClick(
 
   modelOpen.value = false
 }
+
+function handleCacheSettingsSaved(payload: { title?: string, message?: string }) {
+  toastTitle.value = payload?.title || 'Page Updated'
+  toastMessage.value = payload?.message || 'Full page caching settings saved.'
+  toastOpen.value = false
+  toastOpen.value = true
+  modelOpen.value = false
+}
 </script>
 
 <template>
@@ -338,16 +355,28 @@ function handleMenuItemClick(
       </template>
 
       <template #detail>
-        <CacheSettingsContent
-          v-if="activeContent === 'caching'"
-          :loading="cacheSettingsLoading"
-          :error="cacheSettingsError"
-          :data="cacheSettingsData"
-        />
+          <CacheSettingsContent
+            v-if="activeContent === 'caching'"
+            :loading="cacheSettingsLoading"
+            :error="cacheSettingsError"
+            :data="cacheSettingsData"
+            @saved="handleCacheSettingsSaved"
+          />
         <div v-else class="p-6 text-sm text-slate-500">
           Select a page setting to continue.
         </div>
       </template>
     </FloatingPanel>
+
+    <ToastProvider :duration="3000" swipe-direction="right">
+      <Toast :open="toastOpen" variant="success" @update:open="toastOpen = $event">
+        <div class="grid gap-1">
+          <ToastTitle>{{ toastTitle }}</ToastTitle>
+          <ToastDescription>{{ toastMessage }}</ToastDescription>
+        </div>
+        <ToastClose />
+      </Toast>
+      <ToastViewport />
+    </ToastProvider>
   </div>
 </template>
