@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import {
-  FloatingPanelContent,
   FloatingPanelContentForm,
   FloatingPanelContentFormActions,
 } from '@concretecms/backendui'
@@ -82,10 +81,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <FloatingPanelContent
-    value="caching"
-    class="h-full min-h-[24rem] rounded-none bg-slate-50 text-slate-700"
-  >
+  <div class="h-full min-h-[24rem] rounded-none bg-slate-50 text-slate-700">
     <div v-if="loading" class="p-6 text-sm text-slate-600">
       Loading caching settings...
     </div>
@@ -176,11 +172,11 @@ function onSubmit() {
 
       <template #actions>
         <FloatingPanelContentFormActions>
-          <template #dismiss="{ dismiss }">
-            <button type="button" class="btn btn-ghost btn-sm" @click="dismiss()">Cancel</button>
+          <template #dismiss="{ cancel }">
+            <button type="button" class="btn btn-ghost btn-sm" @click="cancel()">Cancel</button>
           </template>
-          <template #confirm>
-            <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
+          <template #confirm="{ save }">
+            <button type="submit" class="btn btn-primary btn-sm" @click="save()">Save Changes</button>
           </template>
         </FloatingPanelContentFormActions>
         <p v-if="submitted" class="px-5 pb-3 text-xs text-success">Saved (stub UI only).</p>
@@ -190,5 +186,5 @@ function onSubmit() {
     <div v-else class="p-6 text-sm text-slate-500">
       Select cache settings to begin.
     </div>
-  </FloatingPanelContent>
+  </div>
 </template>

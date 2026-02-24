@@ -39,10 +39,10 @@ class Caching extends BackendInterfacePageController
 
         switch (Config::get('concrete.cache.full_page_lifetime')) {
             case 'default':
-                $globalSettingLifetime = Loader::helper('date')->describeInterval(Config::get('concrete.cache.lifetime'));
+                $globalSettingLifetime = app('date')->describeInterval(Config::get('concrete.cache.lifetime'));
                 break;
             case 'custom':
-                $globalSettingLifetime = Loader::helper('date')->describeInterval(Config::get('concrete.cache.full_page_lifetime_value') * 60);
+                $globalSettingLifetime = app('date')->describeInterval(Config::get('concrete.cache.full_page_lifetime_value') * 60);
                 break;
             default:
                 $globalSettingLifetime = t('Until manually cleared');

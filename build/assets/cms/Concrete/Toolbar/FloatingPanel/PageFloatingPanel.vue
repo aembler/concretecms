@@ -285,7 +285,7 @@ function handleMenuItemClick(
 </script>
 
 <template>
-  <div class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)]">
+  <div class="fixed left-6 right-6 top-[5.25rem] z-[var(--index-layer-panel)]">
     <FloatingPanel
       v-model:open="modelOpen"
       v-model:expanded="isExpanded"
@@ -309,10 +309,7 @@ function handleMenuItemClick(
       </template>
 
       <template #menu>
-        <div v-if="visibleGroups.length === 0" class="px-3 py-3 text-sm text-slate-500">
-          No page settings are available for your current permissions.
-        </div>
-        <FloatingPanelMenu v-else>
+        <FloatingPanelMenu>
           <div
               v-for="group in visibleGroups"
               :key="group.label"
