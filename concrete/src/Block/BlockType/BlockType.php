@@ -13,6 +13,45 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class BlockType
 {
+    public static function getVersionedBlockTypeDirectory($btHandle, int $version): string
+    {
+        return DIRNAME_BLOCKS . '/' . (string) $btHandle . '/v' . max(1, $version);
+    }
+
+    /**
+     * Resolve a block-type relative path, optionally preferring a versioned hierarchy.
+     *
+     * @param string $btHandle
+     * @param string $file Relative file path inside the block directory
+     * @param string|false $pkgHandle
+     * @param int|null $version
+     * @param bool $template
+     */
+    public static function getBlockTypeRelativePath($btHandle, $file, $pkgHandle = false, ?int $version = null, bool $template = false): string
+    {
+        $btHandle = trim((string) $btHandle, '/');
+        $file = ltrim((string) $file, '/');
+        $defaultPath = DIRNAME_BLOCKS . '/' . $btHandle . '/' . $file;
+        if ($version === null || $version < 1) {
+            return $defaultPath;
+        }
+
+        $app = Application::getFacadeApplication();
+        $locator = $app->make(FileLocator::class);
+        $pkgHandle = (string) $pkgHandle;
+        if ($pkgHandle !== '') {
+            $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
+        }
+
+        $versionedPath = static::getVersionedBlockTypeDirectory($btHandle, $version) . '/' . $file;
+        $record = $locator->getRecord($versionedPath, $template);
+        if ($record !== null && $record->exists()) {
+            return $versionedPath;
+        }
+
+        return $defaultPath;
+    }
+
     /**
      * Get a BlockType given its handle.
      *
@@ -88,14 +127,15 @@ class BlockType
         $app = Application::getFacadeApplication();
         $em = $app->make(EntityManagerInterface::class);
         $pkgHandle = (string) (is_object($pkg) ? $pkg->getPackageHandle() : $pkg);
-        $class = static::getBlockTypeMappedClass($btHandle, $pkgHandle);
+        $class = static::getBlockTypeMappedClass($btHandle, $pkgHandle, 1);
         $bta = $app->build($class);
 
         $locator = $app->make(FileLocator::class);
         if ($pkgHandle !== '') {
             $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
         }
-        $path = dirname($locator->getRecord(DIRNAME_BLOCKS . '/' . $btHandle . '/' . FILENAME_BLOCK_DB)->getFile());
+        $dbPath = static::getBlockTypeRelativePath($btHandle, FILENAME_BLOCK_DB, $pkgHandle, 1);
+        $path = dirname($locator->getRecord($dbPath)->getFile());
 
         //Attempt to run the subclass methods (install schema from db.xml, etc.)
         $bta->install($path, $importMode);
@@ -111,6 +151,7 @@ class BlockType
                 $bt->setPackageID($pkg->getPackageID());
             }
             $bt->setBlockTypeHandle($btHandle);
+            $bt->setBlockTypeActiveVersion(1);
         } finally {
             $loc->popActiveContext();
         }
@@ -136,7 +177,7 @@ class BlockType
      *
      * @return string|null
      */
-    public static function getBlockTypeMappedClass($btHandle, $pkgHandle = false)
+    public static function getBlockTypeMappedClass($btHandle, $pkgHandle = false, ?int $version = null)
     {
         $app = Application::getFacadeApplication();
         $txt = $app->make('helper/text');
@@ -146,6 +187,20 @@ class BlockType
         if ($pkgHandle !== '') {
             $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
         }
+
+        if ($version !== null && $version > 0) {
+            $versionedControllerPath = static::getVersionedBlockTypeDirectory($btHandle, $version) . '/' . FILENAME_CONTROLLER;
+            $versionedRecord = $locator->getRecord($versionedControllerPath);
+            if ($versionedRecord !== null && $versionedRecord->exists()) {
+                $versionedPackageHandle = (string) $versionedRecord->getPackageHandle();
+                $versionedPrefix = $versionedRecord->isOverride() ? true : ($versionedPackageHandle !== '' ? $versionedPackageHandle : $pkgHandle);
+                $versionedClass = core_class('Block\\' . $txt->camelcase($btHandle) . '\\V' . $version . '\\Controller', $versionedPrefix);
+                if (class_exists($versionedClass)) {
+                    return $versionedClass;
+                }
+            }
+        }
+
         $r = $locator->getRecord(DIRNAME_BLOCKS . '/' . $btHandle . '/' . FILENAME_CONTROLLER);
         $overriddenPackageHandle = (string) $r->getPackageHandle();
         if ($overriddenPackageHandle !== '') {

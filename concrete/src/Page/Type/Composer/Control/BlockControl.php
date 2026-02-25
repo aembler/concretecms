@@ -2,6 +2,7 @@
 namespace Concrete\Core\Page\Type\Composer\Control;
 
 use Concrete\Core\Package\PackageList;
+use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
 use Controller;
 use Package;
 use Block;
@@ -21,6 +22,15 @@ class BlockControl extends Control
     protected $bt = false;
     protected $b = false;
     protected $controller;
+
+    protected function getObjectVersion($obj): int
+    {
+        if ($obj instanceof \Concrete\Core\Block\Block) {
+            return $obj->getBlockVersion();
+        }
+
+        return (int) $obj->getBlockTypeActiveVersion();
+    }
 
     public function setBlockTypeID($btID)
     {
@@ -228,9 +238,14 @@ class BlockControl extends Control
         $set = $this->getPageTypeComposerFormLayoutSetControlObject()->getPageTypeComposerFormLayoutSetObject();
 
         if ($customTemplate) {
+            $version = $this->getObjectVersion($obj);
             $rec = $env->getRecord(
-                DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle(
-                ) . '/' . DIRNAME_BLOCK_TEMPLATES_COMPOSER . '/' . $customTemplate
+                BlockTypeService::getBlockTypeRelativePath(
+                    $obj->getBlockTypeHandle(),
+                    DIRNAME_BLOCK_TEMPLATES_COMPOSER . '/' . $customTemplate,
+                    (string) $obj->getPackageHandle(),
+                    $version
+                )
             );
             if ($rec->exists()) {
                 $template = DIRNAME_BLOCK_TEMPLATES_COMPOSER . '/' . $customTemplate;
@@ -302,10 +317,20 @@ class BlockControl extends Control
         if ($obj->getPackageID() > 0) {
             $pkg = Package::getByID($obj->getPackageID());
         }
+        $pkgHandle = $pkg ? (string) $pkg->getPackageHandle() : '';
+        $version = $this->getObjectVersion($obj);
 
         $view = $this;
 
-        $r = $env->getRecord(DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle() . '/' . $file, $pkg);
+        $r = $env->getRecord(
+            BlockTypeService::getBlockTypeRelativePath(
+                $obj->getBlockTypeHandle(),
+                $file,
+                $pkgHandle,
+                $version
+            ),
+            $pkgHandle
+        );
         if ($r->exists()) {
             include $r->file;
         } else {

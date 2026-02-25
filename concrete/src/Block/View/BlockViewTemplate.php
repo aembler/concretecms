@@ -5,6 +5,7 @@ use Loader;
 use AssetList;
 use View;
 use Concrete\Core\Block\Block;
+use Concrete\Core\Block\BlockType\BlockType;
 use Concrete\Core\Package\PackageList;
 use Concrete\Core\Asset\JavascriptAsset;
 use Concrete\Core\Asset\CssAsset;
@@ -76,6 +77,12 @@ class BlockViewTemplate
     {
         $bFilename = $this->bFilename ?? '';
         $obj = $this->obj;
+        $version = null;
+        if ($obj instanceof Block) {
+            $version = $obj->getBlockVersion();
+        } elseif (method_exists($obj, 'getBlockTypeActiveVersion')) {
+            $version = $obj->getBlockTypeActiveVersion();
+        }
 
         /**
          * @var $locator FileLocator
@@ -89,6 +96,23 @@ class BlockViewTemplate
         }
         $locator->addLocation(new FileLocator\AllPackagesLocation($this->getPackageList()));
 
+        $roots = [];
+        if ($version !== null && $version > 0) {
+            $roots[] = BlockType::getVersionedBlockTypeDirectory($obj->getBlockTypeHandle(), $version);
+        }
+        $roots[] = DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle();
+        $roots = array_values(array_unique($roots));
+        $findTemplateRecord = function (string $relativePath) use ($locator, $roots) {
+            foreach ($roots as $root) {
+                $record = $locator->getRecord($root . '/' . ltrim($relativePath, '/'), true);
+                if ($record && $record->exists()) {
+                    return $record;
+                }
+            }
+
+            return null;
+        };
+
         // if we've passed in "templates/" as the first part, we strip that off.
         if (strpos($bFilename, 'templates/') === 0) {
             $bFilename = substr($bFilename, 10);
@@ -101,10 +125,7 @@ class BlockViewTemplate
         }
 
         if ($bFilename) {
-            $record = $locator->getRecord(
-                DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle() . '/' . DIRNAME_BLOCK_TEMPLATES . '/' . $bFilename,
-                true,
-            );
+            $record = $findTemplateRecord(DIRNAME_BLOCK_TEMPLATES . '/' . $bFilename);
             if ($record && $record->exists()) {
                 if (is_dir($record->getFile())) {
                     $this->template = $record->getFile() . '/' . FILENAME_BLOCK_VIEW;
@@ -112,10 +133,7 @@ class BlockViewTemplate
                     $this->basePath = $record->getFile();
                 } else {
                     $this->template = $record->getFile();
-                    $record = $locator->getRecord(
-                        DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle() . '/' . $this->render,
-                        true,
-                    );
+                    $record = $findTemplateRecord($this->render);
                     $this->baseURL = dirname($record->getUrl());
                     $this->basePath = dirname($record->getFile());
                 }
@@ -124,11 +142,8 @@ class BlockViewTemplate
             }
 
             if ($bFilename !== $bFilenameWithoutDotPhp) {
-                $record = $locator->getRecord(
-                    DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle() . '/' . DIRNAME_BLOCK_TEMPLATES . '/' . $bFilenameWithoutDotPhp,
-                    true,
-                );
-                if ($record->exists() && is_dir($record->getFile())) {
+                $record = $findTemplateRecord(DIRNAME_BLOCK_TEMPLATES . '/' . $bFilenameWithoutDotPhp);
+                if ($record && $record->exists() && is_dir($record->getFile())) {
                     $this->template = $record->getFile() . '/' . $this->render;
                     $this->baseURL = $record->getUrl();
                     $this->basePath = $record->getFile();
@@ -137,11 +152,8 @@ class BlockViewTemplate
             }
         }
 
-        $record = $locator->getRecord(
-            DIRNAME_BLOCKS . '/' . $obj->getBlockTypeHandle() . '/' . $this->render,
-            true,
-        );
-        if ($record->exists()) {
+        $record = $findTemplateRecord($this->render);
+        if ($record && $record->exists()) {
             $this->baseURL = dirname($record->getUrl());
             $this->template = $record->getFile();
             $this->basePath = dirname($this->template);

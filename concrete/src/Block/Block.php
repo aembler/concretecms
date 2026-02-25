@@ -172,6 +172,11 @@ class Block extends ConcreteObject implements ObjectInterface
     protected $btCachedBlockRecord;
 
     /**
+     * @var int|null
+     */
+    protected $btVersion = 1;
+
+    /**
      * Destruct the class instance.
      */
     public function __destruct()
@@ -224,7 +229,7 @@ class Block extends ConcreteObject implements ObjectInterface
         $b = new self();
         if ($c == null && $a == null) {
             // just grab really specific block stuff
-            $q = 'select bID, bIsActive, BlockTypes.btID, Blocks.btCachedBlockRecord, BlockTypes.btHandle, BlockTypes.pkgID, BlockTypes.btName, bName, bDateAdded, bDateModified, bFilename, Blocks.uID from Blocks inner join BlockTypes on (Blocks.btID = BlockTypes.btID) where bID = ?';
+            $q = 'select bID, bIsActive, BlockTypes.btID, Blocks.btCachedBlockRecord, Blocks.btVersion, BlockTypes.btHandle, BlockTypes.pkgID, BlockTypes.btName, bName, bDateAdded, bDateModified, bFilename, Blocks.uID from Blocks inner join BlockTypes on (Blocks.btID = BlockTypes.btID) where bID = ?';
             $b->setOriginal(true);
             $v = [$bID];
         } else {
@@ -238,7 +243,7 @@ class Block extends ConcreteObject implements ObjectInterface
 
             $v = [$b->arHandle, $cID, $cvID, $bID];
             $q = 'select CollectionVersionBlocks.isOriginal, CollectionVersionBlocks.cbIncludeAll, Blocks.btCachedBlockRecord, BlockTypes.pkgID, CollectionVersionBlocks.cbOverrideAreaPermissions, CollectionVersionBlocks.cbOverrideBlockTypeCacheSettings, CollectionVersionBlocks.cbRelationID,
- CollectionVersionBlocks.cbOverrideBlockTypeContainerSettings, CollectionVersionBlocks.cbEnableBlockContainer, CollectionVersionBlocks.cbDisplayOrder, Blocks.bIsActive, Blocks.bID, Blocks.btID, bName, bDateAdded, bDateModified, bFilename, btHandle, Blocks.uID from CollectionVersionBlocks inner join Blocks on (CollectionVersionBlocks.bID = Blocks.bID) inner join BlockTypes on (Blocks.btID = BlockTypes.btID) where CollectionVersionBlocks.arHandle = ? and CollectionVersionBlocks.cID = ? and (CollectionVersionBlocks.cvID = ? or CollectionVersionBlocks.cbIncludeAll=1) and CollectionVersionBlocks.bID = ?';
+ CollectionVersionBlocks.cbOverrideBlockTypeContainerSettings, CollectionVersionBlocks.cbEnableBlockContainer, CollectionVersionBlocks.cbDisplayOrder, Blocks.bIsActive, Blocks.bID, Blocks.btID, Blocks.btVersion, bName, bDateAdded, bDateModified, bFilename, btHandle, Blocks.uID from CollectionVersionBlocks inner join Blocks on (CollectionVersionBlocks.bID = Blocks.bID) inner join BlockTypes on (Blocks.btID = BlockTypes.btID) where CollectionVersionBlocks.arHandle = ? and CollectionVersionBlocks.cID = ? and (CollectionVersionBlocks.cvID = ? or CollectionVersionBlocks.cbIncludeAll=1) and CollectionVersionBlocks.bID = ?';
         }
 
         $row = $db->fetchAssociative($q, $v);
@@ -247,7 +252,7 @@ class Block extends ConcreteObject implements ObjectInterface
             $b->setPropertiesFromArray($row);
 
             $bt = BlockType::getByID($b->getBlockTypeID());
-            $class = $bt->getBlockTypeClass();
+            $class = $bt->getBlockTypeClass($b->getBlockVersion());
             if ($class == false) {
                 // we can't find the class file, so we return
                 return false;
@@ -360,6 +365,7 @@ EOT
      */
     public function getBlockPath()
     {
+        $versionDirectory = 'v' . $this->getBlockVersion();
         if ($this->getPackageID() > 0) {
             $pkgHandle = $this->getPackageHandle();
             $dirp = (is_dir(DIR_PACKAGES . '/' . $pkgHandle)) ? DIR_PACKAGES : DIR_PACKAGES_CORE;
@@ -370,6 +376,11 @@ EOT
             } else {
                 $dir = DIR_FILES_BLOCK_TYPES_CORE . '/' . $this->getBlockTypeHandle();
             }
+        }
+
+        $versionedDirectory = $dir . '/' . $versionDirectory;
+        if (is_dir($versionedDirectory)) {
+            return $versionedDirectory;
         }
 
         return $dir;
@@ -442,6 +453,11 @@ EOT
     public function getBlockTypeID()
     {
         return $this->btID ?? null;
+    }
+
+    public function getBlockVersion(): int
+    {
+        return max(1, (int) ($this->btVersion ?? 1));
     }
 
     /**
@@ -1560,7 +1576,7 @@ EOT
             $this->instance->__construct();
         } else {
             $bt = $this->getBlockTypeObject();
-            $class = $bt->getBlockTypeClass();
+            $class = $bt->getBlockTypeClass($this->getBlockVersion());
 
             $this->instance = $app->make($class, ['obj' => $this]);
         }
@@ -1593,8 +1609,17 @@ EOT
     public function inc($file)
     {
         $b = $this;
-        if (file_exists($this->getBlockPath() . '/' . $file)) {
-            include $this->getBlockPath() . '/' . $file;
+        $blockPath = $this->getBlockPath();
+        if (file_exists($blockPath . '/' . $file)) {
+            include $blockPath . '/' . $file;
+            return;
+        }
+        $versionSuffix = '/v' . $this->getBlockVersion();
+        if (substr($blockPath, -strlen($versionSuffix)) === $versionSuffix) {
+            $fallbackPath = dirname($blockPath);
+            if (file_exists($fallbackPath . '/' . $file)) {
+                include $fallbackPath . '/' . $file;
+            }
         }
     }
 
@@ -1624,7 +1649,7 @@ EOT
 
         $btID = $this->getBlockTypeID();
         $bt = BlockType::getByID($btID);
-        $class = $bt->getBlockTypeClass();
+        $class = $bt->getBlockTypeClass($this->getBlockVersion());
         $app = Facade::getFacadeApplication();
         $bc = $app->make($class, ['obj' => $this]);
         $bc->save($data);
@@ -1739,7 +1764,7 @@ EOT
         $dh = $app->make('helper/date');
 
         $bt = BlockType::getByID($this->getBlockTypeID());
-        $blockTypeClass = $bt->getBlockTypeClass();
+        $blockTypeClass = $bt->getBlockTypeClass($this->getBlockVersion());
         if (!$blockTypeClass) {
             return false;
         }
@@ -1752,6 +1777,7 @@ EOT
             'bDateModified' => $bDate,
             'bFilename' => $this->getBlockFilename(),
             'btID' => $this->getBlockTypeID(),
+            'btVersion' => $this->getBlockVersion(),
             'uID' => $this->getBlockUserID(),
         ]);
         $newBID = (int) $connection->lastInsertId(); // this is the latest inserted block ID
@@ -1980,7 +2006,7 @@ EOT
             // so, first we delete the block's sub content
             $bt = BlockType::getByID($this->getBlockTypeID());
             if ($bt && method_exists($bt, 'getBlockTypeClass')) {
-                $class = $bt->getBlockTypeClass();
+                $class = $bt->getBlockTypeClass($this->getBlockVersion());
                 $app = Facade::getFacadeApplication();
                 $bc = $app->make($class, ['obj' => $this]);
                 $bc->delete();
@@ -2016,6 +2042,7 @@ EOT
             // master collections export properly.
             $blockNode = $node->addChild('block');
             $blockNode->addAttribute('type', $this->getBlockTypeHandle());
+            $blockNode->addAttribute('version', (string) $this->getBlockVersion());
             $blockNode->addAttribute('name', $this->getBlockName());
             if ($this->getBlockFilename() != '') {
                 $blockNode->addAttribute('custom-template', $this->getBlockFilename());

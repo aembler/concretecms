@@ -92,6 +92,10 @@ class BlockType
      * @ORM\Column(type="integer", options={"unsigned": true})
      */
     protected $pkgID = 0;
+    /**
+     * @ORM\Column(type="integer", options={"unsigned": true})
+     */
+    protected $btActiveVersion = 1;
 
     public function getBlockTypeInSetName()
     {
@@ -135,6 +139,11 @@ class BlockType
     public function setPackageID($pkgID)
     {
         $this->pkgID = $pkgID;
+    }
+
+    public function setBlockTypeActiveVersion(int $activeVersion): void
+    {
+        $this->btActiveVersion = max(1, $activeVersion);
     }
 
     /**
@@ -267,6 +276,11 @@ class BlockType
         return $this->pkgID;
     }
 
+    public function getBlockTypeActiveVersion(): int
+    {
+        return max(1, (int) $this->btActiveVersion);
+    }
+
     /**
      * gets the BlockTypes description text.
      *
@@ -314,9 +328,13 @@ class BlockType
     /**
      * Returns the class for the current block type.
      */
-    public function getBlockTypeClass()
+    public function getBlockTypeClass(?int $version = null)
     {
-        return \Concrete\Core\Block\BlockType\BlockType::getBlockTypeMappedClass($this->getBlockTypeHandle(), $this->getPackageHandle());
+        if ($version === null) {
+            $version = $this->getBlockTypeActiveVersion();
+        }
+
+        return \Concrete\Core\Block\BlockType\BlockType::getBlockTypeMappedClass($this->getBlockTypeHandle(), $this->getPackageHandle(), $version);
     }
 
     /**
@@ -546,7 +564,8 @@ EOT
             $pkgHandle = $this->getPackageHandle();
         }
 
-        $class = \Concrete\Core\Block\BlockType\BlockType::getBlockTypeMappedClass($this->btHandle, $pkgHandle);
+        $activeVersion = $this->getBlockTypeActiveVersion();
+        $class = \Concrete\Core\Block\BlockType\BlockType::getBlockTypeMappedClass($this->btHandle, $pkgHandle, $activeVersion);
         $bta = $app->build($class);
 
         $this->loadFromController($bta);
@@ -556,7 +575,13 @@ EOT
         $em->flush();
 
         $env = Environment::get();
-        $r = $env->getRecord(DIRNAME_BLOCKS . '/' . $this->btHandle . '/' . FILENAME_BLOCK_DB, $this->getPackageHandle());
+        $dbPath = \Concrete\Core\Block\BlockType\BlockType::getBlockTypeRelativePath(
+            $this->btHandle,
+            FILENAME_BLOCK_DB,
+            $this->getPackageHandle(),
+            $activeVersion
+        );
+        $r = $env->getRecord($dbPath, $this->getPackageHandle());
         if ($r->exists()) {
             $parser = Schema::getSchemaParser(simplexml_load_file($r->file));
             $parser->setIgnoreExistingTables(false);
@@ -654,8 +679,9 @@ EOT
         $bDate = $dh->getOverridableNow();
         $bIsActive = (isset($this->btActiveWhenAdded) && $this->btActiveWhenAdded == 1) ? 1 : 0;
 
-        $v = array($bName, $bDate, $bDate, $bIsActive, $btID, $uID);
-        $q = "insert into Blocks (bName, bDateAdded, bDateModified, bIsActive, btID, uID) values (?, ?, ?, ?, ?, ?)";
+        $blockVersion = $this->getBlockTypeActiveVersion();
+        $v = array($bName, $bDate, $bDate, $bIsActive, $btID, $uID, $blockVersion);
+        $q = "insert into Blocks (bName, bDateAdded, bDateModified, bIsActive, btID, uID, btVersion) values (?, ?, ?, ?, ?, ?, ?)";
 
         $res = $db->executeQuery($q, $v);
 
@@ -670,7 +696,7 @@ EOT
             if (is_object($a)) {
                 $nb->setBlockAreaObject($a);
             }
-            $class = $this->getBlockTypeClass();
+            $class = $this->getBlockTypeClass($blockVersion);
             $bc = $app->make($class, ['obj' => $nb]);
             $bc->save($data);
 
@@ -681,9 +707,9 @@ EOT
     /**
      * Loads controller.
      */
-    public function loadController()
+    public function loadController(?int $version = null)
     {
-        $class = $this->getBlockTypeClass();
+        $class = $this->getBlockTypeClass($version);
 
         /** @var Controller controller */
         if ($class) {

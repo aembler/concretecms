@@ -2,6 +2,7 @@
 
 namespace Concrete\Core\Block\BlockType\Editor;
 
+use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
 use Concrete\Core\Entity\Block\BlockType\BlockType;
 use Concrete\Core\Filesystem\FileLocator;
 use Concrete\Core\Support\Facade\Application;
@@ -26,7 +27,14 @@ class EditorFactory
             $locator->addPackageLocation($packageHandle);
         }
 
-        $record = $locator->getRecord(DIRNAME_BLOCKS . '/' . $blockType->getBlockTypeHandle() . '/manifest.xml');
+        $record = $locator->getRecord(
+            BlockTypeService::getBlockTypeRelativePath(
+                $blockType->getBlockTypeHandle(),
+                'manifest.xml',
+                $packageHandle,
+                $blockType->getBlockTypeActiveVersion()
+            )
+        );
         if ($record && $record->exists()) {
             return new ComposableEditor();
         }

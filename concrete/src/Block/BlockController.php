@@ -541,6 +541,14 @@ class BlockController extends \Concrete\Core\Controller\AbstractController
 
         $bt = \Concrete\Core\Block\BlockType\BlockType::getByHandle($this->btHandle);
         $b = $page->addBlock($bt, $arHandle, $args);
+        if (isset($blockNode['version']) && (string) $blockNode['version'] !== '') {
+            $bVersion = max(1, (int) $blockNode['version']);
+            $this->app->make(Connection::class)->update('Blocks', ['btVersion' => $bVersion], ['bID' => $b->getBlockID()]);
+            $reloadedBlock = \Concrete\Core\Block\Block::getByID($b->getBlockID(), $page, $arHandle);
+            if ($reloadedBlock instanceof \Concrete\Core\Block\Block) {
+                $b = $reloadedBlock;
+            }
+        }
         $bName = (string) $blockNode['name'];
         $bFilename = (string) $blockNode['custom-template'];
         if ($bName) {

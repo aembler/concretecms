@@ -3,6 +3,7 @@ namespace Concrete\Core\Block\View;
 
 use Concrete\Core\Area\Area;
 use Concrete\Core\Block\Block;
+use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
 use Concrete\Core\Block\Events\BlockBeforeRender;
 use Concrete\Core\Block\Events\BlockOutput;
 use Concrete\Core\Config\Repository\Repository;
@@ -71,6 +72,29 @@ class BlockView extends AbstractView
         }
     }
 
+    protected function getBlockTypeVersion(): ?int
+    {
+        if ($this->block instanceof Block) {
+            return $this->block->getBlockVersion();
+        }
+        if (method_exists($this->blockType, 'getBlockTypeActiveVersion')) {
+            return (int) $this->blockType->getBlockTypeActiveVersion();
+        }
+
+        return null;
+    }
+
+    protected function resolveBlockTypeRelativePath(string $filename, bool $template = false): string
+    {
+        return BlockTypeService::getBlockTypeRelativePath(
+            $this->blockType->getBlockTypeHandle(),
+            $filename,
+            $this->blockTypePkgHandle,
+            $this->getBlockTypeVersion(),
+            $template
+        );
+    }
+
     public function showControls()
     {
         return $this->showControls;
@@ -129,9 +153,11 @@ class BlockView extends AbstractView
 
         $env = Environment::get();
         if ($this->viewToRender == 'scrapbook') {
-            $scrapbookTemplate = $this->getBlockPath(
-                    FILENAME_BLOCK_VIEW_SCRAPBOOK
-                ) . '/' . FILENAME_BLOCK_VIEW_SCRAPBOOK;
+            $scrapbookTemplate = $env->getPath(
+                $this->resolveBlockTypeRelativePath(FILENAME_BLOCK_VIEW_SCRAPBOOK, true),
+                $this->blockTypePkgHandle,
+                true
+            );
             if (file_exists($scrapbookTemplate)) {
                 $view = 'scrapbook';
             } else {
@@ -157,8 +183,7 @@ class BlockView extends AbstractView
                     }
                 }
                 if ($this->controller->blockViewRenderOverride) {
-                    $template = DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
-                        ) . '/' . $this->controller->blockViewRenderOverride . '.php';
+                    $template = $this->resolveBlockTypeRelativePath($this->controller->blockViewRenderOverride . '.php', true);
                     $this->setViewTemplate($env->getPath($template, $this->blockTypePkgHandle));
                 } else {
                     $bFilename = false;
@@ -198,30 +223,25 @@ class BlockView extends AbstractView
                 break;
             case 'add':
                 if ($this->controller->blockViewRenderOverride) {
-                    $template = DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
-                        ) . '/' . $this->controller->blockViewRenderOverride . '.php';
+                    $template = $this->resolveBlockTypeRelativePath($this->controller->blockViewRenderOverride . '.php', true);
                 } else {
-                    $template = DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
-                        ) . '/' . FILENAME_BLOCK_ADD;
+                    $template = $this->resolveBlockTypeRelativePath(FILENAME_BLOCK_ADD, true);
                 }
                 $this->setViewTemplate($env->getPath($template, $this->blockTypePkgHandle));
                 break;
             case 'scrapbook':
                 $this->setViewTemplate(
                     $env->getPath(
-                        DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
-                        ) . '/' . FILENAME_BLOCK_VIEW_SCRAPBOOK,
+                        $this->resolveBlockTypeRelativePath(FILENAME_BLOCK_VIEW_SCRAPBOOK, true),
                         $this->blockTypePkgHandle
                     )
                 );
                 break;
             case 'edit':
                 if ($this->controller->blockViewRenderOverride) {
-                    $template = DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
-                        ) . '/' . $this->controller->blockViewRenderOverride . '.php';
+                    $template = $this->resolveBlockTypeRelativePath($this->controller->blockViewRenderOverride . '.php', true);
                 } else {
-                    $template = DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle(
-                        ) . '/' . FILENAME_BLOCK_EDIT;
+                    $template = $this->resolveBlockTypeRelativePath(FILENAME_BLOCK_EDIT, true);
                 }
                 $this->setBlockViewHeaderFile(DIR_FILES_ELEMENTS_CORE . '/block_header_edit.php');
                 $this->setBlockViewFooterFile(DIR_FILES_ELEMENTS_CORE . '/block_footer_edit.php');
@@ -339,6 +359,14 @@ class BlockView extends AbstractView
             }
         }
 
+        $version = $this->getBlockTypeVersion();
+        if ($version !== null && $version > 0) {
+            $versionedBase = $base . '/v' . $version;
+            if (is_dir($versionedBase) && ($filename === null || file_exists($versionedBase . '/' . $filename))) {
+                $base = $versionedBase;
+            }
+        }
+
         return $base;
     }
 
@@ -366,6 +394,11 @@ class BlockView extends AbstractView
             }
         }
 
+        $version = $this->getBlockTypeVersion();
+        if ($version !== null && $version > 0 && strpos($this->getBlockPath($filename), '/v' . $version) !== false) {
+            $base .= '/v' . $version;
+        }
+
         return $base;
     }
 
@@ -375,7 +408,7 @@ class BlockView extends AbstractView
         extract($this->getScopeItems());
         $env = Environment::get();
         include $env->getPath(
-            DIRNAME_BLOCKS . '/' . $this->blockType->getBlockTypeHandle() . '/' . $fileToInclude,
+            $this->resolveBlockTypeRelativePath($fileToInclude, $template),
             $this->blockTypePkgHandle,
             $template,
         );
