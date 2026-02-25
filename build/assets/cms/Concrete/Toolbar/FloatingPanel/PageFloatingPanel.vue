@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
-  FloatingPanelBackdrop,
   FloatingPanelContent,
   FloatingPanelHeader,
   FloatingPanelMenu,
@@ -13,7 +12,6 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-  useUiStore,
   useAjax,
 } from '@concretecms/backendui'
 import {
@@ -63,7 +61,6 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
-const ui = useUiStore()
 const { request } = useAjax()
 
 const modelOpen = computed({
@@ -309,13 +306,6 @@ function handleCacheSettingsSaved(payload: { title?: string, message?: string })
       width="min(92vw, 26rem)"
       height="calc(100vh - 8.5rem)"
     >
-      <template #backdrop>
-        <FloatingPanelBackdrop
-          :to="ui.menuContainer ?? 'body'"
-          class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
-        />
-      </template>
-
       <template #header>
       <FloatingPanelHeader
         title="Page Settings"

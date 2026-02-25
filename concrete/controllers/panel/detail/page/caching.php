@@ -60,7 +60,7 @@ class Caching extends BackendInterfacePageController
         if ($record instanceof PageCacheRecord) {
             $cacheState = 'cached';
             $cacheMessage = t('This page currently exists in the full page cache.');
-            $cacheExpiresAt = Core::make('date')->formatDateTime($record->getCacheRecordExpiration());
+            $cacheExpiresAt = app('date')->formatDateTime($record->getCacheRecordExpiration());
             $canPurge = true;
         } elseif ($record instanceof UnknownPageCacheRecord) {
             $cacheState = 'unknown';

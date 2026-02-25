@@ -147,20 +147,25 @@
         </DropdownMenu>
       </div>
     </div>
-    <PageFloatingPanel
-      v-model:open="pageSettingsOpen"
-      :permissions="pageSettingsPermissions"
-      :page-id="pageSettingsPageId"
-      :loading="pageSettingsLoading"
-      :error="pageSettingsError"
-    />
-    <AddFloatingPanel
-      v-model:open="addPanelOpen"
-      :loading="addPanelLoading"
-      :error="addPanelError"
-      :default-tab="addPanelDefaultTab"
-      :block-sets="addPanelBlockSets"
-    />
+    <FloatingPanelGroup
+      :backdrop-to="ui.menuContainer ?? 'body'"
+      backdrop-class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
+    >
+      <PageFloatingPanel
+        v-model:open="pageSettingsOpen"
+        :permissions="pageSettingsPermissions"
+        :page-id="pageSettingsPageId"
+        :loading="pageSettingsLoading"
+        :error="pageSettingsError"
+      />
+      <AddFloatingPanel
+        v-model:open="addPanelOpen"
+        :loading="addPanelLoading"
+        :error="addPanelError"
+        :default-tab="addPanelDefaultTab"
+        :block-sets="addPanelBlockSets"
+      />
+    </FloatingPanelGroup>
   </div>
 </template>
 
@@ -182,6 +187,7 @@ import HelpButton from "./Button/HelpButton.vue";
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
 import AddFloatingPanel from './FloatingPanel/AddFloatingPanel.vue'
 import {
+  FloatingPanelGroup,
   useUiStore,
   useAjax,
   useFloatingPanelsStore,
@@ -275,9 +281,11 @@ const launchPageSettings = () => {
     return
   }
 
-  floatingPanels.close()
   pageSettingsLoading.value = true
   pageSettingsError.value = null
+  pageSettingsPermissions.value = null
+  pageSettingsPageId.value = null
+  pageSettingsOpen.value = true
   const currentCollectionId = Number((window as any).CCM_CID ?? 0)
   const pageSettingsUrl = currentCollectionId > 0
     ? `/ccm/system/panels/page?cID=${currentCollectionId}`
@@ -296,8 +304,6 @@ const launchPageSettings = () => {
 
       pageSettingsPermissions.value = data?.permissions ?? null
       pageSettingsPageId.value = Number.isInteger(data?.pageId) ? data.pageId : null
-      floatingPanels.open(pageSettingsPanelId)
-      pageSettingsOpen.value = true
     },
     onError: () => {
       pageSettingsError.value = 'Unable to load page settings.'
@@ -318,9 +324,11 @@ const launchAddPanel = () => {
     return
   }
 
-  floatingPanels.close()
   addPanelLoading.value = true
   addPanelError.value = null
+  addPanelBlockSets.value = []
+  addPanelDefaultTab.value = 'blocks'
+  addPanelOpen.value = true
   const currentCollectionId = Number((window as any).CCM_CID ?? 0)
   const addPanelUrl = currentCollectionId > 0
     ? `/ccm/system/panels/add?cID=${currentCollectionId}`
@@ -345,8 +353,6 @@ const launchAddPanel = () => {
         addPanelDefaultTab.value = 'blocks'
       }
       addPanelBlockSets.value = Array.isArray(data?.blocks?.sets) ? data.blocks.sets : []
-      floatingPanels.open(addPanelId)
-      addPanelOpen.value = true
     },
     onError: () => {
       addPanelError.value = 'Unable to load add panel.'

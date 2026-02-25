@@ -2,10 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
-  FloatingPanelBackdrop,
   FloatingPanelMenuItem,
   FloatingPanelSearch,
-  useUiStore,
   useFuzzySearch,
 } from '@concretecms/backendui'
 import {
@@ -67,7 +65,6 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
-const ui = useUiStore()
 
 const modelOpen = computed({
   get: () => props.open,
@@ -202,13 +199,6 @@ function iconForBlockHandle(handle: string) {
       width="min(92vw, 32rem)"
       height="calc(100vh - 8.5rem)"
     >
-      <template #backdrop>
-        <FloatingPanelBackdrop
-          :to="ui.menuContainer ?? 'body'"
-          class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
-        />
-      </template>
-
       <template #default>
       <div class="px-1 pb-2">
         <div class="relative flex items-center justify-center gap-1 border-b border-slate-200/70 pb-2 pe-16">
