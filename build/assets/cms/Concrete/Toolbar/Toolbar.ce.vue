@@ -253,7 +253,19 @@ const addPanelOpen = computed({
 const addPanelLoading = ref(false)
 const addPanelError = ref<string | null>(null)
 const addPanelDefaultTab = ref<'blocks' | 'clipboard' | 'library' | 'layouts'>('blocks')
-const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{ id: number, handle: string, name: string, description?: string }> }>>([])
+const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{
+  id: number
+  handle: string
+  name: string
+  description?: string
+  icon?: {
+    type: string
+    src?: string
+    alt?: string
+    className?: string
+    svg?: string
+  }
+}> }>>([])
 
 function handleSearch() {
 

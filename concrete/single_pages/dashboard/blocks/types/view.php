@@ -12,12 +12,14 @@
  * @var int $numActive
  */
 
+$blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
+
 if ($controller->getAction() == 'inspect') {
     // @var Concrete\Core\Entity\Block\BlockType\BlockType $bt
     // @var int $num
     // @var int $numActive
     ?>
-    <h3><img src="<?= $ci->getBlockTypeIconURL($bt) ?>"/> <?= t($bt->getBlockTypeName()) ?></h3>
+    <h3><?= $blockTypeService->getBlockTypeIcon($bt)->toHtmlObject() ?> <?= t($bt->getBlockTypeName()) ?></h3>
     <dl>
         <dt><?= t('Description') ?></dt>
         <dd><?= t($bt->getBlockTypeDescription()) ?></dd>
@@ -104,9 +106,9 @@ if ($controller->getAction() == 'inspect') {
         <ul class="item-select-list">
             <?php
             foreach ($availableBlockTypes as $bt) {
-                $btIcon = $ci->getBlockTypeIconURL($bt);
+                $btIcon = $blockTypeService->getBlockTypeIcon($bt);
                 ?>
-                <li><span class="clearfix"><img src="<?= $btIcon ?>"/> <?= t($bt->getBlockTypeName()) ?>
+                <li><span class="clearfix"><?= $btIcon->toHtmlObject() ?> <?= t($bt->getBlockTypeName()) ?>
                     <a href="<?= $urlResolver->resolve(['/dashboard/blocks/types', 'install', $bt->getBlockTypeHandle()]) ?>"
                        class="btn float-end btn-sm btn-secondary"><?= t('Install') ?></a>
                 </span></li>
@@ -158,7 +160,7 @@ if ($controller->getAction() == 'inspect') {
                             title="<?= h($bt->getBlockTypeDescription()) ?>">
                             <a href="<?= $view->action('inspect', $bt->getBlockTypeID()) ?>">
                                 <i class="fas fa-bars" aria-hidden="true"></i>
-                                <img src="<?= $ci->getBlockTypeIconURL($bt) ?>"/>
+                                <?= $blockTypeService->getBlockTypeIcon($bt)->toHtmlObject() ?>
                                 <?= t($bt->getBlockTypeName()) ?>
                             </a>
                         </li>
@@ -175,11 +177,11 @@ if ($controller->getAction() == 'inspect') {
     <ul class="item-select-list">
         <?php
         foreach ($internalBlockTypes as $bt) {
-            $btIcon = $ci->getBlockTypeIconURL($bt);
+            $btIcon = $blockTypeService->getBlockTypeIcon($bt);
             ?>
             <li>
                 <a href="<?= $view->action('inspect', $bt->getBlockTypeID()) ?>">
-                    <img src="<?= $btIcon ?>"/> <?= t($bt->getBlockTypeName()) ?>
+                    <?= $btIcon->toHtmlObject() ?> <?= t($bt->getBlockTypeName()) ?>
                 </a>
             </li>
             <?php

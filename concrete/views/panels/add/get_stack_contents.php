@@ -3,12 +3,13 @@
 defined('C5_EXECUTE') or die('Access Denied.');
 
 $blockPreviewUrl = URL::to('/ccm/system/block/preview');
+$blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
 ?>
 <div class="blocks">
     <?php
     foreach ($blocks as $block) {
         $type = $block->getBlockTypeObject();
-        $icon = $ci->getBlockTypeIconURL($type);
+        $icon = (string) $blockTypeService->getBlockTypeIcon($type)->toHtmlObject();
         ?>
         <div
             class="block ccm-panel-add-block-draggable-block-type"
@@ -21,7 +22,7 @@ $blockPreviewUrl = URL::to('/ccm/system/block/preview');
             data-has-add-template="<?= $type->hasAddTemplate() ?>"
             data-supports-inline-add="<?= $type->supportsInlineAdd() ?>"
             data-btID="<?= $type->getBlockTypeID() ?>"
-            data-dragging-avatar="<?= h('<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center"><img src="' . $icon . '" /></div><p><span>' . t($type->getBlockTypeInSetName()) . '</span></p>') ?>"
+            data-dragging-avatar="<?= h('<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center">' . $icon . '</div><p><span>' . t($type->getBlockTypeInSetName()) . '</span></p>') ?>"
             title="<?= t($type->getBlockTypeName()) ?>"
             data-block-id="<?= (int) $block->getBlockID() ?>"
         >

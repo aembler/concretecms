@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
+import { computed } from 'vue'
+
+type PanelIcon = {
+  type: string
+  src?: string
+  alt?: string
+  className?: string
+  svg?: string
+}
 
 const props = withDefaults(defineProps<{
-  icon: Component
+  icon?: PanelIcon
   title: string
   description?: string
   expanded?: boolean
@@ -10,6 +18,11 @@ const props = withDefaults(defineProps<{
   description: '',
   expanded: false,
 })
+
+const iconType = computed(() => props.icon?.type ?? '')
+const imageIconSrc = computed(() => (iconType.value === 'image-file' ? props.icon?.src : ''))
+const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ? props.icon?.className ?? '' : ''))
+const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 </script>
 
 <template>
@@ -22,7 +35,15 @@ const props = withDefaults(defineProps<{
   >
     <template v-if="props.expanded">
       <div class="flex items-start gap-3">
-        <component :is="props.icon" class="h-5 w-5 text-slate-500" />
+        <img
+          v-if="imageIconSrc"
+          :src="imageIconSrc"
+          :alt="props.icon?.alt || ''"
+          class="h-5 w-5 object-contain"
+        >
+        <i v-else-if="fontAwesomeClassName" :class="fontAwesomeClassName" />
+        <span v-else-if="inlineSvg" class="h-5 w-5 text-slate-500" v-html="inlineSvg" />
+        <span v-else class="h-5 w-5 rounded bg-slate-200" />
         <div class="min-w-0">
           <div class="truncate text-sm font-semibold text-slate-800">{{ props.title }}</div>
           <div class="mt-1 text-xs text-slate-500 line-clamp-2">
@@ -32,7 +53,15 @@ const props = withDefaults(defineProps<{
       </div>
     </template>
     <template v-else>
-      <component :is="props.icon" class="h-5 w-5 text-slate-500" />
+      <img
+        v-if="imageIconSrc"
+        :src="imageIconSrc"
+        :alt="props.icon?.alt || ''"
+        class="h-5 w-5 object-contain"
+      >
+      <i v-else-if="fontAwesomeClassName" :class="fontAwesomeClassName" />
+      <span v-else-if="inlineSvg" class="h-5 w-5 text-slate-500" v-html="inlineSvg" />
+      <span v-else class="h-5 w-5 rounded bg-slate-200" />
       <div class="line-clamp-2 text-xs font-semibold leading-tight text-slate-800">{{ props.title }}</div>
     </template>
   </button>

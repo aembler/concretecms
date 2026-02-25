@@ -19,12 +19,9 @@ import {
   DocumentTextIcon,
   QueueListIcon,
   ChatBubbleLeftEllipsisIcon,
-  CalendarDaysIcon,
-  MapPinIcon,
   TableCellsIcon,
   Square3Stack3DIcon,
   DocumentDuplicateIcon,
-  PlusCircleIcon,
   Bars3BottomLeftIcon,
 } from '@heroicons/vue/24/outline'
 import AddBlock from './Add/Block.vue'
@@ -36,6 +33,13 @@ type BlockType = {
   handle: string
   name: string
   description?: string
+  icon?: {
+    type: string
+    src?: string
+    alt?: string
+    className?: string
+    svg?: string
+  }
 }
 
 type BlockSet = {
@@ -176,18 +180,6 @@ const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchK
   minQueryLengthToSearch: 3,
   debounceMs: 100,
 })
-
-function iconForBlockHandle(handle: string) {
-  const normalized = handle.toLowerCase()
-  if (normalized.includes('image') || normalized.includes('gallery')) return PhotoIcon
-  if (normalized.includes('content') || normalized.includes('html') || normalized.includes('text')) return DocumentTextIcon
-  if (normalized.includes('calendar') || normalized.includes('event')) return CalendarDaysIcon
-  if (normalized.includes('page_list') || normalized.includes('list')) return QueueListIcon
-  if (normalized.includes('topic') || normalized.includes('conversation') || normalized.includes('form')) return ChatBubbleLeftEllipsisIcon
-  if (normalized.includes('map')) return MapPinIcon
-  if (normalized.includes('layout') || normalized.includes('container')) return TableCellsIcon
-  return PlusCircleIcon
-}
 </script>
 
 <template>
@@ -234,7 +226,7 @@ function iconForBlockHandle(handle: string) {
                 <AddBlock
                   v-for="blockType in set.blockTypes"
                   :key="`${set.name}-${blockType.id}`"
-                  :icon="iconForBlockHandle(blockType.handle)"
+                  :icon="blockType.icon"
                   :title="blockType.name"
                   :description="blockType.description"
                 />
@@ -257,7 +249,7 @@ function iconForBlockHandle(handle: string) {
                 <AddBlock
                   v-for="blockType in set.blockTypes"
                   :key="`expanded-${set.name}-${blockType.id}`"
-                  :icon="iconForBlockHandle(blockType.handle)"
+                  :icon="blockType.icon"
                   :title="blockType.name"
                   :description="blockType.description"
                   :expanded="true"

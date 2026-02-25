@@ -1,9 +1,8 @@
 <?php
 namespace Concrete\Core\Page\Stack\Pile;
 
-use Concrete\Core\Application\Service\Urls;
+use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
 use Concrete\Core\Block\View\BlockView;
-use Concrete\Core\Support\Facade\Application;
 use Loader;
 use Concrete\Core\Foundation\ConcreteObject;
 use Concrete\Core\Block\Block;
@@ -150,11 +149,9 @@ class PileContent extends ConcreteObject implements \JsonSerializable
 
         /** @var \Concrete\Core\Entity\Block\BlockType\BlockType $type */
         $type = $block->getBlockTypeObject();
-        $app = Application::getFacadeApplication();
-        /** @var Urls $ci */
-        $ci = $app->make(Urls::class);
-
-        $icon = $ci->getBlockTypeIconURL($type);
+        /** @var BlockTypeService $blockTypeService */
+        $blockTypeService = app(BlockTypeService::class);
+        $icon = (string) $blockTypeService->getBlockTypeIcon($type)->toHtmlObject();
 
         ob_start();
         $bv = new BlockView($block);
@@ -172,7 +169,7 @@ class PileContent extends ConcreteObject implements \JsonSerializable
             "supportsInlineAdd" => (int)$type->supportsInlineAdd(),
             "blockTypeId" => $type->getBlockTypeID(),
             "pileContentId" => $this->getPileContentID(),
-            "draggingAvatar" => h('<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center"><img src="' . $icon . '" /></div><p><span>' . t($type->getBlockTypeName()) . '</span></p>'),
+            "draggingAvatar" => h('<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center">' . $icon . '</div><p><span>' . t($type->getBlockTypeName()) . '</span></p>'),
             "blockId" => (int) $block->getBlockID(),
             "blockContent" => $blockContent
         ];

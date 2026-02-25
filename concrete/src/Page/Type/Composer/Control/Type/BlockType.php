@@ -1,7 +1,6 @@
 <?php
 namespace Concrete\Core\Page\Type\Composer\Control\Type;
 
-use Loader;
 use BlockType as ConcreteBlockType;
 use BlockTypeList;
 use Environment;
@@ -14,7 +13,7 @@ class BlockType extends Type
         $objects = array();
         $btl = new BlockTypeList();
         $blockTypes = $btl->get();
-        $ci = Loader::helper('concrete/urls');
+        $blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
 
         $env = Environment::get();
 
@@ -24,7 +23,8 @@ class BlockType extends Type
             if ($cmf->exists() || count($bt->getBlockTypeComposerTemplates()) > 0) {
                 $bx = new BlockControl();
                 $bx->setBlockTypeID($bt->getBlockTypeID());
-                $bx->setPageTypeComposerControlIconSRC($ci->getBlockTypeIconURL($bt));
+                $icon = $blockTypeService->getBlockTypeIcon($bt)->jsonSerialize();
+                $bx->setPageTypeComposerControlIconSRC((string) ($icon['src'] ?? ''));
                 $bx->setPageTypeComposerControlName(t($bt->getBlockTypeName()));
                 $objects[] = $bx;
             }
@@ -36,10 +36,11 @@ class BlockType extends Type
     public function getPageTypeComposerControlByIdentifier($identifier)
     {
         $bt = ConcreteBlockType::getByID($identifier);
-        $ci = Loader::helper('concrete/urls');
+        $blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
         $bx = new BlockControl();
         $bx->setBlockTypeID($bt->getBlockTypeID());
-        $bx->setPageTypeComposerControlIconSRC($ci->getBlockTypeIconURL($bt));
+        $icon = $blockTypeService->getBlockTypeIcon($bt)->jsonSerialize();
+        $bx->setPageTypeComposerControlIconSRC((string) ($icon['src'] ?? ''));
         $bx->setPageTypeComposerControlName(t($bt->getBlockTypeName()));
 
         return $bx;

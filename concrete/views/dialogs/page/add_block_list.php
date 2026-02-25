@@ -9,6 +9,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
  */
 
 $id = str_replace('.', '_', uniqid('ccm-add-block-lists-', true));
+$blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
 ?>
 <div id="<?= $id ?>">
     <div class="input-group">
@@ -24,7 +25,7 @@ $id = str_replace('.', '_', uniqid('ccm-add-block-lists-', true));
             <ul class="item-select-list">
                 <?php
                 foreach ($blockTypes as $bt) {
-                    $btIcon = $ci->getBlockTypeIconURL($bt);
+                    $icon = $blockTypeService->getBlockTypeIcon($bt);
                     ?>
                     <li>
                         <a
@@ -40,7 +41,7 @@ $id = str_replace('.', '_', uniqid('ccm-add-block-lists-', true));
                                 data-btID="<?= $bt->getBlockTypeID() ?>"
                                 title="<?= h(t($bt->getBlockTypeDescription())) ?>"
                                 href="javascript:void(0)"
-                        ><img src="<?= $btIcon ?>"/> <?= t($bt->getBlockTypeName()) ?></a>
+                        ><?= $icon->toHtmlObject() ?> <?= t($bt->getBlockTypeName()) ?></a>
                     </li>
                     <?php
                 }

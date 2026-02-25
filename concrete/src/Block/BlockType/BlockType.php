@@ -2,6 +2,9 @@
 
 namespace Concrete\Core\Block\BlockType;
 
+use Concrete\Core\Application\Service\Urls;
+use Concrete\Core\Application\UserInterface\Icon\IconInterface;
+use Concrete\Core\Application\UserInterface\Icon\ImageFileIcon;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Cache\Level\RequestCache;
 use Concrete\Core\Database\Connection\Connection;
@@ -13,6 +16,17 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class BlockType
 {
+    public function getBlockTypeIcon(BlockTypeEntity $blockType): IconInterface
+    {
+        /** @var Urls $urls */
+        $urls = app(Urls::class);
+
+        return new ImageFileIcon(
+            (string) $urls->getBlockTypeIconURL($blockType),
+            (string) $blockType->getBlockTypeName()
+        );
+    }
+
     public static function getVersionedBlockTypeDirectory($btHandle, int $version): string
     {
         return DIRNAME_BLOCKS . '/' . (string) $btHandle . '/v' . max(1, $version);

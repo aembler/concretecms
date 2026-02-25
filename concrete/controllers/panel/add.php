@@ -4,7 +4,6 @@ namespace Concrete\Controller\Panel;
 
 use Concrete\Controller\Backend\UserInterface\Page as BackendInterfacePageController;
 use Concrete\Core\Application\EditResponse;
-use Concrete\Core\Application\Service\Urls;
 use Concrete\Core\Area\Area;
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockType\BlockType;
@@ -143,11 +142,9 @@ class Add extends BackendInterfacePageController
                 /** @var \Concrete\Core\Entity\Block\BlockType\BlockType $type */
                 /** @noinspection DuplicatedCode */
                 $type = $block->getBlockTypeObject();
-                $app = Application::getFacadeApplication();
-                /** @var Urls $ci */
-                $ci = $app->make(Urls::class);
-
-                $icon = $ci->getBlockTypeIconURL($type);
+                /** @var BlockType $blockTypeService */
+                $blockTypeService = app(BlockType::class);
+                $icon = (string) $blockTypeService->getBlockTypeIcon($type)->toHtmlObject();
 
                 ob_start();
                 $bv = new BlockView($block);
@@ -167,7 +164,7 @@ class Add extends BackendInterfacePageController
                         "supportsInlineAdd" => (int)$type->supportsInlineAdd(),
                         "blockTypeId" => $type->getBlockTypeID(),
                         "draggingAvatar" => h(
-                            '<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center"><img src="' . $icon . '" /></div><p><span>' . t(
+                            '<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center">' . $icon . '</div><p><span>' . t(
                                 $type->getBlockTypeName()
                             ) . '</span></p>'
                         ),
@@ -398,10 +395,12 @@ class Add extends BackendInterfacePageController
 
     /**
      * @param array<string, BlockTypeEntity[]> $blockTypesForSets
-     * @return array<int, array{name: string, blockTypes: array<int, array{id: int, handle: string, name: string, description: string}>}>
+     * @return array<int, array{name: string, blockTypes: array<int, array{id: int, handle: string, name: string, description: string, icon: array<string, mixed>}>}>
      */
     protected function serializeBlockTypesForSets(array $blockTypesForSets): array
     {
+        /** @var BlockType $blockTypeService */
+        $blockTypeService = $this->app->make(BlockType::class);
         $serializedSets = [];
         foreach ($blockTypesForSets as $setName => $blockTypes) {
             $serializedSet = [
@@ -410,11 +409,13 @@ class Add extends BackendInterfacePageController
             ];
 
             foreach ($blockTypes as $blockType) {
+                $icon = $blockTypeService->getBlockTypeIcon($blockType);
                 $serializedSet['blockTypes'][] = [
                     'id' => (int) $blockType->getBlockTypeID(),
                     'handle' => (string) $blockType->getBlockTypeHandle(),
                     'name' => (string) $blockType->getBlockTypeInSetName(),
                     'description' => (string) $blockType->getBlockTypeDescription(),
+                    'icon' => $icon->jsonSerialize(),
                 ];
             }
 

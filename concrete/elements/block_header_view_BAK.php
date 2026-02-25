@@ -200,7 +200,7 @@ if ($showMenu) {
         class="<?=$class?>"
         data-block-type-handle="<?=$btHandle?>"
         data-launch-block-menu="block-menu-b<?=$b->getBlockID()?>-<?=$a->getAreaID()?>"
-        data-dragging-avatar="<?=h('<p><img src="' . Loader::helper('concrete/urls')->getBlockTypeIconURL($btw) . '" /><span>' . t($btw->getBlockTypeName()) . '</span></p>')?>"
+        data-dragging-avatar="<?= h('<p>' . app(\Concrete\Core\Block\BlockType\BlockType::class)->getBlockTypeIcon($btw)->toHtmlObject() . '<span>' . t($btw->getBlockTypeName()) . '</span></p>') ?>"
         <?php if (in_array($btw->getBlockTypeHandle(), [BLOCK_HANDLE_LAYOUT_PROXY, BLOCK_HANDLE_CONTAINER_PROXY])) { ?>
     data-block-menu-handle="none"<?php
 }

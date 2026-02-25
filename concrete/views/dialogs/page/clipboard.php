@@ -1,5 +1,7 @@
 <?php
 defined('C5_EXECUTE') or die("Access Denied.");
+
+$blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
 ?>
 <div id="ccm-panel-add-clipboard-block-list">
     <ul class="item-select-list">
@@ -13,7 +15,7 @@ defined('C5_EXECUTE') or die("Access Denied.");
         }
 
         $type = $block->getBlockTypeObject();
-        $icon = $ci->getBlockTypeIconURL($type);
+        $icon = $blockTypeService->getBlockTypeIcon($type);
         ?>
 
         <li>
@@ -28,7 +30,7 @@ defined('C5_EXECUTE') or die("Access Denied.");
                 data-supports-inline-add="<?= $type->supportsInlineAdd() ?>"
                 data-btID="<?= $type->getBlockTypeID() ?>"
                 data-pcID="<?=$pile_content->getPileContentID()?>"
-                href="javascript:void(0)"><img src="<?=$icon?>" /> <?=t($type->getBlockTypeName())?></a>
+                href="javascript:void(0)"><?= $icon->toHtmlObject() ?> <?=t($type->getBlockTypeName())?></a>
 
                 <div class="item-select-list-content">
                     <?php
