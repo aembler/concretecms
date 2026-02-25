@@ -13,8 +13,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Caching extends BackendInterfacePageController
 {
-    protected $viewPath = '/panels/details/page/caching';
-
     protected function canAccess()
     {
         return $this->permissions->canEditPageSpeedSettings();

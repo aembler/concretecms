@@ -31,8 +31,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Add extends BackendInterfacePageController
 {
-    protected $viewPath = '/panels/add';
-    protected $pagetypes = [];
     /** @var Page */
     protected $page;
 
@@ -523,7 +521,7 @@ class Add extends BackendInterfacePageController
                 }
             }
             if (!empty($blockTypesForSet)) {
-                $key = $set->getBlockTypeSetDisplayName();
+                $key = $set->getBlockTypeSetDisplayName('text');
                 
                 // let's only add sets that actually require ordering
                 if (is_array($blockOrder) && in_array($set->getBlockTypeSetHandle(), $blockOrder)) {

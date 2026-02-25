@@ -31,12 +31,14 @@ abstract class UserInterface extends Controller
     {
         $this->app = Application::getFacadeApplication();
         $this->error = $this->app->make('error');
-        $this->view = new DialogView($this->viewPath);
-        if (preg_match('/Concrete\\\Package\\\(.*)\\\Controller/i', get_class($this), $matches)) {
-            $pkgHandle = uncamelcase($matches[1]);
-            $this->view->setPackageHandle($pkgHandle);
+        if (isset($this->viewPath)) {
+            $this->view = new DialogView($this->viewPath);
+            if (preg_match('/Concrete\\\Package\\\(.*)\\\Controller/i', get_class($this), $matches)) {
+                $pkgHandle = uncamelcase($matches[1]);
+                $this->view->setPackageHandle($pkgHandle);
+            }
+            $this->view->setController($this);
         }
-        $this->view->setController($this);
         $this->request = Request::getInstance();
     }
 
