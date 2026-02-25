@@ -5,6 +5,7 @@ import {
   FloatingPanelContent,
   FloatingPanelHeader,
   FloatingPanelMenu,
+  FloatingPanelMenuTitle,
   FloatingPanelMenuItem,
   Toast,
   ToastClose,
@@ -322,7 +323,7 @@ function handleCacheSettingsSaved(payload: { title?: string, message?: string })
               :key="group.label"
               class="mb-2"
           >
-            <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{{ group.label }}</div>
+            <FloatingPanelMenuTitle>{{ group.label }}</FloatingPanelMenuTitle>
             <FloatingPanelMenuItem
                 v-for="item in group.items"
                 :key="item.key"

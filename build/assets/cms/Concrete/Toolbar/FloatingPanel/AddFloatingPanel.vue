@@ -2,6 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
+  FloatingPanelHeader,
+  FloatingPanelHeaderTabs,
+  FloatingPanelMenu,
+  FloatingPanelMenuTitle,
   FloatingPanelMenuItem,
   FloatingPanelSearch,
   useFuzzySearch,
@@ -22,9 +26,8 @@ import {
   DocumentDuplicateIcon,
   PlusCircleIcon,
   Bars3BottomLeftIcon,
-  XMarkIcon,
-  ChevronRightIcon,
 } from '@heroicons/vue/24/outline'
+import AddBlock from './Add/Block.vue'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
 
@@ -43,8 +46,6 @@ type BlockSet = {
 type BlockSearchRecord = {
   setName: string
   name: string
-  handle: string
-  description: string
   blockType: BlockType
 }
 
@@ -124,15 +125,13 @@ const blockSearchRecords = computed<BlockSearchRecord[]>(() =>
     set.blockTypes.map((blockType) => ({
       setName: set.name,
       name: blockType.name,
-      handle: blockType.handle,
-      description: blockType.description ?? '',
       blockType,
     }))))
 
 const { items: filteredBlockRecords } = useFuzzySearch(blockSearchRecords, searchKeywords, {
-  keys: ['setName', 'name', 'handle', 'description'],
-  threshold: 0.34,
-  minQueryLengthToSearch: 2,
+  keys: ['name'],
+  threshold: 0.2,
+  minQueryLengthToSearch: 3,
   debounceMs: 100,
 })
 
@@ -158,23 +157,23 @@ const filteredBlockSets = computed(() => {
 })
 
 const { items: filteredClipboardItems } = useFuzzySearch(() => clipboardItems, searchKeywords, {
-  keys: ['name', 'meta'],
-  threshold: 0.34,
-  minQueryLengthToSearch: 2,
+  keys: ['name'],
+  threshold: 0.2,
+  minQueryLengthToSearch: 3,
   debounceMs: 100,
 })
 
 const { items: filteredLibraryItems } = useFuzzySearch(() => libraryItems, searchKeywords, {
-  keys: ['name', 'type'],
-  threshold: 0.34,
-  minQueryLengthToSearch: 2,
+  keys: ['name'],
+  threshold: 0.2,
+  minQueryLengthToSearch: 3,
   debounceMs: 100,
 })
 
 const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchKeywords, {
-  keys: ['name', 'detail'],
-  threshold: 0.34,
-  minQueryLengthToSearch: 2,
+  keys: ['name'],
+  threshold: 0.2,
+  minQueryLengthToSearch: 3,
   debounceMs: 100,
 })
 
@@ -192,81 +191,55 @@ function iconForBlockHandle(handle: string) {
 </script>
 
 <template>
-  <div class="fixed left-6 top-[5.25rem] z-[var(--index-layer-panel)]">
+  <div class="fixed left-6 right-6 top-[5.25rem] z-[var(--index-layer-panel)]">
     <FloatingPanel
       v-model:open="modelOpen"
       v-model:expanded="isExpanded"
-      width="min(92vw, 32rem)"
+      width="min(92vw, 26rem)"
       height="calc(100vh - 8.5rem)"
     >
+      <template #header>
+        <FloatingPanelHeader :closeable="true" :expandable="true" class="px-1 mb-4">
+          <template #tabs>
+            <FloatingPanelHeaderTabs
+              v-model="activeTab"
+              :tabs="tabs"
+              :show-labels="isExpanded"
+            />
+          </template>
+
+          <FloatingPanelSearch
+            v-model="searchKeywords"
+            :placeholder="searchPlaceholder"
+            class="mx-2 mt-3"
+          />
+        </FloatingPanelHeader>
+      </template>
+
       <template #default>
-      <div class="px-1 pb-2">
-        <div class="relative flex items-center justify-center gap-1 border-b border-slate-200/70 pb-2 pe-16">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            type="button"
-            class="inline-flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-500 transition hover:text-slate-800"
-            :class="activeTab === tab.id ? 'text-slate-900 border-b-2 border-slate-900 -mb-[2px] font-semibold' : 'border-b-2 border-transparent'"
-            @click="activeTab = tab.id"
-          >
-            <component :is="tab.icon" class="h-5 w-5" />
-            <span v-if="isExpanded" class="text-sm">{{ tab.label }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="absolute right-10 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-current/80 transition-colors hover:bg-gray-500/10"
-            :aria-label="isExpanded ? 'Collapse panel' : 'Expand panel'"
-            @click="isExpanded = !isExpanded"
-          >
-            <ChevronRightIcon class="h-4 w-4 transition-transform duration-300" :class="isExpanded ? 'rotate-180' : ''" />
-          </button>
-
-          <button
-            type="button"
-            class="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-current/80 transition-colors hover:bg-gray-500/10"
-            aria-label="Close panel"
-            @click="modelOpen = false"
-          >
-            <XMarkIcon class="size-6 stroke-[1.25]" />
-          </button>
-        </div>
-        <FloatingPanelSearch
-          v-model="searchKeywords"
-          :placeholder="searchPlaceholder"
-          class="mx-2 mt-3"
-        />
-      </div>
-
       <div v-if="loading" class="px-3 py-3 text-sm text-slate-600">Loading add panel contents...</div>
       <div v-else-if="error" class="px-3 py-3 rounded-lg bg-error/10 text-error text-sm">
         {{ error }}
       </div>
       <template v-else-if="activeTab === 'blocks'">
         <template v-if="!isExpanded">
-          <div
-            v-for="set in filteredBlockSets"
-            :key="set.name"
-            class="mb-2"
-          >
-            <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">{{ set.name }}</div>
-            <FloatingPanelMenuItem
-              v-for="blockType in set.blockTypes.slice(0, 6)"
-              :key="`${set.name}-${blockType.id}`"
-              variant="detail"
-              as="a"
-              href="#"
-              @click.prevent
+          <div class="px-2 pb-3">
+            <div
+              v-for="set in filteredBlockSets"
+              :key="set.name"
+              class="mb-6"
             >
-              <template #icon>
-                <component :is="iconForBlockHandle(blockType.handle)" class="w-5 h-5" />
-              </template>
-              {{ blockType.name }}
-              <template #description>
-                {{ blockType.description || 'Add this block type to the selected area.' }}
-              </template>
-            </FloatingPanelMenuItem>
+              <h4 class="mb-3 px-2 text-sm font-semibold tracking-wide text-slate-700">{{ set.name }}</h4>
+              <div class="grid grid-cols-4 gap-3">
+                <AddBlock
+                  v-for="blockType in set.blockTypes"
+                  :key="`${set.name}-${blockType.id}`"
+                  :icon="iconForBlockHandle(blockType.handle)"
+                  :title="blockType.name"
+                  :description="blockType.description"
+                />
+              </div>
+            </div>
           </div>
           <div v-if="filteredBlockSets.length === 0" class="px-3 py-4 text-sm text-slate-500">
             No block types match your search.
@@ -281,22 +254,14 @@ function iconForBlockHandle(handle: string) {
             >
               <h4 class="mb-3 px-2 text-sm font-semibold tracking-wide text-slate-700">{{ set.name }}</h4>
               <div class="grid grid-cols-2 gap-3 xl:grid-cols-3">
-                <button
+                <AddBlock
                   v-for="blockType in set.blockTypes"
                   :key="`expanded-${set.name}-${blockType.id}`"
-                  type="button"
-                  class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:border-primary/40 hover:bg-base-100"
-                >
-                  <div class="flex items-start gap-3">
-                    <component :is="iconForBlockHandle(blockType.handle)" class="h-5 w-5 text-slate-500" />
-                    <div class="min-w-0">
-                      <div class="truncate text-sm font-semibold text-slate-800">{{ blockType.name }}</div>
-                      <div class="mt-1 text-xs text-slate-500 line-clamp-2">
-                        {{ blockType.description || 'Drag into an editable area to add this block.' }}
-                      </div>
-                    </div>
-                  </div>
-                </button>
+                  :icon="iconForBlockHandle(blockType.handle)"
+                  :title="blockType.name"
+                  :description="blockType.description"
+                  :expanded="true"
+                />
               </div>
             </div>
             <div v-if="filteredBlockSets.length === 0" class="rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-500">
@@ -307,23 +272,25 @@ function iconForBlockHandle(handle: string) {
       </template>
       <template v-else-if="activeTab === 'clipboard'">
         <template v-if="!isExpanded">
-          <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">Clipboard</div>
-          <FloatingPanelMenuItem
-            v-for="item in filteredClipboardItems"
-            :key="item.name"
-            variant="detail"
-            as="a"
-            href="#"
-            @click.prevent
-          >
-            <template #icon>
-              <component :is="item.icon" class="w-5 h-5" />
-            </template>
-            {{ item.name }}
-            <template #description>
-              {{ item.meta }}
-            </template>
-          </FloatingPanelMenuItem>
+          <FloatingPanelMenu>
+            <FloatingPanelMenuTitle>Clipboard</FloatingPanelMenuTitle>
+            <FloatingPanelMenuItem
+              v-for="item in filteredClipboardItems"
+              :key="item.name"
+              variant="detail"
+              as="a"
+              href="#"
+              @click.prevent
+            >
+              <template #icon>
+                <component :is="item.icon" class="w-5 h-5" />
+              </template>
+              {{ item.name }}
+              <template #description>
+                {{ item.meta }}
+              </template>
+            </FloatingPanelMenuItem>
+          </FloatingPanelMenu>
           <div v-if="filteredClipboardItems.length === 0" class="px-3 py-4 text-sm text-slate-500">
             No clipboard items match your search.
           </div>
@@ -351,23 +318,25 @@ function iconForBlockHandle(handle: string) {
       </template>
       <template v-else-if="activeTab === 'library'">
         <template v-if="!isExpanded">
-          <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">Content Library</div>
-          <FloatingPanelMenuItem
-            v-for="item in filteredLibraryItems"
-            :key="item.name"
-            variant="detail"
-            as="a"
-            href="#"
-            @click.prevent
-          >
-            <template #icon>
-              <component :is="item.icon" class="w-5 h-5" />
-            </template>
-            {{ item.name }}
-            <template #description>
-              {{ item.type }}
-            </template>
-          </FloatingPanelMenuItem>
+          <FloatingPanelMenu>
+            <FloatingPanelMenuTitle>Content Library</FloatingPanelMenuTitle>
+            <FloatingPanelMenuItem
+              v-for="item in filteredLibraryItems"
+              :key="item.name"
+              variant="detail"
+              as="a"
+              href="#"
+              @click.prevent
+            >
+              <template #icon>
+                <component :is="item.icon" class="w-5 h-5" />
+              </template>
+              {{ item.name }}
+              <template #description>
+                {{ item.type }}
+              </template>
+            </FloatingPanelMenuItem>
+          </FloatingPanelMenu>
           <div v-if="filteredLibraryItems.length === 0" class="px-3 py-4 text-sm text-slate-500">
             No content library items match your search.
           </div>
@@ -395,23 +364,25 @@ function iconForBlockHandle(handle: string) {
       </template>
       <template v-else>
         <template v-if="!isExpanded">
-          <div class="px-3 pb-2 pt-1 text-[11px] uppercase tracking-[0.14em] text-slate-500">Layouts & Containers</div>
-          <FloatingPanelMenuItem
-            v-for="item in filteredLayoutItems"
-            :key="item.name"
-            variant="detail"
-            as="a"
-            href="#"
-            @click.prevent
-          >
-            <template #icon>
-              <component :is="item.icon" class="w-5 h-5" />
-            </template>
-            {{ item.name }}
-            <template #description>
-              {{ item.detail }}
-            </template>
-          </FloatingPanelMenuItem>
+          <FloatingPanelMenu>
+            <FloatingPanelMenuTitle>Layouts & Containers</FloatingPanelMenuTitle>
+            <FloatingPanelMenuItem
+              v-for="item in filteredLayoutItems"
+              :key="item.name"
+              variant="detail"
+              as="a"
+              href="#"
+              @click.prevent
+            >
+              <template #icon>
+                <component :is="item.icon" class="w-5 h-5" />
+              </template>
+              {{ item.name }}
+              <template #description>
+                {{ item.detail }}
+              </template>
+            </FloatingPanelMenuItem>
+          </FloatingPanelMenu>
           <div v-if="filteredLayoutItems.length === 0" class="px-3 py-4 text-sm text-slate-500">
             No layouts or containers match your search.
           </div>
