@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useUiStore } from '@concretecms/backendui'
+import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 
 type PanelIcon = {
   type: string
@@ -30,6 +30,8 @@ const imageIconSrc = computed(() => (iconType.value === 'image-file' ? props.ico
 const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ? props.icon?.className ?? '' : ''))
 const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 const uiStore = useUiStore()
+const floatingPanels = useFloatingPanelsStore()
+const addPanelId = 'toolbar:add'
 const blockButton = ref<HTMLButtonElement | null>(null)
 const highlightedDropArea = ref<HTMLElement | null>(null)
 let interactable: any = null
@@ -138,39 +140,6 @@ function isPointOutsideRect(x: number, y: number, rect: DOMRect): boolean {
   return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
 }
 
-function openAddBlockDialog(areaHandle: string) {
-  if (!props.blockTypeId || !areaHandle) {
-    return
-  }
-
-  const cID = Number((window as any).CCM_CID ?? 0)
-  const dispatcher = String((window as any).CCM_DISPATCHER_FILENAME ?? '')
-  const params = new URLSearchParams({
-    cID: String(cID),
-    btID: String(props.blockTypeId),
-    arHandle: areaHandle,
-  })
-  const url = `${dispatcher}/ccm/system/dialogs/page/add_block?${params.toString()}`
-  const jQueryRef = (window as any).jQuery
-
-  if (jQueryRef?.fn?.dialog?.open) {
-    jQueryRef.fn.dialog.open({
-      href: url,
-      title: `Add ${props.title}`,
-      width: 640,
-      modal: false,
-    })
-    return
-  }
-
-  if ((window as any).ConcreteDialog?.open) {
-    ;(window as any).ConcreteDialog.open({
-      href: url,
-      title: `Add ${props.title}`,
-    })
-  }
-}
-
 onMounted(() => {
   if (!blockButton.value) {
     return
@@ -211,17 +180,19 @@ onMounted(() => {
         const target = blockButton.value
         const dropArea = highlightedDropArea.value
         const areaHandle = getAreaHandleFromElement(dropArea)
+        const didFindValidDropZone = areaHandle.length > 0
 
         removeDragPreview()
         setDropHighlight(null)
-        setAddContentDragActive(false)
+        if (didFindValidDropZone) {
+          console.log(props)
+          floatingPanels.close(addPanelId)
+        } else {
+          setAddContentDragActive(false)
+        }
         dragPanelBounds = null
         hasExitedAddPanel = false
         target?.classList.remove('opacity-60')
-
-        if (areaHandle) {
-          openAddBlockDialog(areaHandle)
-        }
       },
     },
   })
