@@ -149,7 +149,7 @@
     </div>
     <FloatingPanelGroup
       :backdrop-to="ui.menuContainer ?? 'body'"
-      backdrop-class="bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]"
+      :backdrop-class="floatingPanelBackdropClass"
     >
       <PageFloatingPanel
         v-model:open="pageSettingsOpen"
@@ -181,7 +181,7 @@ import {
   LayoutDashboard as DashboardIcon,
   Map as SitemapIcon,
 } from 'lucide-vue-next'
-import { computed, ref, onMounted, useTemplateRef } from 'vue'
+import { computed, ref, onMounted, useTemplateRef, watch } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
@@ -266,6 +266,11 @@ const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{
     svg?: string
   }
 }> }>>([])
+const isAddContentDragActive = computed(() => ui.page.addContentDragActive)
+const floatingPanelBackdropClass = computed(() =>
+  isAddContentDragActive.value
+    ? 'pointer-events-none bg-transparent z-[var(--index-layer-panel-backdrop)]'
+    : 'bg-concrete-backdrop-bg z-[var(--index-layer-panel-backdrop)]')
 
 function handleSearch() {
 
@@ -281,6 +286,12 @@ onMounted(() => {
   ui.menuContainer = teleportTarget.value ?? 'body'
   document.querySelector('html').classList.add('ccm-toolbar-visible')
 
+})
+
+watch(() => addPanelOpen.value, (isOpen) => {
+  if (!isOpen) {
+    ui.page.addContentDragActive = false
+  }
 })
 
 const launchPageSettings = () => {

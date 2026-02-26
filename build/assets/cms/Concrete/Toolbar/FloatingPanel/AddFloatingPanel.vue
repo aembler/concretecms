@@ -9,6 +9,7 @@ import {
   FloatingPanelMenuItem,
   FloatingPanelSearch,
   useFuzzySearch,
+  useUiStore,
 } from '@concretecms/backendui'
 import {
   PuzzlePieceIcon,
@@ -70,6 +71,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
+const uiStore = useUiStore()
 
 const modelOpen = computed({
   get: () => props.open,
@@ -180,16 +182,34 @@ const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchK
   minQueryLengthToSearch: 3,
   debounceMs: 100,
 })
+
+const isAddContentDragActive = computed(() => uiStore.page.addContentDragActive)
+const addPanelDragStyle = computed(() => {
+  const active = isAddContentDragActive.value
+  return {
+    transform: active ? 'translate3d(-105%, 0, 0)' : 'translate3d(0, 0, 0)',
+    opacity: active ? '0.12' : '1',
+    willChange: 'transform, opacity',
+    transition: active
+      ? 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 120ms linear'
+      : 'transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease-out',
+  }
+})
 </script>
 
 <template>
-  <div class="fixed left-6 right-6 top-[5.25rem] z-[var(--index-layer-panel)]">
-    <FloatingPanel
-      v-model:open="modelOpen"
-      v-model:expanded="isExpanded"
-      width="min(92vw, 26rem)"
-      height="calc(100vh - 8.5rem)"
-    >
+  <div
+    class="fixed left-6 right-6 top-[5.25rem] z-[var(--index-layer-panel)]"
+    :class="isAddContentDragActive ? 'pointer-events-none' : ''"
+  >
+    <div data-add-floating-panel class="inline-block max-w-full">
+      <FloatingPanel
+        v-model:open="modelOpen"
+        v-model:expanded="isExpanded"
+        width="min(92vw, 26rem)"
+        height="calc(100vh - 8.5rem)"
+        :panel-style="addPanelDragStyle"
+      >
       <template #header>
         <FloatingPanelHeader :closeable="true" :expandable="true" class="px-1 mb-4">
           <template #tabs>
@@ -405,6 +425,7 @@ const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchK
         </template>
       </template>
       </template>
-    </FloatingPanel>
+      </FloatingPanel>
+    </div>
   </div>
 </template>

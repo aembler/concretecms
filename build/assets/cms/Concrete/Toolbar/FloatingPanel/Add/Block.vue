@@ -35,6 +35,8 @@ const highlightedDropArea = ref<HTMLElement | null>(null)
 let interactable: any = null
 let dragPreview: HTMLElement | null = null
 let dragPreviewContainer: HTMLElement | null = null
+let dragPanelBounds: DOMRect | null = null
+let hasExitedAddPanel = false
 
 function getClientCoordinates(event: any): { x: number; y: number } {
   return {
@@ -128,6 +130,14 @@ function removeDragPreview() {
   dragPreviewContainer = null
 }
 
+function setAddContentDragActive(next: boolean) {
+  uiStore.page.addContentDragActive = next
+}
+
+function isPointOutsideRect(x: number, y: number, rect: DOMRect): boolean {
+  return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
+}
+
 function openAddBlockDialog(areaHandle: string) {
   if (!props.blockTypeId || !areaHandle) {
     return
@@ -178,12 +188,23 @@ onMounted(() => {
       start: (event: any) => {
         const target = event.currentTarget as HTMLElement
         const { x, y } = getClientCoordinates(event)
+        const addPanel = target.closest('[data-add-floating-panel]')
+
+        dragPanelBounds = addPanel instanceof HTMLElement ? addPanel.getBoundingClientRect() : null
+        hasExitedAddPanel = false
+        setAddContentDragActive(false)
         target.classList.add('opacity-60')
         createDragPreview(target, x, y)
       },
       move: (event: any) => {
         const { x, y } = getClientCoordinates(event)
         moveDragPreview(x, y)
+
+        if (!hasExitedAddPanel && (!dragPanelBounds || isPointOutsideRect(x, y, dragPanelBounds))) {
+          hasExitedAddPanel = true
+          setAddContentDragActive(true)
+        }
+
         setDropHighlight(getAreaElementFromPoint(x, y))
       },
       end: () => {
@@ -193,6 +214,9 @@ onMounted(() => {
 
         removeDragPreview()
         setDropHighlight(null)
+        setAddContentDragActive(false)
+        dragPanelBounds = null
+        hasExitedAddPanel = false
         target?.classList.remove('opacity-60')
 
         if (areaHandle) {
@@ -206,6 +230,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   removeDragPreview()
   setDropHighlight(null)
+  setAddContentDragActive(false)
+  dragPanelBounds = null
+  hasExitedAddPanel = false
   interactable?.unset?.()
   interactable = null
 })
