@@ -163,6 +163,22 @@ class BlockType
     }
 
     /**
+     * Determines if the block type has an edit template available.
+     *
+     * @return bool
+     */
+    public function hasEditTemplate()
+    {
+        $bv = new BlockView($this);
+        $path = $bv->getBlockPath(FILENAME_BLOCK_EDIT);
+        if (file_exists($path . '/' . FILENAME_BLOCK_EDIT)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * gets the available composer templates
      * used for editing instances of the BlockType while in the composer ui in the dashboard.
      *

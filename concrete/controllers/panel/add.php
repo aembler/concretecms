@@ -3,6 +3,7 @@
 namespace Concrete\Controller\Panel;
 
 use Concrete\Controller\Backend\UserInterface\Page as BackendInterfacePageController;
+use Concrete\Core\Api\Fractal\Transformer\BlockTypeTransformer;
 use Concrete\Core\Application\EditResponse;
 use Concrete\Core\Area\Area;
 use Concrete\Core\Block\Block;
@@ -395,12 +396,14 @@ class Add extends BackendInterfacePageController
 
     /**
      * @param array<string, BlockTypeEntity[]> $blockTypesForSets
-     * @return array<int, array{name: string, blockTypes: array<int, array{id: int, handle: string, name: string, description: string, icon: array<string, mixed>}>}>
+     * @return array<int, array{name: string, blockTypes: array<int, array<string, mixed>>}>
      */
     protected function serializeBlockTypesForSets(array $blockTypesForSets): array
     {
         /** @var BlockType $blockTypeService */
         $blockTypeService = $this->app->make(BlockType::class);
+        /** @var BlockTypeTransformer $blockTypeTransformer */
+        $blockTypeTransformer = $this->app->make(BlockTypeTransformer::class);
         $serializedSets = [];
         foreach ($blockTypesForSets as $setName => $blockTypes) {
             $serializedSet = [
@@ -410,13 +413,9 @@ class Add extends BackendInterfacePageController
 
             foreach ($blockTypes as $blockType) {
                 $icon = $blockTypeService->getBlockTypeIcon($blockType);
-                $serializedSet['blockTypes'][] = [
-                    'id' => (int) $blockType->getBlockTypeID(),
-                    'handle' => (string) $blockType->getBlockTypeHandle(),
-                    'name' => (string) $blockType->getBlockTypeInSetName(),
-                    'description' => (string) $blockType->getBlockTypeDescription(),
-                    'icon' => $icon->jsonSerialize(),
-                ];
+                $blockTypeData = $blockTypeTransformer->transform($blockType);
+                $blockTypeData['icon'] = $icon->jsonSerialize();
+                $serializedSet['blockTypes'][] = $blockTypeData;
             }
 
             $serializedSets[] = $serializedSet;
@@ -573,7 +572,7 @@ class Add extends BackendInterfacePageController
                         Arr::sort(
                             $blockTypesForSets[$key], 
                             function (BlockTypeEntity $bte) {
-                                return $bte->getBlockTypeInSetName();
+                                return $bte->getBlockTypeName();
                             }
                         )
                     );

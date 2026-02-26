@@ -20181,8 +20181,9 @@ __webpack_require__.r(__webpack_exports__);
     }
     var registry = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_4__.useBlockEditorRegistry)();
     var currentEditorComponent = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
-      var _parseBlockType$edito;
-      return registry.getEditorComponent(parseBlockType === null || parseBlockType === void 0 || (_parseBlockType$edito = parseBlockType.editor) === null || _parseBlockType$edito === void 0 ? void 0 : _parseBlockType$edito.component);
+      var _parseBlockType$edito, _parseBlockType$edito2, _parseBlockType$edito3;
+      var editorComponent = (_parseBlockType$edito = parseBlockType === null || parseBlockType === void 0 || (_parseBlockType$edito2 = parseBlockType.editors) === null || _parseBlockType$edito2 === void 0 || (_parseBlockType$edito2 = _parseBlockType$edito2.edit) === null || _parseBlockType$edito2 === void 0 ? void 0 : _parseBlockType$edito2.component) !== null && _parseBlockType$edito !== void 0 ? _parseBlockType$edito : parseBlockType === null || parseBlockType === void 0 || (_parseBlockType$edito3 = parseBlockType.editor) === null || _parseBlockType$edito3 === void 0 ? void 0 : _parseBlockType$edito3.component;
+      return registry.getEditorComponent(editorComponent);
     });
     var __returned__ = {
       editMode: editMode,
@@ -21189,12 +21190,20 @@ var addPanelId = 'toolbar:add';
       type: String,
       required: false,
       "default": ''
+    },
+    editor: {
+      type: [Object, null],
+      required: false,
+      "default": null
     }
   },
+  emits: ["added"],
   setup: function setup(__props, _ref) {
-    var __expose = _ref.expose;
+    var __expose = _ref.expose,
+      __emit = _ref.emit;
     __expose();
     var props = __props;
+    var emit = __emit;
     var iconType = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
       var _props$icon$type, _props$icon;
       return (_props$icon$type = (_props$icon = props.icon) === null || _props$icon === void 0 ? void 0 : _props$icon.type) !== null && _props$icon$type !== void 0 ? _props$icon$type : '';
@@ -21213,6 +21222,8 @@ var addPanelId = 'toolbar:add';
     });
     var uiStore = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.useUiStore)();
     var floatingPanels = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.useFloatingPanelsStore)();
+    var _useAjax = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.useAjax)(),
+      request = _useAjax.request;
     var blockButton = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
     var highlightedDropArea = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
     var interactable = null;
@@ -21220,12 +21231,24 @@ var addPanelId = 'toolbar:add';
     var dragPreviewContainer = null;
     var dragPanelBounds = null;
     var hasExitedAddPanel = false;
+    var lastClientX = 0;
+    var lastClientY = 0;
     function getClientCoordinates(event) {
       var _ref2, _event$clientX, _event$client, _ref3, _event$clientY, _event$client2;
       return {
         x: Number((_ref2 = (_event$clientX = event === null || event === void 0 ? void 0 : event.clientX) !== null && _event$clientX !== void 0 ? _event$clientX : event === null || event === void 0 || (_event$client = event.client) === null || _event$client === void 0 ? void 0 : _event$client.x) !== null && _ref2 !== void 0 ? _ref2 : 0),
         y: Number((_ref3 = (_event$clientY = event === null || event === void 0 ? void 0 : event.clientY) !== null && _event$clientY !== void 0 ? _event$clientY : event === null || event === void 0 || (_event$client2 = event.client) === null || _event$client2 === void 0 ? void 0 : _event$client2.y) !== null && _ref3 !== void 0 ? _ref3 : 0)
       };
+    }
+    function normalizeJsonResponse(response) {
+      if (typeof response !== 'string') {
+        return response;
+      }
+      try {
+        return JSON.parse(response);
+      } catch (error) {
+        return {};
+      }
     }
     function setDropHighlight(target) {
       var _highlightedDropArea$, _highlightedDropArea$2;
@@ -21257,6 +21280,130 @@ var addPanelId = 'toolbar:add';
         return (_nestedBlock$getAttri = nestedBlock.getAttribute('delete-area-handle')) !== null && _nestedBlock$getAttri !== void 0 ? _nestedBlock$getAttri : '';
       }
       return '';
+    }
+    function getAreaEnableGridContainer(areaElement) {
+      if (!areaElement) {
+        return 0;
+      }
+      var rawValue = areaElement.getAttribute('data-area-enable-grid-container') || areaElement.getAttribute('area-enable-grid-container') || areaElement.getAttribute('ar-enable-grid-container') || '0';
+      return parseInt(rawValue, 10) > 0 ? 1 : 0;
+    }
+    function parseConcreteBlockId(blockElement) {
+      var _blockElement$getAttr;
+      if (!blockElement) {
+        return 0;
+      }
+      var rawId = (_blockElement$getAttr = blockElement.getAttribute('id')) !== null && _blockElement$getAttr !== void 0 ? _blockElement$getAttr : '';
+      if (!rawId.startsWith('b')) {
+        return 0;
+      }
+      var blockId = parseInt(rawId.slice(1), 10);
+      return Number.isNaN(blockId) ? 0 : blockId;
+    }
+    function getDragAreaBlockIdFromPoint(x, y, areaHandle) {
+      var target = document.elementFromPoint(x, y);
+      if (!(target instanceof Element)) {
+        return 0;
+      }
+      var blockElement = target.closest('concrete-block[id^="b"]');
+      if (!blockElement) {
+        return 0;
+      }
+      var blockArea = blockElement.closest('[data-area-handle], concrete-area, .ccm-area');
+      if (getAreaHandleFromElement(blockArea) !== areaHandle) {
+        return 0;
+      }
+      return parseConcreteBlockId(blockElement);
+    }
+    function executeScripts(scripts) {
+      scripts.forEach(function (script) {
+        var node = document.createElement('script');
+        if (script.src) {
+          node.src = script.src;
+        } else {
+          node.textContent = script.textContent;
+        }
+        document.body.appendChild(node);
+        node.remove();
+      });
+    }
+    function insertRenderedBlockHtml(html, areaElement, dragAreaBlockID) {
+      var parser = document.createElement('div');
+      parser.innerHTML = html;
+      var scripts = Array.from(parser.querySelectorAll('script'));
+      scripts.forEach(function (script) {
+        return script.remove();
+      });
+      var fragment = document.createDocumentFragment();
+      Array.from(parser.childNodes).forEach(function (node) {
+        return fragment.appendChild(node);
+      });
+      var dragAreaBlock = dragAreaBlockID > 0 ? document.querySelector("concrete-block#b".concat(dragAreaBlockID)) : null;
+      if (dragAreaBlock !== null && dragAreaBlock !== void 0 && dragAreaBlock.parentElement) {
+        dragAreaBlock.after(fragment);
+      } else if (areaElement) {
+        areaElement.prepend(fragment);
+      } else {
+        return;
+      }
+      executeScripts(scripts);
+    }
+    function addBlockWithoutEditor(areaHandle, areaElement, dragAreaBlockID) {
+      var _window$CCM_CID, _props$blockTypeId, _window$CCM_SECURITY_;
+      var cID = Number((_window$CCM_CID = window.CCM_CID) !== null && _window$CCM_CID !== void 0 ? _window$CCM_CID : 0);
+      var btID = Number((_props$blockTypeId = props.blockTypeId) !== null && _props$blockTypeId !== void 0 ? _props$blockTypeId : 0);
+      if (cID <= 0 || btID <= 0 || !areaHandle) {
+        return;
+      }
+      var token = String((_window$CCM_SECURITY_ = window.CCM_SECURITY_TOKEN) !== null && _window$CCM_SECURITY_ !== void 0 ? _window$CCM_SECURITY_ : '');
+      var submitParams = new URLSearchParams();
+      submitParams.set('cID', String(cID));
+      submitParams.set('arHandle', areaHandle);
+      submitParams.set('btID', String(btID));
+      submitParams.set('mode', 'edit');
+      submitParams.set('add', '1');
+      submitParams.set('dragAreaBlockID', String(dragAreaBlockID));
+      if (token) {
+        submitParams.set('ccm_token', token);
+      }
+      // TODO: Legacy flow also flattened area custom templates into arCustomTemplates[<btHandle>].
+      // We are intentionally skipping this until we port template overrides to the Vue add flow.
+      var submitUrl = "".concat(CCM_DISPATCHER_FILENAME, "/ccm/system/dialogs/page/add_block/submit?").concat(submitParams.toString());
+      request({
+        url: submitUrl,
+        method: 'GET',
+        skipResponseValidation: true,
+        onSuccess: function onSuccess(response) {
+          var _normalizedResponse$b;
+          var normalizedResponse = normalizeJsonResponse(response);
+          if (normalizedResponse !== null && normalizedResponse !== void 0 && normalizedResponse.error || Array.isArray(normalizedResponse === null || normalizedResponse === void 0 ? void 0 : normalizedResponse.errors) && normalizedResponse.errors.length > 0) {
+            return;
+          }
+          var bID = parseInt(String((_normalizedResponse$b = normalizedResponse === null || normalizedResponse === void 0 ? void 0 : normalizedResponse.bID) !== null && _normalizedResponse$b !== void 0 ? _normalizedResponse$b : ''), 10);
+          if (Number.isNaN(bID)) {
+            return;
+          }
+          var renderParams = new URLSearchParams();
+          renderParams.set('arHandle', areaHandle);
+          renderParams.set('cID', String(cID));
+          renderParams.set('bID', String(bID));
+          renderParams.set('arEnableGridContainer', String(getAreaEnableGridContainer(areaElement)));
+          var renderUrl = "".concat(CCM_DISPATCHER_FILENAME, "/ccm/system/block/render?").concat(renderParams.toString());
+          request({
+            url: renderUrl,
+            method: 'GET',
+            skipResponseValidation: true,
+            onSuccess: function onSuccess(html) {
+              var _window, _window2;
+              insertRenderedBlockHtml(String(html || ''), areaElement, dragAreaBlockID);
+              emit('added', {
+                title: (normalizedResponse === null || normalizedResponse === void 0 ? void 0 : normalizedResponse.title) || ((_window = window) === null || _window === void 0 || (_window = _window.ccmi18n) === null || _window === void 0 ? void 0 : _window.addBlock) || 'Add Block',
+                message: (normalizedResponse === null || normalizedResponse === void 0 ? void 0 : normalizedResponse.message) || ((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.ccmi18n) === null || _window2 === void 0 ? void 0 : _window2.addBlockMsg) || 'The block has been added successfully.'
+              });
+            }
+          });
+        }
+      });
     }
     function createDragPreview(source, x, y) {
       var width = source.getBoundingClientRect().width;
@@ -21324,6 +21471,8 @@ var addPanelId = 'toolbar:add';
             var _getClientCoordinates = getClientCoordinates(event),
               x = _getClientCoordinates.x,
               y = _getClientCoordinates.y;
+            lastClientX = x;
+            lastClientY = y;
             var addPanel = target.closest('[data-add-floating-panel]');
             dragPanelBounds = addPanel instanceof HTMLElement ? addPanel.getBoundingClientRect() : null;
             hasExitedAddPanel = false;
@@ -21335,6 +21484,8 @@ var addPanelId = 'toolbar:add';
             var _getClientCoordinates2 = getClientCoordinates(event),
               x = _getClientCoordinates2.x,
               y = _getClientCoordinates2.y;
+            lastClientX = x;
+            lastClientY = y;
             moveDragPreview(x, y);
             if (!hasExitedAddPanel && (!dragPanelBounds || isPointOutsideRect(x, y, dragPanelBounds))) {
               hasExitedAddPanel = true;
@@ -21342,21 +21493,32 @@ var addPanelId = 'toolbar:add';
             }
             setDropHighlight(getAreaElementFromPoint(x, y));
           },
-          end: function end() {
+          end: function end(event) {
             var target = blockButton.value;
             var dropArea = highlightedDropArea.value;
             var areaHandle = getAreaHandleFromElement(dropArea);
             var didFindValidDropZone = areaHandle.length > 0;
+            var _getClientCoordinates3 = getClientCoordinates(event),
+              x = _getClientCoordinates3.x,
+              y = _getClientCoordinates3.y;
+            var clientX = x || lastClientX;
+            var clientY = y || lastClientY;
+            var dragAreaBlockID = didFindValidDropZone ? getDragAreaBlockIdFromPoint(clientX, clientY, areaHandle) : 0;
             removeDragPreview();
             setDropHighlight(null);
             if (didFindValidDropZone) {
-              console.log(props);
+              var _props$editor;
               floatingPanels.close(addPanelId);
+              if (!((_props$editor = props.editor) !== null && _props$editor !== void 0 && _props$editor.component)) {
+                addBlockWithoutEditor(areaHandle, dropArea, dragAreaBlockID);
+              }
             } else {
               setAddContentDragActive(false);
             }
             dragPanelBounds = null;
             hasExitedAddPanel = false;
+            lastClientX = 0;
+            lastClientY = 0;
             target === null || target === void 0 || target.classList.remove('opacity-60');
           }
         }
@@ -21374,12 +21536,14 @@ var addPanelId = 'toolbar:add';
     });
     var __returned__ = {
       props: props,
+      emit: emit,
       iconType: iconType,
       imageIconSrc: imageIconSrc,
       fontAwesomeClassName: fontAwesomeClassName,
       inlineSvg: inlineSvg,
       uiStore: uiStore,
       floatingPanels: floatingPanels,
+      request: request,
       addPanelId: addPanelId,
       blockButton: blockButton,
       highlightedDropArea: highlightedDropArea,
@@ -21413,10 +21577,29 @@ var addPanelId = 'toolbar:add';
       set hasExitedAddPanel(v) {
         hasExitedAddPanel = v;
       },
+      get lastClientX() {
+        return lastClientX;
+      },
+      set lastClientX(v) {
+        lastClientX = v;
+      },
+      get lastClientY() {
+        return lastClientY;
+      },
+      set lastClientY(v) {
+        lastClientY = v;
+      },
       getClientCoordinates: getClientCoordinates,
+      normalizeJsonResponse: normalizeJsonResponse,
       setDropHighlight: setDropHighlight,
       getAreaElementFromPoint: getAreaElementFromPoint,
       getAreaHandleFromElement: getAreaHandleFromElement,
+      getAreaEnableGridContainer: getAreaEnableGridContainer,
+      parseConcreteBlockId: parseConcreteBlockId,
+      getDragAreaBlockIdFromPoint: getDragAreaBlockIdFromPoint,
+      executeScripts: executeScripts,
+      insertRenderedBlockHtml: insertRenderedBlockHtml,
+      addBlockWithoutEditor: addBlockWithoutEditor,
       createDragPreview: createDragPreview,
       moveDragPreview: moveDragPreview,
       removeDragPreview: removeDragPreview,
@@ -21501,6 +21684,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   },
   emits: ["update:open"],
   setup: function setup(__props, _ref) {
+    var _window, _window2;
     var __expose = _ref.expose,
       __emit = _ref.emit;
     __expose();
@@ -21682,6 +21866,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         transition: active ? 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 120ms linear' : 'transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease-out'
       };
     });
+    var toastOpen = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(false);
+    var toastTitle = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(((_window = window) === null || _window === void 0 || (_window = _window.ccmi18n) === null || _window === void 0 ? void 0 : _window.addBlock) || 'Add Block');
+    var toastMessage = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.ccmi18n) === null || _window2 === void 0 ? void 0 : _window2.addBlockMsg) || 'The block has been added successfully.');
+    function handleBlockAdded(payload) {
+      var _window3, _window4;
+      toastTitle.value = (payload === null || payload === void 0 ? void 0 : payload.title) || ((_window3 = window) === null || _window3 === void 0 || (_window3 = _window3.ccmi18n) === null || _window3 === void 0 ? void 0 : _window3.addBlock) || 'Add Block';
+      toastMessage.value = (payload === null || payload === void 0 ? void 0 : payload.message) || ((_window4 = window) === null || _window4 === void 0 || (_window4 = _window4.ccmi18n) === null || _window4 === void 0 ? void 0 : _window4.addBlockMsg) || 'The block has been added successfully.';
+      toastOpen.value = false;
+      toastOpen.value = true;
+    }
     var __returned__ = {
       props: props,
       emit: emit,
@@ -21704,6 +21898,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       filteredLayoutItems: filteredLayoutItems,
       isAddContentDragActive: isAddContentDragActive,
       addPanelDragStyle: addPanelDragStyle,
+      toastOpen: toastOpen,
+      toastTitle: toastTitle,
+      toastMessage: toastMessage,
+      handleBlockAdded: handleBlockAdded,
       get FloatingPanel() {
         return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.FloatingPanel;
       },
@@ -21724,6 +21922,24 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       },
       get FloatingPanelSearch() {
         return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.FloatingPanelSearch;
+      },
+      get Toast() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.Toast;
+      },
+      get ToastClose() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.ToastClose;
+      },
+      get ToastDescription() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.ToastDescription;
+      },
+      get ToastProvider() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.ToastProvider;
+      },
+      get ToastTitle() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.ToastTitle;
+      },
+      get ToastViewport() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.ToastViewport;
       },
       AddBlock: _Add_Block_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
     };
@@ -23500,6 +23716,9 @@ var _hoisted_29 = {
   key: 0,
   "class": "rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-500 xl:col-span-2"
 };
+var _hoisted_30 = {
+  "class": "grid gap-1"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["fixed left-6 right-6 top-[5.25rem] z-[var(--index-layer-panel)]", $setup.isAddContentDragActive ? 'pointer-events-none' : ''])
@@ -23555,20 +23774,24 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           key: set.name,
           "class": "mb-6"
         }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(set.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(set.blockTypes, function (blockType) {
+          var _blockType$editors$ad, _blockType$editors;
           return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)($setup["AddBlock"], {
             key: "".concat(set.name, "-").concat(blockType.id),
             icon: blockType.icon,
             title: blockType.name,
             description: blockType.description,
             "block-type-id": blockType.id,
-            "block-type-handle": blockType.handle
-          }, null, 8 /* PROPS */, ["icon", "title", "description", "block-type-id", "block-type-handle"]);
+            "block-type-handle": blockType.handle,
+            editor: (_blockType$editors$ad = (_blockType$editors = blockType.editors) === null || _blockType$editors === void 0 ? void 0 : _blockType$editors.add) !== null && _blockType$editors$ad !== void 0 ? _blockType$editors$ad : null,
+            onAdded: $setup.handleBlockAdded
+          }, null, 8 /* PROPS */, ["icon", "title", "description", "block-type-id", "block-type-handle", "editor"]);
         }), 128 /* KEYED_FRAGMENT */))])]);
       }), 128 /* KEYED_FRAGMENT */))]), $setup.filteredBlockSets.length === 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, " No block types match your search. ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64 /* STABLE_FRAGMENT */)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.filteredBlockSets, function (set) {
         return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
           key: "expanded-".concat(set.name),
           "class": "mb-6"
         }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(set.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(set.blockTypes, function (blockType) {
+          var _blockType$editors$ad2, _blockType$editors2;
           return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)($setup["AddBlock"], {
             key: "expanded-".concat(set.name, "-").concat(blockType.id),
             icon: blockType.icon,
@@ -23576,8 +23799,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             description: blockType.description,
             expanded: true,
             "block-type-id": blockType.id,
-            "block-type-handle": blockType.handle
-          }, null, 8 /* PROPS */, ["icon", "title", "description", "block-type-id", "block-type-handle"]);
+            "block-type-handle": blockType.handle,
+            editor: (_blockType$editors$ad2 = (_blockType$editors2 = blockType.editors) === null || _blockType$editors2 === void 0 ? void 0 : _blockType$editors2.add) !== null && _blockType$editors$ad2 !== void 0 ? _blockType$editors$ad2 : null,
+            onAdded: $setup.handleBlockAdded
+          }, null, 8 /* PROPS */, ["icon", "title", "description", "block-type-id", "block-type-handle", "editor"]);
         }), 128 /* KEYED_FRAGMENT */))])]);
       }), 128 /* KEYED_FRAGMENT */)), $setup.filteredBlockSets.length === 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_11, " No block types match your search. ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]))], 64 /* STABLE_FRAGMENT */)) : $setup.activeTab === 'clipboard' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
         key: 3
@@ -23587,7 +23812,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
           return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["FloatingPanelMenuTitle"], null, {
             "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-              return _cache[7] || (_cache[7] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clipboard")]);
+              return _cache[8] || (_cache[8] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Clipboard")]);
             }),
             _: 1 /* STABLE */
           }), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.filteredClipboardItems, function (item) {
@@ -23629,7 +23854,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
           return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["FloatingPanelMenuTitle"], null, {
             "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-              return _cache[8] || (_cache[8] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Content Library")]);
+              return _cache[9] || (_cache[9] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Content Library")]);
             }),
             _: 1 /* STABLE */
           }), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.filteredLibraryItems, function (item) {
@@ -23671,7 +23896,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
           return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["FloatingPanelMenuTitle"], null, {
             "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-              return _cache[9] || (_cache[9] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Layouts & Containers")]);
+              return _cache[10] || (_cache[10] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Layouts & Containers")]);
             }),
             _: 1 /* STABLE */
           }), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($setup.filteredLayoutItems, function (item) {
@@ -23708,7 +23933,36 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }), 128 /* KEYED_FRAGMENT */)), $setup.filteredLayoutItems.length === 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_29, " No layouts or containers match your search. ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]))], 64 /* STABLE_FRAGMENT */))];
     }),
     _: 1 /* STABLE */
-  }, 8 /* PROPS */, ["open", "expanded", "panel-style"])])], 2 /* CLASS */);
+  }, 8 /* PROPS */, ["open", "expanded", "panel-style"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ToastProvider"], {
+    duration: 3000,
+    "swipe-direction": "right"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Toast"], {
+        open: $setup.toastOpen,
+        variant: "success",
+        "onUpdate:open": _cache[7] || (_cache[7] = function ($event) {
+          return $setup.toastOpen = $event;
+        })
+      }, {
+        "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_30, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ToastTitle"], null, {
+            "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+              return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.toastTitle), 1 /* TEXT */)];
+            }),
+            _: 1 /* STABLE */
+          }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ToastDescription"], null, {
+            "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+              return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.toastMessage), 1 /* TEXT */)];
+            }),
+            _: 1 /* STABLE */
+          })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ToastClose"])];
+        }),
+        _: 1 /* STABLE */
+      }, 8 /* PROPS */, ["open"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ToastViewport"])];
+    }),
+    _: 1 /* STABLE */
+  })])], 2 /* CLASS */);
 }
 
 /***/ }),

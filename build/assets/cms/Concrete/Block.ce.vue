@@ -235,7 +235,8 @@ function handleUpdated(payload: { response: any; html: string }) {
 
 const registry = useBlockEditorRegistry();
 const currentEditorComponent = computed(() => {
-  return registry.getEditorComponent(parseBlockType?.editor?.component);
+  const editorComponent = parseBlockType?.editors?.edit?.component ?? parseBlockType?.editor?.component
+  return registry.getEditorComponent(editorComponent);
 });
 
 </script>

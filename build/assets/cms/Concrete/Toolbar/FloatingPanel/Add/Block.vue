@@ -11,6 +11,10 @@ type PanelIcon = {
   svg?: string
 }
 
+type BlockTypeEditor = {
+  component: string
+} | null
+
 const props = withDefaults(defineProps<{
   icon?: PanelIcon
   title: string
@@ -18,11 +22,13 @@ const props = withDefaults(defineProps<{
   expanded?: boolean
   blockTypeId?: number
   blockTypeHandle?: string
+  editor?: BlockTypeEditor
 }>(), {
   description: '',
   expanded: false,
   blockTypeId: 0,
   blockTypeHandle: '',
+  editor: null,
 })
 
 const iconType = computed(() => props.icon?.type ?? '')
@@ -185,7 +191,15 @@ onMounted(() => {
         removeDragPreview()
         setDropHighlight(null)
         if (didFindValidDropZone) {
-          console.log(props)
+          console.debug('[AddBlockDrag] Valid drop zone detected', {
+            blockTypeId: props.blockTypeId,
+            blockTypeHandle: props.blockTypeHandle,
+            title: props.title,
+            description: props.description,
+            areaHandle,
+            addEditor: props.editor,
+            addEditorComponent: props.editor?.component ?? null,
+          })
           floatingPanels.close(addPanelId)
         } else {
           setAddContentDragActive(false)

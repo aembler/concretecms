@@ -20,7 +20,10 @@ class BlockTypeTransformer extends TransformerAbstract
             'handle' => $blockType->getBlockTypeHandle(),
             'name' => $blockType->getBlockTypeName(),
             'description' => $blockType->getBlockTypeDescription(),
-            'editor' => $this->editorFactory->createFromBlockType($blockType),
+            'editors' => [
+                EditorFactory::MODE_ADD => $this->editorFactory->createForBlockType($blockType, EditorFactory::MODE_ADD),
+                EditorFactory::MODE_EDIT => $this->editorFactory->createForBlockType($blockType, EditorFactory::MODE_EDIT),
+            ],
         ];
     }
 

@@ -29,11 +29,19 @@ import AddBlock from './Add/Block.vue'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
 
+type BlockTypeEditor = {
+  component: string
+} | null
+
 type BlockType = {
   id: number
   handle: string
   name: string
   description?: string
+  editors?: {
+    add?: BlockTypeEditor
+    edit?: BlockTypeEditor
+  }
   icon?: {
     type: string
     src?: string
@@ -251,6 +259,7 @@ const addPanelDragStyle = computed(() => {
                   :description="blockType.description"
                   :block-type-id="blockType.id"
                   :block-type-handle="blockType.handle"
+                  :editor="blockType.editors?.add ?? null"
                 />
               </div>
             </div>
@@ -277,6 +286,7 @@ const addPanelDragStyle = computed(() => {
                   :expanded="true"
                   :block-type-id="blockType.id"
                   :block-type-handle="blockType.handle"
+                  :editor="blockType.editors?.add ?? null"
                 />
               </div>
             </div>

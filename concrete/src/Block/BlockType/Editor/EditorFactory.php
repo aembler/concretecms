@@ -9,14 +9,17 @@ use Concrete\Core\Support\Facade\Application;
 
 class EditorFactory
 {
-    public function createFromBlockType(BlockType $blockType): EditorInterface
+    public const MODE_ADD = 'add';
+    public const MODE_EDIT = 'edit';
+
+    public function createForBlockType(BlockType $blockType, string $mode = self::MODE_EDIT): ?EditorInterface
     {
+        if (!$this->supportsMode($blockType, $mode)) {
+            return null;
+        }
+
         $controller = $blockType->getController();
-        if (
-            is_object($controller)
-            && method_exists($controller, 'supportsInlineEdit')
-            && $controller->supportsInlineEdit()
-        ) {
+        if ($this->supportsInlineEditor($controller, $mode)) {
             return new InlineEditor();
         }
 
@@ -40,5 +43,36 @@ class EditorFactory
         }
 
         return new DialogEditor();
+    }
+
+    protected function supportsMode(BlockType $blockType, string $mode): bool
+    {
+        if ($mode === self::MODE_ADD) {
+            return $blockType->hasAddTemplate();
+        }
+        if ($mode === self::MODE_EDIT) {
+            return $blockType->hasEditTemplate();
+        }
+
+        return false;
+    }
+
+    protected function supportsInlineEditor($controller, string $mode): bool
+    {
+        if (!is_object($controller)) {
+            return false;
+        }
+
+        if ($mode === self::MODE_ADD) {
+            return method_exists($controller, 'supportsInlineAdd')
+                && $controller->supportsInlineAdd();
+        }
+
+        if ($mode === self::MODE_EDIT) {
+            return method_exists($controller, 'supportsInlineEdit')
+                && $controller->supportsInlineEdit();
+        }
+
+        return false;
     }
 }

@@ -24,6 +24,7 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
 <?php } else {
 
     $blockTypeData = app(BlockTypeTransformer::class)->transform($blockType);
+    $blockTypeData['editor'] = $blockTypeData['editors']['edit'] ?? null;
     $isMasterCollection = $c->isMasterCollection();
     $defaultsMessage = '';
     if ($isMasterCollection) {

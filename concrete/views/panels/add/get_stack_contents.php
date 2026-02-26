@@ -22,7 +22,7 @@ $blockTypeService = app(\Concrete\Core\Block\BlockType\BlockType::class);
             data-has-add-template="<?= $type->hasAddTemplate() ?>"
             data-supports-inline-add="<?= $type->supportsInlineAdd() ?>"
             data-btID="<?= $type->getBlockTypeID() ?>"
-            data-dragging-avatar="<?= h('<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center">' . $icon . '</div><p><span>' . t($type->getBlockTypeInSetName()) . '</span></p>') ?>"
+            data-dragging-avatar="<?= h('<div class="ccm-block-icon-wrapper d-flex align-items-center justify-content-center">' . $icon . '</div><p><span>' . t($type->getBlockTypeName()) . '</span></p>') ?>"
             title="<?= t($type->getBlockTypeName()) ?>"
             data-block-id="<?= (int) $block->getBlockID() ?>"
         >
