@@ -229,6 +229,8 @@ const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchK
                   :icon="blockType.icon"
                   :title="blockType.name"
                   :description="blockType.description"
+                  :block-type-id="blockType.id"
+                  :block-type-handle="blockType.handle"
                 />
               </div>
             </div>
@@ -253,6 +255,8 @@ const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchK
                   :title="blockType.name"
                   :description="blockType.description"
                   :expanded="true"
+                  :block-type-id="blockType.id"
+                  :block-type-handle="blockType.handle"
                 />
               </div>
             </div>
