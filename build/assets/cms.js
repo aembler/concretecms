@@ -94,13 +94,3 @@ customElements.define('concrete-area', ConcreteAreaElement)
 customElements.define('concrete-block', ConcreteBlockElement)
 customElements.define('concrete-container', ConcreteContainerElement)
 customElements.define('concrete-area-block-target', ConcreteAreaBlockTargetElement)
-
-import { useBlockEditorRegistry } from '@concretecms/backendui';
-import ComposableEditor from './cms/Concrete/Block/Editor/ComposableEditor.vue';
-import DialogEditor from './cms/Concrete/Block/Editor/DialogEditor.vue';
-import InlineEditor from './cms/Concrete/Block/Editor/InlineEditor.vue';
-
-const registry = useBlockEditorRegistry();
-registry.registerEditorComponent('ComposableEditor', ComposableEditor);
-registry.registerEditorComponent('DialogEditor', DialogEditor);
-registry.registerEditorComponent('InlineEditor', InlineEditor);

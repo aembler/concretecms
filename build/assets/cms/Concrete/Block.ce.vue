@@ -69,8 +69,10 @@ import { computed, getCurrentInstance, ref } from "vue"
 import HotSpot from "./Ui/HotSpot.vue"
 import Menu from "./Block/Menu.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
+import DialogEditor from "./Block/Editor/DialogEditor.vue";
+import ComposableEditor from "./Block/Editor/ComposableEditor.vue";
+import InlineEditor from "./Block/Editor/InlineEditor.vue";
 import { useParsedJsonProp } from '@concretecms/backendui'
-import { useBlockEditorRegistry } from '@concretecms/backendui'
 import { useUiStore } from '@concretecms/backendui'
 import {
   Toast,
@@ -222,10 +224,19 @@ function handleUpdated(payload: { response: any; html: string }) {
   toastOpen.value = true
 }
 
-const registry = useBlockEditorRegistry();
+const editorComponents: Record<string, any> = {
+  DialogEditor,
+  ComposableEditor,
+  InlineEditor,
+}
+
 const currentEditorComponent = computed(() => {
-  const editorComponent = parseBlockType?.editors?.edit?.component ?? parseBlockType?.editor?.component
-  return registry.getEditorComponent(editorComponent);
+  const editorComponentKey = parseBlockType?.editors?.edit?.component ?? parseBlockType?.editor?.component
+  if (!editorComponentKey || typeof editorComponentKey !== 'string') {
+    return null
+  }
+
+  return editorComponents[editorComponentKey] ?? null
 });
 
 </script>
