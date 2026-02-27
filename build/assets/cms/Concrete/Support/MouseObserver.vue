@@ -4,11 +4,18 @@ import { useUiStore } from '@concretecms/backendui'
 
 const uiStore = useUiStore()
 
-function handleMouseMove(event: MouseEvent) {
-  const path = event.composedPath() as HTMLElement[]
-  const firstElementWithId = path.find(el => (el as HTMLElement).id) as HTMLElement | undefined
+function getFirstElementWithIdFromPath(eventPath: EventTarget[]): HTMLElement | null {
+  const firstElementWithId = eventPath.find(
+    (el): el is HTMLElement => el instanceof HTMLElement && Boolean(el.id)
+  )
 
-  if (firstElementWithId) {
+  return firstElementWithId || null
+}
+
+function handleMouseMove(event: MouseEvent) {
+  const firstElementWithId = getFirstElementWithIdFromPath(event.composedPath())
+
+  if (firstElementWithId?.id) {
     uiStore.clickProxy.hoverElementId = firstElementWithId.id
   } else {
     uiStore.clickProxy.hoverElementId = ''
@@ -60,8 +67,10 @@ function handleGlobalClick(event: MouseEvent) {
     const clickedInsideActive = isClickInsideActiveMenu(eventPath, eventTarget, activeMenuId)
 
     if (!clickedInsideActive) {
-      uiStore.clickProxy.hoverElementId = ''
+      const firstElementWithId = getFirstElementWithIdFromPath(eventPath)
+      uiStore.clickProxy.hoverElementId = firstElementWithId?.id || ''
       uiStore.clickProxy.activeElementId = ''
+      uiStore.clickProxy.activeElementMenuId = ''
       uiStore.clickProxy.doubleClickedElementId = ''
       event.stopPropagation()
     }

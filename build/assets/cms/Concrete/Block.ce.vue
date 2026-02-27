@@ -3,6 +3,7 @@
       v-if="!isDeleted"
       :item-id="id"
       :menu-id="menuId"
+      :active="!isAddContentDragActive"
       hover-outline-color="outline-concrete-green"
       active-outline-color="outline-concrete-green"
       active-bg-class="bg-concrete-green/30"
@@ -115,6 +116,7 @@ const parseBlockType = useParsedJsonProp(props.blocktype)
 const instance = getCurrentInstance()
 
 let menuId = computed(() => props.id + '-menu')
+const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
 
 function editBlock() {
   editMode.value = true
@@ -218,19 +220,6 @@ function handleUpdated(payload: { response: any; html: string }) {
   toastDescription.value = payload?.response?.message || 'The block has been saved successfully.'
   toastOpen.value = false
   toastOpen.value = true
-
-  const parsedAreaId = parseInt(payload?.response?.aID, 10)
-  const parsedBlockId = parseInt(payload?.response?.bID, 10)
-  if (Number.isNaN(parsedAreaId) || Number.isNaN(parsedBlockId)) {
-    return
-  }
-
-  const editor = (window as any).Concrete?.getEditMode?.()
-  const area = editor?.getAreaByID?.(parsedAreaId)
-  const block = area?.getBlockByID?.(parsedBlockId)
-  ;(window as any).ConcreteEvent?.fire?.('EditModeUpdateBlockComplete', {
-    block: block
-  })
 }
 
 const registry = useBlockEditorRegistry();

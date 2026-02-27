@@ -2,7 +2,8 @@
   <div
       ref="rootEl"
       :class="[
-      'select-none z-1 relative cursor-pointer outline-3 transition-all duration-200',
+      'select-none z-1 relative outline-3 transition-all duration-200',
+      props.active ? 'cursor-pointer' : 'cursor-default',
       outlineColor,
     ]"
   >
@@ -20,7 +21,7 @@
 
     <!-- Menu: stays absolutely positioned, with dynamic top -->
     <!-- need data-theme=light for daisyUI variables -->
-    <teleport :to="uiStore.menuContainer">
+    <teleport v-if="props.active" :to="uiStore.menuContainer">
       <Transition
           enter-active-class="transition-opacity duration-200"
           enter-from-class="opacity-0"
@@ -49,27 +50,30 @@
 
     <div
         :class="[
-        'absolute inset-0 z-10 pointer-events-auto transition-all duration-200',
+        'absolute inset-0 z-10 transition-all duration-200',
+        props.active ? 'pointer-events-auto' : 'pointer-events-none',
         isStoreActiveMatch && activeBgClass
       ]"
     ></div>
-    <div class="absolute inset-0 cursor-pointer z-2"></div>
+    <div :class="['absolute inset-0 z-2', props.active ? 'cursor-pointer' : 'cursor-default']"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useUiStore } from '@concretecms/backendui'
 
 const props = withDefaults(
     defineProps<{
       itemId: string
       menuId: string
+      active?: boolean
       hoverOutlineColor?: string
       activeOutlineColor?: string
       activeBgClass?: string
     }>(),
     {
+      active: true,
       hoverOutlineColor: 'concrete-green',
       activeOutlineColor: 'concrete-green',
       activeBgClass: '',
@@ -83,9 +87,13 @@ const menuEl = ref<HTMLElement | null>(null)
 const menuTop = ref('0px')
 const menuLeft = ref('0px')
 
-const isStoreActiveMatch = computed(() => uiStore.clickProxy.activeElementId === props.itemId)
-const isStoreDoubleClickMatch = computed(() => uiStore.clickProxy.doubleClickedElementId === props.itemId)
+const isStoreActiveMatch = computed(() => props.active && uiStore.clickProxy.activeElementId === props.itemId)
+const isStoreDoubleClickMatch = computed(() => props.active && uiStore.clickProxy.doubleClickedElementId === props.itemId)
 const isStoreHoverMatch = computed(() => {
+  if (!props.active) {
+    return false
+  }
+
   if (!uiStore.clickProxy.activeElementId) {
     return uiStore.clickProxy.hoverElementId === props.itemId
   }
@@ -103,6 +111,10 @@ const verticalDifferenceAbove = 10
 const verticalDifferenceBelow = 10
 
 async function updateMenuTop() {
+  if (!props.active) {
+    return
+  }
+
   if (!rootEl.value || !menuEl.value || !isStoreActiveMatch.value) return
 
   const rect = rootEl.value.getBoundingClientRect()
@@ -128,11 +140,29 @@ onMounted(() => {
 })
 watch([() => uiStore.scroll.y, () => isStoreActiveMatch.value], updateMenuTop)
 watch(() => isStoreActiveMatch.value, () => {
+  if (!props.active) {
+    return
+  }
+
   uiStore.clickProxy.activeElementMenuId = props.menuId
 })
 watch(() => isStoreDoubleClickMatch.value, (value) => {
   if (value) {
     emit('dblclick')
+  }
+})
+watch(() => props.active, (active) => {
+  if (active) {
+    return
+  }
+
+  if (uiStore.clickProxy.activeElementId === props.itemId) {
+    uiStore.clickProxy.activeElementId = ''
+    uiStore.clickProxy.activeElementMenuId = ''
+    uiStore.clickProxy.doubleClickedElementId = ''
+  }
+  if (uiStore.clickProxy.hoverElementId === props.itemId) {
+    uiStore.clickProxy.hoverElementId = ''
   }
 })
 </script>

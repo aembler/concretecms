@@ -88,6 +88,7 @@ class FileManager
 <div data-concrete-file-input="{$uniqid}">
     <concrete-file-input {$filters} :file-id="{$fID}" choose-text="{$chooseText}" input-name="{$inputName}"></concrete-file-input>
 </div>
+<!--
 <script type="text/javascript">
 $(function() {
     Concrete.Vue.activateContext('cms', function (Vue, config) {
@@ -98,6 +99,7 @@ $(function() {
     })
 });
 </script>
+//-->
 EOL;
         return $html;
     }

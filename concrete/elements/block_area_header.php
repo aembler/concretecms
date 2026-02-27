@@ -9,3 +9,6 @@ defined('C5_EXECUTE') or die("Access Denied.");
     data-area-id="<?=$a->getAreaID()?>"
     data-area-handle="<?=h($a->getAreaHandle())?>"
 >
+<?php
+View::element('block_area_block_target', ['a' => $a, 'afterBlockId' => 0, 'targetIndex' => 0]);
+?>

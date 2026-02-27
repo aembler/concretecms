@@ -16,6 +16,7 @@ import ConcreteApp from './cms/Concrete/App.ce.vue'
 import ConcreteArea from './cms/Concrete/Area.ce.vue'
 import ConcreteBlock from './cms/Concrete/Block.ce.vue'
 import ConcreteContainer from './cms/Concrete/Container.ce.vue'
+import ConcreteAreaBlockTarget from './cms/Concrete/AreaBlockTarget.ce.vue'
 
 import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
 import postcss from 'postcss'
@@ -58,20 +59,33 @@ const app = createApp();
 const pinia = createPinia();
 app.use(pinia);
 
+// For custom elements we must merge component-local SFC styles with the shared
+// backend UI stylesheet. Passing only `styles: [cleanedCss]` can overwrite the
+// CE's compiled local styles, which makes `<style>` blocks inside `.ce.vue`
+// components appear to be ignored.
+function getMergedElementStyles(component) {
+    const localStyles = Array.isArray(component?.styles) ? component.styles : []
+    return [...localStyles, cleanedCss]
+}
+
 const ConcreteAppElement = defineCustomElement(ConcreteApp, {
-    styles: [cleanedCss],
+    styles: getMergedElementStyles(ConcreteApp),
     plugins: [pinia]
 })
 const ConcreteAreaElement = defineCustomElement(ConcreteArea, {
-    styles: [cleanedCss],
+    styles: getMergedElementStyles(ConcreteArea),
     plugins: [pinia]
 })
 const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
-    styles: [cleanedCss],
+    styles: getMergedElementStyles(ConcreteBlock),
     plugins: [pinia]
 })
 const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {
-    styles: [cleanedCss],
+    styles: getMergedElementStyles(ConcreteContainer),
+    plugins: [pinia]
+})
+const ConcreteAreaBlockTargetElement = defineCustomElement(ConcreteAreaBlockTarget, {
+    styles: getMergedElementStyles(ConcreteAreaBlockTarget),
     plugins: [pinia]
 })
 
@@ -79,6 +93,7 @@ customElements.define('concrete-app', ConcreteAppElement)
 customElements.define('concrete-area', ConcreteAreaElement)
 customElements.define('concrete-block', ConcreteBlockElement)
 customElements.define('concrete-container', ConcreteContainerElement)
+customElements.define('concrete-area-block-target', ConcreteAreaBlockTargetElement)
 
 import { useBlockEditorRegistry } from '@concretecms/backendui';
 import ComposableEditor from './cms/Concrete/Block/Editor/ComposableEditor.vue';

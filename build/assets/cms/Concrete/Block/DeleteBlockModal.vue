@@ -76,7 +76,8 @@ import {
   ToastDescription,
   ToastProvider,
   ToastTitle,
-  ToastViewport
+  ToastViewport,
+  normalizeJsonResponse
 } from '@concretecms/backendui'
 
 const props = withDefaults(defineProps<{
@@ -141,14 +142,7 @@ function submitDelete() {
     method: 'POST',
     body,
     onSuccess: (response) => {
-      let normalizedResponse: any = response
-      if (typeof normalizedResponse === 'string') {
-        try {
-          normalizedResponse = JSON.parse(normalizedResponse)
-        } catch (error) {
-          normalizedResponse = {}
-        }
-      }
+      const normalizedResponse: any = normalizeJsonResponse(response)
 
       emit('update:open', false)
       emit('deleted', normalizedResponse)

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
+import { useAjax, useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
+import { buildRenderUrl, normalizeJsonResponse, renderBlockHtmlAtDropTarget } from '../../../../support/block'
 
 type PanelIcon = {
   type: string
@@ -14,6 +15,24 @@ type PanelIcon = {
 type BlockTypeEditor = {
   component: string
 } | null
+
+type AddContentDropTarget = {
+  areaId?: number | string
+  areaHandle?: string
+  afterBlockId?: number | string
+  targetIndex?: number | string
+}
+
+type AddContentDraggedItem = {
+  type?: string
+  payload?: {
+    blockTypeId?: number
+    blockTypeHandle?: string
+    title?: string
+    description?: string
+    editor?: BlockTypeEditor
+  }
+}
 
 const props = withDefaults(defineProps<{
   icon?: PanelIcon
@@ -37,57 +56,37 @@ const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ?
 const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 const uiStore = useUiStore()
 const floatingPanels = useFloatingPanelsStore()
+const { request } = useAjax()
+const pageState = computed(() => (uiStore.page as any))
 const addPanelId = 'toolbar:add'
 const blockButton = ref<HTMLButtonElement | null>(null)
-const highlightedDropArea = ref<HTMLElement | null>(null)
 let interactable: any = null
 let dragPreview: HTMLElement | null = null
 let dragPreviewContainer: HTMLElement | null = null
 let dragPanelBounds: DOMRect | null = null
 let hasExitedAddPanel = false
+let isSubmittingAddWithoutEditor = false
+
+function ensureAddContentPageState() {
+  if (typeof pageState.value.addContentDragInProgress === 'undefined') {
+    pageState.value.addContentDragInProgress = false
+  }
+  if (typeof pageState.value.addContentDragPointer === 'undefined') {
+    pageState.value.addContentDragPointer = null
+  }
+  if (typeof pageState.value.addContentDraggedItem === 'undefined') {
+    pageState.value.addContentDraggedItem = null
+  }
+  if (typeof pageState.value.addContentDropTarget === 'undefined') {
+    pageState.value.addContentDropTarget = null
+  }
+}
 
 function getClientCoordinates(event: any): { x: number; y: number } {
   return {
     x: Number(event?.clientX ?? event?.client?.x ?? 0),
     y: Number(event?.clientY ?? event?.client?.y ?? 0),
   }
-}
-
-function setDropHighlight(target: HTMLElement | null) {
-  if (highlightedDropArea.value === target) {
-    return
-  }
-
-  highlightedDropArea.value?.classList.remove('ccm-add-block-drop-target')
-  highlightedDropArea.value = target
-  highlightedDropArea.value?.classList.add('ccm-add-block-drop-target')
-}
-
-function getAreaElementFromPoint(x: number, y: number): HTMLElement | null {
-  const target = document.elementFromPoint(x, y)
-  if (!(target instanceof Element)) {
-    return null
-  }
-
-  return target.closest('[data-area-handle], concrete-area, .ccm-area') as HTMLElement | null
-}
-
-function getAreaHandleFromElement(areaElement: HTMLElement | null): string {
-  if (!areaElement) {
-    return ''
-  }
-
-  const areaHandleFromData = areaElement.getAttribute('data-area-handle') || areaElement.getAttribute('area-handle')
-  if (areaHandleFromData) {
-    return areaHandleFromData
-  }
-
-  const nestedBlock = areaElement.querySelector('concrete-block[delete-area-handle]')
-  if (nestedBlock instanceof HTMLElement) {
-    return nestedBlock.getAttribute('delete-area-handle') ?? ''
-  }
-
-  return ''
 }
 
 function createDragPreview(source: HTMLElement, x: number, y: number) {
@@ -142,11 +141,111 @@ function setAddContentDragActive(next: boolean) {
   uiStore.page.addContentDragActive = next
 }
 
+function setAddContentDragInProgress(next: boolean) {
+  pageState.value.addContentDragInProgress = next
+}
+
+function setAddContentDragPointer(x: number, y: number) {
+  pageState.value.addContentDragPointer = { x, y }
+}
+
+function clearAddContentDragPointer() {
+  pageState.value.addContentDragPointer = null
+}
+
+function setAddContentDraggedItem() {
+  pageState.value.addContentDraggedItem = {
+    type: 'blockType',
+    payload: {
+      blockTypeId: props.blockTypeId ?? 0,
+      blockTypeHandle: props.blockTypeHandle ?? '',
+      title: props.title,
+      description: props.description ?? '',
+      editor: props.editor ?? null,
+    },
+  }
+}
+
+function clearAddContentDraggedItem() {
+  pageState.value.addContentDraggedItem = null
+}
+
+function clearAddContentDropTarget() {
+  pageState.value.addContentDropTarget = null
+}
+
 function isPointOutsideRect(x: number, y: number, rect: DOMRect): boolean {
   return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
 }
 
+function notifyBlockAdded() {
+  const message = (window as any).ccmi18n?.addBlockMsg || 'The block has been added successfully.'
+  ;(window as any).ConcreteAlert?.notify?.({ message })
+}
+
+function submitAddBlockWithoutEditor(dropTarget: AddContentDropTarget) {
+  if (isSubmittingAddWithoutEditor) {
+    return
+  }
+
+  const arHandle = String(dropTarget?.areaHandle || '')
+  const btID = Number(props.blockTypeId || 0)
+  if (!arHandle || btID <= 0) {
+    return
+  }
+
+  isSubmittingAddWithoutEditor = true
+  const cID = Number((window as any).CCM_CID || 0)
+  const ccmToken = String((window as any).CCM_SECURITY_TOKEN || '')
+  const dragAreaBlockID = Number(dropTarget?.afterBlockId || 0)
+
+  const submitParams = new URLSearchParams()
+  submitParams.set('cID', String(cID))
+  submitParams.set('arHandle', arHandle)
+  submitParams.set('btID', String(btID))
+  submitParams.set('mode', 'edit')
+  submitParams.set('add', '1')
+  submitParams.set('ccm_token', ccmToken)
+  submitParams.set('dragAreaBlockID', String(dragAreaBlockID))
+  // TODO: add legacy arCustomTemplates support when custom templates are wired into uiStore.page state.
+
+  request({
+    url: `${CCM_DISPATCHER_FILENAME}/ccm/system/dialogs/page/add_block/submit?${submitParams.toString()}`,
+    method: 'GET',
+    skipResponseValidation: true,
+    onSuccess: (response) => {
+      const normalizedResponse: any = normalizeJsonResponse(response)
+      if (normalizedResponse?.error || (Array.isArray(normalizedResponse?.errors) && normalizedResponse.errors.length > 0)) {
+        return
+      }
+
+      const renderUrl = buildRenderUrl(normalizedResponse)
+      if (!renderUrl) {
+        return
+      }
+
+      request({
+        url: renderUrl,
+        method: 'GET',
+        skipResponseValidation: true,
+        onSuccess: (html: string) => {
+          const didRender = renderBlockHtmlAtDropTarget(String(html || ''), dropTarget)
+          if (!didRender) {
+            return
+          }
+
+          notifyBlockAdded()
+        },
+      })
+    },
+    onComplete: () => {
+      isSubmittingAddWithoutEditor = false
+    },
+  })
+}
+
 onMounted(() => {
+  ensureAddContentPageState()
   if (!blockButton.value) {
     return
   }
@@ -168,42 +267,42 @@ onMounted(() => {
         dragPanelBounds = addPanel instanceof HTMLElement ? addPanel.getBoundingClientRect() : null
         hasExitedAddPanel = false
         setAddContentDragActive(false)
+        setAddContentDragInProgress(true)
+        clearAddContentDropTarget()
+        setAddContentDraggedItem()
+        setAddContentDragPointer(x, y)
         target.classList.add('opacity-60')
         createDragPreview(target, x, y)
       },
       move: (event: any) => {
         const { x, y } = getClientCoordinates(event)
         moveDragPreview(x, y)
+        setAddContentDragPointer(x, y)
 
         if (!hasExitedAddPanel && (!dragPanelBounds || isPointOutsideRect(x, y, dragPanelBounds))) {
           hasExitedAddPanel = true
           setAddContentDragActive(true)
         }
-
-        setDropHighlight(getAreaElementFromPoint(x, y))
       },
       end: () => {
         const target = blockButton.value
-        const dropArea = highlightedDropArea.value
-        const areaHandle = getAreaHandleFromElement(dropArea)
-        const didFindValidDropZone = areaHandle.length > 0
+        const activeDropTarget = (pageState.value.addContentDropTarget || null) as AddContentDropTarget | null
+        const draggedItem = (pageState.value.addContentDraggedItem || null) as AddContentDraggedItem | null
+        const didFindValidDropZone = Boolean(activeDropTarget?.areaHandle && draggedItem?.type === 'blockType')
 
         removeDragPreview()
-        setDropHighlight(null)
         if (didFindValidDropZone) {
-          console.debug('[AddBlockDrag] Valid drop zone detected', {
-            blockTypeId: props.blockTypeId,
-            blockTypeHandle: props.blockTypeHandle,
-            title: props.title,
-            description: props.description,
-            areaHandle,
-            addEditor: props.editor,
-            addEditorComponent: props.editor?.component ?? null,
-          })
           floatingPanels.close(addPanelId)
-        } else {
-          setAddContentDragActive(false)
+          const addEditor = draggedItem?.payload?.editor ?? null
+          if (addEditor === null && activeDropTarget) {
+            submitAddBlockWithoutEditor({ ...activeDropTarget })
+          }
         }
+        setAddContentDragActive(false)
+        setAddContentDragInProgress(false)
+        clearAddContentDragPointer()
+        clearAddContentDraggedItem()
+        clearAddContentDropTarget()
         dragPanelBounds = null
         hasExitedAddPanel = false
         target?.classList.remove('opacity-60')
@@ -214,8 +313,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   removeDragPreview()
-  setDropHighlight(null)
   setAddContentDragActive(false)
+  setAddContentDragInProgress(false)
+  clearAddContentDragPointer()
+  clearAddContentDraggedItem()
+  clearAddContentDropTarget()
   dragPanelBounds = null
   hasExitedAddPanel = false
   interactable?.unset?.()
@@ -270,11 +372,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
-.ccm-add-block-drop-target {
-  outline: 2px solid rgba(73, 159, 244, 0.9);
-  outline-offset: 4px;
-}
-
 .ccm-add-block-drag-preview {
   background-color: rgba(240, 249, 255, 0.98);
   transition: none !important;

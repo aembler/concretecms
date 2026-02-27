@@ -53,6 +53,7 @@ import {
   LazyDialog,
   useAjax
 } from '@concretecms/backendui'
+import { buildRenderUrl, normalizeJsonResponse } from '../../../support/block'
 
 const props = withDefaults(defineProps<{
   editAction?: string
@@ -134,47 +135,6 @@ function normalizeMethod(method: string): 'GET' | 'POST' | 'PUT' | 'DELETE' {
   }
 
   return 'POST'
-}
-
-function normalizeJsonResponse(response: any): any {
-  if (typeof response !== 'string') {
-    return response
-  }
-
-  try {
-    return JSON.parse(response)
-  } catch (error) {
-    return {}
-  }
-}
-
-function buildRenderUrl(response: any): string | null {
-  const parsedAreaId = parseInt(response?.aID, 10)
-  const parsedBlockId = parseInt(response?.bID, 10)
-  if (Number.isNaN(parsedAreaId) || Number.isNaN(parsedBlockId)) {
-    return null
-  }
-
-  const editor = (window as any).Concrete?.getEditMode?.()
-  const area = editor?.getAreaByID?.(parsedAreaId)
-  const arHandle = response?.arHandle || area?.getHandle?.()
-  if (!arHandle) {
-    return null
-  }
-
-  const cID = response?.cID || (window as any).CCM_CID || 0
-  const arEnableGridContainer = area?.getEnableGridContainer?.() ? 1 : 0
-  const params = new URLSearchParams()
-  params.set('arHandle', String(arHandle))
-  params.set('cID', String(cID))
-  params.set('bID', String(parsedBlockId))
-  params.set('arEnableGridContainer', String(arEnableGridContainer))
-  params.set('placeholder', '')
-  if (response?.tempFilename) {
-    params.set('tempFilename', String(response.tempFilename))
-  }
-
-  return `${CCM_DISPATCHER_FILENAME}/ccm/system/block/render?${params.toString()}`
 }
 
 function handleSave() {
