@@ -62,6 +62,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useUiStore } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
 
 const props = withDefaults(
     defineProps<{
@@ -81,21 +82,22 @@ const props = withDefaults(
 )
 
 const uiStore = useUiStore()
+const concreteUiStore = useConcreteUiStore()
 const rootEl = ref<HTMLElement | null>(null)
 const menuEl = ref<HTMLElement | null>(null)
 
 const menuTop = ref('0px')
 const menuLeft = ref('0px')
 
-const isStoreActiveMatch = computed(() => props.active && uiStore.clickProxy.activeElementId === props.itemId)
-const isStoreDoubleClickMatch = computed(() => props.active && uiStore.clickProxy.doubleClickedElementId === props.itemId)
+const isStoreActiveMatch = computed(() => props.active && concreteUiStore.clickProxy.activeElementId === props.itemId)
+const isStoreDoubleClickMatch = computed(() => props.active && concreteUiStore.clickProxy.doubleClickedElementId === props.itemId)
 const isStoreHoverMatch = computed(() => {
   if (!props.active) {
     return false
   }
 
-  if (!uiStore.clickProxy.activeElementId) {
-    return uiStore.clickProxy.hoverElementId === props.itemId
+  if (!concreteUiStore.clickProxy.activeElementId) {
+    return concreteUiStore.clickProxy.hoverElementId === props.itemId
   }
 })
 const isVisible = computed(() => isStoreActiveMatch.value || isStoreHoverMatch.value)
@@ -138,13 +140,13 @@ const emit = defineEmits(['dblclick'])
 onMounted(() => {
   updateMenuTop()
 })
-watch([() => uiStore.scroll.y, () => isStoreActiveMatch.value], updateMenuTop)
+watch([() => concreteUiStore.scroll.y, () => isStoreActiveMatch.value], updateMenuTop)
 watch(() => isStoreActiveMatch.value, () => {
   if (!props.active) {
     return
   }
 
-  uiStore.clickProxy.activeElementMenuId = props.menuId
+  concreteUiStore.clickProxy.activeElementMenuId = props.menuId
 })
 watch(() => isStoreDoubleClickMatch.value, (value) => {
   if (value) {
@@ -156,13 +158,13 @@ watch(() => props.active, (active) => {
     return
   }
 
-  if (uiStore.clickProxy.activeElementId === props.itemId) {
-    uiStore.clickProxy.activeElementId = ''
-    uiStore.clickProxy.activeElementMenuId = ''
-    uiStore.clickProxy.doubleClickedElementId = ''
+  if (concreteUiStore.clickProxy.activeElementId === props.itemId) {
+    concreteUiStore.clickProxy.activeElementId = ''
+    concreteUiStore.clickProxy.activeElementMenuId = ''
+    concreteUiStore.clickProxy.doubleClickedElementId = ''
   }
-  if (uiStore.clickProxy.hoverElementId === props.itemId) {
-    uiStore.clickProxy.hoverElementId = ''
+  if (concreteUiStore.clickProxy.hoverElementId === props.itemId) {
+    concreteUiStore.clickProxy.hoverElementId = ''
   }
 })
 </script>

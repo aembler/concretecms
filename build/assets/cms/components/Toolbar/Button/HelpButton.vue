@@ -3,14 +3,14 @@ import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 import {
   useAjax,
-  useUiStore,
   Dialog,
   DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from '@concretecms/backendui'
-const ui = useUiStore()
+import { useConcreteUiStore } from '../../../stores/concrete-ui'
+const ui = useConcreteUiStore()
 
 const props = defineProps<{
   helpUrl: string

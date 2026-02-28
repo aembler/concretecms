@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watchEffect } from 'vue'
-import { useUiStore } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../stores/concrete-ui'
 
 const props = withDefaults(defineProps<{
   areaId?: number | string
@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
   targetIndex: 0,
 })
 
-const uiStore = useUiStore()
+const uiStore = useConcreteUiStore()
 const targetRef = ref<HTMLElement | null>(null)
 let stickyReleaseTimer: ReturnType<typeof setTimeout> | null = null
 

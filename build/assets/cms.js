@@ -20,10 +20,7 @@ import ConcreteAreaBlockTarget from './cms/components/AreaBlockTarget.ce.vue'
 
 import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
 import postcss from 'postcss'
-
-// We have to import our pinia from this otherwise we have weird errors where pinia state isn't shared
-// across the Concrete web components and the secondary backendui ibrary
-import { createPinia } from "@concretecms/backendui";
+import { createConcretePinia } from './cms/stores/pinia'
 
 // Extract only @property rules
 function extractPropertyRules(css) {
@@ -56,7 +53,7 @@ const { cleanedCss, propertyCss } = extractPropertyRules(rawCss)
 injectGlobalStyles(propertyCss)
 
 const app = createApp();
-const pinia = createPinia();
+const pinia = createConcretePinia();
 app.use(pinia);
 
 // For custom elements we must merge component-local SFC styles with the shared

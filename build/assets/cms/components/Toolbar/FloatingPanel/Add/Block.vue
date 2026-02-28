@@ -2,6 +2,7 @@
 import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { normalizeJsonResponse, useAjax, useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../../../stores/concrete-ui'
 
 type PanelIcon = {
   type: string
@@ -54,9 +55,10 @@ const imageIconSrc = computed(() => (iconType.value === 'image-file' ? props.ico
 const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ? props.icon?.className ?? '' : ''))
 const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 const uiStore = useUiStore()
+const concreteUiStore = useConcreteUiStore()
 const floatingPanels = useFloatingPanelsStore()
 const { request } = useAjax()
-const pageState = computed(() => (uiStore.page as any))
+const pageState = computed(() => (concreteUiStore.page as any))
 const addPanelId = 'toolbar:add'
 const blockButton = ref<HTMLButtonElement | null>(null)
 let interactable: any = null
@@ -137,7 +139,7 @@ function removeDragPreview() {
 }
 
 function setAddContentDragActive(next: boolean) {
-  uiStore.page.addContentDragActive = next
+  concreteUiStore.page.addContentDragActive = next
 }
 
 function setAddContentDragInProgress(next: boolean) {
@@ -201,7 +203,7 @@ function submitAddBlockWithoutEditor(dropTarget: AddContentDropTarget) {
   submitParams.set('add', '1')
   submitParams.set('ccm_token', ccmToken)
   submitParams.set('dragAreaBlockID', String(dragAreaBlockID))
-  // TODO: add legacy arCustomTemplates support when custom templates are wired into uiStore.page state.
+  // TODO: add legacy arCustomTemplates support when custom templates are wired into concrete UI page state.
 
   request({
     url: `${CCM_DISPATCHER_FILENAME}/ccm/system/dialogs/page/add_block/submit?${submitParams.toString()}`,

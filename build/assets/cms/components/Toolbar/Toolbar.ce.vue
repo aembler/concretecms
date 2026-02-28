@@ -15,12 +15,12 @@
         <!-- Master Collection Exit -->
         <div
             v-if="isMasterCollection"
-            :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="ui.toolbar.showTooltips ? 'Exit Edit Defaults' : null"
+            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="concreteUi.toolbar.showTooltips ? 'Exit Edit Defaults' : null"
         >
           <a :href="masterCollectionUrl" class="c-toolbar-button">
             <ArrowLeftIcon class="w-4 h-4" />
-            <span v-if="ui.toolbar.showTitles">Exit Edit Defaults</span>
+            <span v-if="concreteUi.toolbar.showTitles">Exit Edit Defaults</span>
           </a>
         </div>
 
@@ -28,21 +28,21 @@
         <template v-if="!pageInUseBySomeoneElse && !isAlias">
           <div
               v-if="isEditMode"
-              :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-              :data-tip="ui.toolbar.showTooltips ? 'Exit Edit Mode' : null"
+              :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+              :data-tip="concreteUi.toolbar.showTooltips ? 'Exit Edit Mode' : null"
           >
             <a
                 :href="checkInUrl"
                 class="c-toolbar-button c-toolbar-button-active"
             >
               <PencilIcon class="w-4 h-4" />
-              <span v-if="ui.toolbar.showTitles">Exit Edit Mode</span>
+              <span v-if="concreteUi.toolbar.showTitles">Exit Edit Mode</span>
             </a>
           </div>
           <div
               v-else-if="canEditPageContents"
-              :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-              :data-tip="ui.toolbar.showTooltips ? 'Edit This Page' : null"
+              :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+              :data-tip="concreteUi.toolbar.showTooltips ? 'Edit This Page' : null"
           >
             <a
                 :href="checkoutUrl"
@@ -50,26 +50,26 @@
                 title="Edit This Page"
             >
               <PencilIcon class="w-4 h-4" />
-              <span v-if="ui.toolbar.showTitles">Edit Mode</span>
+              <span v-if="concreteUi.toolbar.showTitles">Edit Mode</span>
             </a>
           </div>
         </template>
 
         <!-- Add Content -->
         <div v-if="canEditPageContents && !pageInUseBySomeoneElse"
-             :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-             :data-tip="ui.toolbar.showTooltips ? 'Add Content' : null">
+             :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+             :data-tip="concreteUi.toolbar.showTooltips ? 'Add Content' : null">
           <a :href="addContentUrl" @click.prevent="launchAddPanel" class="c-toolbar-button">
             <PlusIcon class="w-4 h-4" />
-            <span v-if="ui.toolbar.showTitles">Add</span>
+            <span v-if="concreteUi.toolbar.showTitles">Add</span>
           </a>
         </div>
 
         <!-- Page Settings -->
         <div
             v-if="canEditPageSettings"
-            :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="ui.toolbar.showTooltips ? 'Page Settings' : null"
+            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="concreteUi.toolbar.showTooltips ? 'Page Settings' : null"
         >
           <a
               href="#"
@@ -77,7 +77,7 @@
               class="c-toolbar-button"
           >
             <Cog6ToothIcon class="w-4 h-4" />
-            <span v-if="ui.toolbar.showTitles">Settings</span>
+            <span v-if="concreteUi.toolbar.showTitles">Settings</span>
           </a>
         </div>
       </div>
@@ -90,24 +90,24 @@
         <!-- Dashboard -->
         <div
             v-if="canAccessDashboard"
-            :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="ui.toolbar.showTooltips ? 'Dashboard' : null"
+            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="concreteUi.toolbar.showTooltips ? 'Dashboard' : null"
         >
           <a :href="dashboardUrl" class="c-toolbar-button">
             <DashboardIcon class="w-4 h-4" />
-            <span v-if="ui.toolbar.showTitles">Dashboard</span>
+            <span v-if="concreteUi.toolbar.showTitles">Dashboard</span>
           </a>
         </div>
 
         <!-- Sitemap -->
         <div
             v-if="canViewSitemap"
-            :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="ui.toolbar.showTooltips ? 'Pages' : null"
+            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="concreteUi.toolbar.showTooltips ? 'Pages' : null"
         >
           <a href="#" @click.prevent="launchSitemap" class="c-toolbar-button">
             <SitemapIcon class="w-4 h-4" />
-            <span v-if="ui.toolbar.showTitles">Pages</span>
+            <span v-if="concreteUi.toolbar.showTitles">Pages</span>
           </a>
         </div>
 
@@ -197,7 +197,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator
 } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
 const ui = useUiStore()
+const concreteUi = useConcreteUiStore()
 const floatingPanels = useFloatingPanelsStore()
 const { request } = useAjax()
 
@@ -271,7 +273,7 @@ const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{
     svg?: string
   }
 }> }>>([])
-const isAddContentDragActive = computed(() => ui.page.addContentDragActive)
+const isAddContentDragActive = computed(() => concreteUi.page.addContentDragActive)
 const floatingPanelBackdropClass = computed(() =>
   isAddContentDragActive.value
     ? 'pointer-events-none bg-transparent z-[var(--index-layer-panel-backdrop)]'
@@ -295,7 +297,7 @@ onMounted(() => {
 
 watch(() => addPanelOpen.value, (isOpen) => {
   if (!isOpen) {
-    ui.page.addContentDragActive = false
+    concreteUi.page.addContentDragActive = false
   }
 })
 

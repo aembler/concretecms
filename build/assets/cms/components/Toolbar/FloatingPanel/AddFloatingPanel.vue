@@ -9,7 +9,6 @@ import {
   FloatingPanelMenuItem,
   FloatingPanelSearch,
   useFuzzySearch,
-  useUiStore,
 } from '@concretecms/backendui'
 import {
   PuzzlePieceIcon,
@@ -26,6 +25,7 @@ import {
   Bars3BottomLeftIcon,
 } from '@heroicons/vue/24/outline'
 import AddBlock from './Add/Block.vue'
+import { useConcreteUiStore } from '../../../stores/concrete-ui'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
 
@@ -79,7 +79,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
-const uiStore = useUiStore()
+const uiStore = useConcreteUiStore()
 
 const modelOpen = computed({
   get: () => props.open,

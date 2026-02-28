@@ -74,7 +74,7 @@ import DialogEditor from "./Block/Editor/DialogEditor.vue";
 import ComposableEditor from "./Block/Editor/ComposableEditor.vue";
 import InlineEditor from "./Block/Editor/InlineEditor.vue";
 import { useParsedJsonProp } from '@concretecms/backendui'
-import { useUiStore } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../stores/concrete-ui'
 import {
   Toast,
   ToastClose,
@@ -91,7 +91,7 @@ const showDeleteModal = ref(false)
 const toastOpen = ref(false)
 const toastTitle = ref('Update Block')
 const toastDescription = ref('The block has been saved successfully.')
-const uiStore = useUiStore()
+const uiStore = useConcreteUiStore()
 
 const props = defineProps({
   id: String,

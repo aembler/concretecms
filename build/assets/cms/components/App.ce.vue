@@ -55,8 +55,8 @@ const props = defineProps({
   }
 })
 
-import { useUiStore } from '@concretecms/backendui'
-const ui = useUiStore()
+import { useConcreteUiStore } from '../stores/concrete-ui'
+const ui = useConcreteUiStore()
 
 ui.toolbar.showTooltips = props.toolbarShowTooltips
 ui.toolbar.showTitles = props.toolbarShowTitles

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useUiStore } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
 
 const uiStore = useUiStore()
+const concreteUiStore = useConcreteUiStore()
 
 function getFirstElementWithIdFromPath(eventPath: EventTarget[]): HTMLElement | null {
   const firstElementWithId = eventPath.find(
@@ -16,9 +18,9 @@ function handleMouseMove(event: MouseEvent) {
   const firstElementWithId = getFirstElementWithIdFromPath(event.composedPath())
 
   if (firstElementWithId?.id) {
-    uiStore.clickProxy.hoverElementId = firstElementWithId.id
+    concreteUiStore.clickProxy.hoverElementId = firstElementWithId.id
   } else {
-    uiStore.clickProxy.hoverElementId = ''
+    concreteUiStore.clickProxy.hoverElementId = ''
   }
 }
 
@@ -60,41 +62,41 @@ function handleGlobalClick(event: MouseEvent) {
 
   const eventPath = event.composedPath()
   const eventTarget = event.target
-  const activeId = uiStore.clickProxy.activeElementId
+  const activeId = concreteUiStore.clickProxy.activeElementId
 
   if (activeId) {
-    const activeMenuId = uiStore.clickProxy.activeElementMenuId
+    const activeMenuId = concreteUiStore.clickProxy.activeElementMenuId
     const clickedInsideActive = isClickInsideActiveMenu(eventPath, eventTarget, activeMenuId)
 
     if (!clickedInsideActive) {
       const firstElementWithId = getFirstElementWithIdFromPath(eventPath)
-      uiStore.clickProxy.hoverElementId = firstElementWithId?.id || ''
-      uiStore.clickProxy.activeElementId = ''
-      uiStore.clickProxy.activeElementMenuId = ''
-      uiStore.clickProxy.doubleClickedElementId = ''
+      concreteUiStore.clickProxy.hoverElementId = firstElementWithId?.id || ''
+      concreteUiStore.clickProxy.activeElementId = ''
+      concreteUiStore.clickProxy.activeElementMenuId = ''
+      concreteUiStore.clickProxy.doubleClickedElementId = ''
       event.stopPropagation()
     }
-  } else if (uiStore.clickProxy.hoverElementId) {
-    uiStore.clickProxy.activeElementId = uiStore.clickProxy.hoverElementId
+  } else if (concreteUiStore.clickProxy.hoverElementId) {
+    concreteUiStore.clickProxy.activeElementId = concreteUiStore.clickProxy.hoverElementId
   }
 }
 
 function handleGlobalDoubleClick(event: MouseEvent) {
   const path = event.composedPath() as HTMLElement[]
-  const activeId = uiStore.clickProxy.activeElementId
+  const activeId = concreteUiStore.clickProxy.activeElementId
 
   if (activeId) {
     const clickedInsideActive = path.some((el) =>
         (el as HTMLElement).id === activeId
     )
     if (clickedInsideActive) {
-      uiStore.clickProxy.doubleClickedElementId = activeId
+      concreteUiStore.clickProxy.doubleClickedElementId = activeId
     }
   }
 }
 
 function handleScroll() {
-  uiStore.updateScroll(window.scrollY)
+  concreteUiStore.updateScroll(window.scrollY)
 }
 
 onMounted(() => {
