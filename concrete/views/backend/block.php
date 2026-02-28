@@ -6,4 +6,5 @@ defined('C5_EXECUTE') or die("Access Denied.");
 // assets provided by the theme aren't loaded by the block in this mode.
 $pt = $c->getCollectionThemeObject();
 $pt->registerAssets();
+$bv->disableControls();
 $bv->render('view');

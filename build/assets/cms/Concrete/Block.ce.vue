@@ -34,6 +34,11 @@
         @updated="handleUpdated"
       />
     </div>
+    <InjectedView
+      v-if="renderedBlockHtml"
+      :html="renderedBlockHtml"
+      :evaluate-scripts="false"
+    />
     <slot />
   </HotSpot>
 
@@ -65,13 +70,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref } from "vue"
+import { computed, ref } from "vue"
 import HotSpot from "./Ui/HotSpot.vue"
 import Menu from "./Block/Menu.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import DialogEditor from "./Block/Editor/DialogEditor.vue";
 import ComposableEditor from "./Block/Editor/ComposableEditor.vue";
 import InlineEditor from "./Block/Editor/InlineEditor.vue";
+import InjectedView from "./Utility/InjectedView.vue";
 import { useParsedJsonProp } from '@concretecms/backendui'
 import { useUiStore } from '@concretecms/backendui'
 import {
@@ -90,6 +96,7 @@ const showDeleteModal = ref(false)
 const toastOpen = ref(false)
 const toastTitle = ref('Update Block')
 const toastDescription = ref('The block has been saved successfully.')
+const renderedBlockHtml = ref('')
 const uiStore = useUiStore()
 
 const props = defineProps({
@@ -115,7 +122,6 @@ const props = defineProps({
 
 const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
-const instance = getCurrentInstance()
 
 let menuId = computed(() => props.id + '-menu')
 const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
@@ -137,86 +143,16 @@ function clearMenuState() {
 function handleDeleted(response: any) {
   isDeleted.value = true
   clearMenuState()
-
-  const parsedAreaId = parseInt(response?.aID, 10)
-  const parsedBlockId = parseInt(response?.bID, 10)
-  if (Number.isNaN(parsedAreaId) || Number.isNaN(parsedBlockId)) {
-    return
-  }
-
-  const editor = (window as any).Concrete?.getEditMode?.()
-  const area = editor?.getAreaByID?.(parsedAreaId)
-  const block = area?.getBlockByID?.(parsedBlockId)
-
-  ;(window as any).ConcreteEvent?.fire?.('EditModeBlockDeleteComplete', {
-    block: block
-  })
-}
-
-function executeScripts(scripts: HTMLScriptElement[]) {
-  scripts.forEach((script) => {
-    const node = document.createElement('script')
-    if (script.src) {
-      node.src = script.src
-    } else {
-      node.textContent = script.textContent
-    }
-    document.body.appendChild(node)
-    node.remove()
-  })
-}
-
-function getHostElement(): HTMLElement | null {
-  const rootNode = (instance?.vnode?.el as any)?.getRootNode?.()
-  const host = rootNode?.host
-  return host instanceof HTMLElement ? host : null
-}
-
-function syncHostAttributes(host: HTMLElement, replacement: HTMLElement) {
-  const currentAttributes = Array.from(host.attributes)
-  currentAttributes.forEach((attribute) => {
-    host.removeAttribute(attribute.name)
-  })
-
-  Array.from(replacement.attributes).forEach((attribute) => {
-    host.setAttribute(attribute.name, attribute.value)
-  })
-}
-
-function syncHostContent(host: HTMLElement, replacement: HTMLElement) {
-  while (host.firstChild) {
-    host.removeChild(host.firstChild)
-  }
-
-  Array.from(replacement.childNodes).forEach((child) => {
-    host.appendChild(child.cloneNode(true))
-  })
 }
 
 function handleUpdated(payload: { response: any; html: string }) {
-  const host = getHostElement()
-  if (!host || !payload?.html) {
-    return
-  }
-
-  const parser = document.createElement('div')
-  parser.innerHTML = payload.html
-  const scripts = Array.from(parser.querySelectorAll('script'))
-  scripts.forEach((script) => script.remove())
-
-  const replacement = (
-    parser.querySelector('concrete-block')
-    || parser.querySelector('.ccm-block-edit')
-    || parser.firstElementChild
-  ) as HTMLElement | null
-  if (!replacement) {
-    return
-  }
-
-  syncHostAttributes(host, replacement)
-  syncHostContent(host, replacement)
-  executeScripts(scripts)
+  console.debug('[Block.ce] Received updated payload', {
+    id: props.id,
+    htmlLength: String(payload?.html || '').length,
+    response: payload?.response,
+  })
   editMode.value = false
+  renderedBlockHtml.value = String(payload?.html || '')
 
   toastTitle.value = payload?.response?.title || 'Update Block'
   toastDescription.value = payload?.response?.message || 'The block has been saved successfully.'
