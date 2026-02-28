@@ -49,8 +49,8 @@
       :is-master-collection="deleteIsMasterCollection"
       :dialog-title="deleteDialogTitle"
       :progressive-operation-title="deleteProgressiveOperationTitle"
+      :page-id="cId"
       @update:open="showDeleteModal = $event"
-      @deleted="handleDeleted"
   />
 
   <ToastProvider :duration="3000" swipe-direction="right">
@@ -66,15 +66,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import HotSpot from "./Ui/HotSpot.vue"
 import Menu from "./Block/Menu.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import DialogEditor from "./Block/Editor/DialogEditor.vue";
 import ComposableEditor from "./Block/Editor/ComposableEditor.vue";
 import InlineEditor from "./Block/Editor/InlineEditor.vue";
-import { useParsedJsonProp } from '@concretecms/backendui'
+import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
+import type { DeleteBlockOperation } from '../stores/types/page-operations'
 import {
   Toast,
   ToastClose,
@@ -92,6 +93,8 @@ const toastOpen = ref(false)
 const toastTitle = ref('Update Block')
 const toastDescription = ref('The block has been saved successfully.')
 const uiStore = useConcreteUiStore()
+const { request } = useAjax()
+const runningDeleteOperationId = ref<string | null>(null)
 
 const props = defineProps({
   id: String,
@@ -112,6 +115,7 @@ const props = defineProps({
   deleteIsMasterCollection: Boolean | String | Number,
   deleteDialogTitle: String,
   deleteProgressiveOperationTitle: String,
+  cId: Number | String,
 })
 
 const parsedVariants = useParsedJsonProp(props.variants)
@@ -132,11 +136,6 @@ function clearMenuState() {
     uiStore.clickProxy.doubleClickedElementId = ''
     uiStore.clickProxy.activeElementMenuId = ''
   }
-}
-
-function handleDeleted(response: any) {
-  isDeleted.value = true
-  clearMenuState()
 }
 
 function handleUpdated(payload: { response: any }) {
@@ -162,5 +161,78 @@ const currentEditorComponent = computed(() => {
 
   return editorComponents[editorComponentKey] ?? null
 });
+
+const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
+  const operationId = uiStore.page.activeOperationId
+  if (!operationId) {
+    return null
+  }
+
+  const operation = uiStore.page.operationsQueue.find((item) => item.id === operationId)
+  if (!operation || operation.type !== 'block.delete' || operation.status !== 'running') {
+    return null
+  }
+
+  return operation
+})
+
+function matchesDeleteTarget(operation: DeleteBlockOperation) {
+  return String(operation.pageBlock.bID) === String(props.deleteBlockId)
+    && String(operation.pageBlock.arHandle) === String(props.deleteAreaHandle)
+    && String(operation.pageBlock.cID || '') === String(props.cId || '')
+}
+
+function runDeleteOperation(operation: DeleteBlockOperation) {
+  runningDeleteOperationId.value = operation.id
+  uiStore.logPageOperation('block.delete.request', {
+    operationId: operation.id,
+    blockId: props.deleteBlockId,
+    areaHandle: props.deleteAreaHandle,
+    pageId: props.cId,
+  })
+
+  const url = operation.deleteAll ? operation.deleteAllAction : operation.deleteAction
+  const body = operation.deleteAll ? { deleteAll: 1 } : {}
+
+  request({
+    url,
+    method: 'POST',
+    body,
+    onSuccess: (response) => {
+      const normalizedResponse: any = normalizeJsonResponse(response)
+      isDeleted.value = true
+      clearMenuState()
+
+      toastTitle.value = normalizedResponse?.title || 'Deleted'
+      toastDescription.value = normalizedResponse?.message || 'Block deleted successfully.'
+      toastOpen.value = false
+      toastOpen.value = true
+
+      uiStore.completePageOperation(operation.id)
+    },
+    onError: () => {
+      uiStore.failPageOperation(operation.id)
+    },
+    onComplete: () => {
+      runningDeleteOperationId.value = null
+    },
+  })
+}
+
+watch(
+  activeDeleteOperation,
+  (operation) => {
+    if (!operation || !matchesDeleteTarget(operation)) {
+      return
+    }
+
+    if (runningDeleteOperationId.value === operation.id) {
+      return
+    }
+
+    runDeleteOperation(operation)
+  },
+  { immediate: true }
+)
 
 </script>

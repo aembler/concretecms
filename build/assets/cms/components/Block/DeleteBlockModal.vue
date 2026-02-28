@@ -6,7 +6,6 @@
       </DialogHeader>
 
       <form
-        ref="formEl"
         method="post"
         data-form="delete-block"
         :data-action-delete-all="deleteAllAction"
@@ -36,30 +35,15 @@
       </form>
 
       <DialogFooter>
-        <button type="button" class="btn btn-secondary" :disabled="isSubmitting" @click="emit('update:open', false)">
+        <button type="button" class="btn btn-secondary" @click="emit('update:open', false)">
           Cancel
         </button>
-        <button type="button" data-submit="delete-block-form" class="btn btn-error" :disabled="isSubmitting" @click="submitDelete">
+        <button type="button" data-submit="delete-block-form" class="btn btn-error" @click="submitDelete">
           Delete
         </button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
-
-  <ToastProvider :duration="3500" swipe-direction="right">
-    <Toast
-      :open="toastOpen"
-      variant="success"
-      @update:open="toastOpen = $event"
-    >
-      <div class="grid gap-1">
-        <ToastTitle>{{ toastTitle }}</ToastTitle>
-        <ToastDescription>{{ toastDescription }}</ToastDescription>
-      </div>
-      <ToastClose />
-    </Toast>
-    <ToastViewport />
-  </ToastProvider>
 </template>
 
 <script setup lang="ts">
@@ -70,15 +54,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  useAjax,
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-  normalizeJsonResponse
 } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
+import type { DeleteBlockOperation } from '../../stores/types/page-operations'
 
 const props = withDefaults(defineProps<{
   open: boolean
@@ -91,25 +69,21 @@ const props = withDefaults(defineProps<{
   isMasterCollection?: boolean | string | number
   dialogTitle?: string
   progressiveOperationTitle?: string
+  pageId?: string | number
 }>(), {
   defaultsMessage: '',
   isMasterCollection: false,
   dialogTitle: 'Delete',
-  progressiveOperationTitle: 'Delete Blocks'
+  progressiveOperationTitle: 'Delete Blocks',
+  pageId: '',
 })
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
-  (e: 'deleted', response: any): void
 }>()
 
-const formEl = ref<HTMLFormElement | null>(null)
-const isSubmitting = ref(false)
 const deleteAll = ref('0')
-const { request } = useAjax()
-const toastOpen = ref(false)
-const toastTitle = ref('Deleted')
-const toastDescription = ref('Block deleted successfully.')
+const uiStore = useConcreteUiStore()
 
 const isMasterCollection = computed(() => {
   if (typeof props.isMasterCollection === 'boolean') {
@@ -125,37 +99,23 @@ watch(() => props.open, (isOpen) => {
 })
 
 function submitDelete() {
-  if (isSubmitting.value) {
-    return
-  }
-
-  let url = props.deleteAction
-  let body: Record<string, any> = {}
-  if (parseInt(deleteAll.value, 10) === 1) {
-    url = props.deleteAllAction
-    body = { deleteAll: 1 }
-  }
-
-  isSubmitting.value = true
-  request({
-    url,
-    method: 'POST',
-    body,
-    onSuccess: (response) => {
-      const normalizedResponse: any = normalizeJsonResponse(response)
-
-      emit('update:open', false)
-      emit('deleted', normalizedResponse)
-
-      toastTitle.value = normalizedResponse?.title || 'Deleted'
-      toastDescription.value = normalizedResponse?.message || 'Block deleted successfully.'
-
-      toastOpen.value = false
-      toastOpen.value = true
+  const useDeleteAll = parseInt(deleteAll.value, 10) === 1
+  const operation: DeleteBlockOperation = {
+    id: `block.delete.${String(props.blockId)}.${Date.now()}`,
+    type: 'block.delete',
+    status: 'queued',
+    pageBlock: {
+      bID: props.blockId,
+      arHandle: props.areaHandle,
+      cID: props.pageId || '',
     },
-    onComplete: () => {
-      isSubmitting.value = false
-    }
-  })
+    deleteAction: props.deleteAction,
+    deleteAllAction: props.deleteAllAction,
+    deleteAll: useDeleteAll,
+  }
+
+  uiStore.enqueuePageOperation(operation)
+  uiStore.logPageOperation('block.delete.enqueued', operation)
+  emit('update:open', false)
 }
 </script>
