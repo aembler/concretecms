@@ -32,6 +32,9 @@
         :dialog-title="editDialogTitle"
         :dialog-width="editDialogWidth"
         :dialog-height="editDialogHeight"
+        :block-id="deleteBlockId"
+        :area-handle="deleteAreaHandle"
+        :page-id="pageId"
         @updated="handleUpdated"
       />
     </div>
@@ -49,7 +52,7 @@
       :is-master-collection="deleteIsMasterCollection"
       :dialog-title="deleteDialogTitle"
       :progressive-operation-title="deleteProgressiveOperationTitle"
-      :page-id="cId"
+      :page-id="pageId"
       @update:open="showDeleteModal = $event"
   />
 
@@ -90,8 +93,8 @@ const editorRenderKey = ref(0)
 const isDeleted = ref(false)
 const showDeleteModal = ref(false)
 const toastOpen = ref(false)
-const toastTitle = ref('Update Block')
-const toastDescription = ref('The block has been saved successfully.')
+const toastTitle = ref('Deleted')
+const toastDescription = ref('Block deleted successfully.')
 const uiStore = useConcreteUiStore()
 const { request } = useAjax()
 const runningDeleteOperationId = ref<string | null>(null)
@@ -115,7 +118,7 @@ const props = defineProps({
   deleteIsMasterCollection: Boolean | String | Number,
   deleteDialogTitle: String,
   deleteProgressiveOperationTitle: String,
-  cId: Number | String,
+  pageId: Number | String,
 })
 
 const parsedVariants = useParsedJsonProp(props.variants)
@@ -138,13 +141,8 @@ function clearMenuState() {
   }
 }
 
-function handleUpdated(payload: { response: any }) {
+function handleUpdated() {
   editMode.value = false
-
-  toastTitle.value = payload?.response?.title || 'Update Block'
-  toastDescription.value = payload?.response?.message || 'The block has been saved successfully.'
-  toastOpen.value = false
-  toastOpen.value = true
 }
 
 const editorComponents: Record<string, any> = {
@@ -179,17 +177,11 @@ const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
 function matchesDeleteTarget(operation: DeleteBlockOperation) {
   return String(operation.pageBlock.bID) === String(props.deleteBlockId)
     && String(operation.pageBlock.arHandle) === String(props.deleteAreaHandle)
-    && String(operation.pageBlock.cID || '') === String(props.cId || '')
+    && String(operation.pageBlock.cID || '') === String(props.pageId || '')
 }
 
 function runDeleteOperation(operation: DeleteBlockOperation) {
   runningDeleteOperationId.value = operation.id
-  uiStore.logPageOperation('block.delete.request', {
-    operationId: operation.id,
-    blockId: props.deleteBlockId,
-    areaHandle: props.deleteAreaHandle,
-    pageId: props.cId,
-  })
 
   const url = operation.deleteAll ? operation.deleteAllAction : operation.deleteAction
   const body = operation.deleteAll ? { deleteAll: 1 } : {}

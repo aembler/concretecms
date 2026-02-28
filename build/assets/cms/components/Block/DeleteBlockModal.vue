@@ -115,7 +115,6 @@ function submitDelete() {
   }
 
   uiStore.enqueuePageOperation(operation)
-  uiStore.logPageOperation('block.delete.enqueued', operation)
   emit('update:open', false)
 }
 </script>

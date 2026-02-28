@@ -16,4 +16,14 @@ export type DeleteBlockOperation = {
   deleteAll: boolean
 }
 
-export type PageOperation = DeleteBlockOperation
+export type UpdateBlockOperation = {
+  id: string
+  type: 'block.update'
+  status: PageOperationStatus
+  originalBlock: BlockRef
+  updatedBlock: BlockRef
+  replacementHtml?: string
+  response?: any
+}
+
+export type PageOperation = DeleteBlockOperation | UpdateBlockOperation

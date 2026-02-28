@@ -54,12 +54,17 @@ import {
   normalizeJsonResponse,
   useAjax
 } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../../stores/concrete-ui'
+import type { BlockRef, UpdateBlockOperation } from '../../../stores/types/page-operations'
 
 const props = withDefaults(defineProps<{
   editAction?: string
   dialogTitle?: string
   dialogWidth?: string | number
   dialogHeight?: string | number
+  blockId: string | number
+  areaHandle: string
+  pageId: string | number
 }>(), {
   editAction: '',
   dialogTitle: '',
@@ -73,6 +78,7 @@ const helpTooltipOpen = ref(false)
 const isSubmitting = ref(false)
 const { request } = useAjax()
 const lazyDialogRef = ref<any>(null)
+const uiStore = useConcreteUiStore()
 
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any }): void
@@ -114,27 +120,27 @@ function findPrimaryForm(): HTMLFormElement | null {
     return null
   }
 
-  const blockForm = contentEl.querySelector('#ccm-block-form')
-  if (blockForm instanceof HTMLFormElement) {
-    return blockForm
+  const selectors = ['#ccm-block-form', '[data-dialog-form]', 'form']
+  for (const selector of selectors) {
+    const form = contentEl.querySelector(selector)
+    if (form instanceof HTMLFormElement) {
+      return form
+    }
   }
 
-  const dialogForm = contentEl.querySelector('[data-dialog-form]')
-  if (dialogForm instanceof HTMLFormElement) {
-    return dialogForm
-  }
-
-  const firstForm = contentEl.querySelector('form')
-  return firstForm instanceof HTMLFormElement ? firstForm : null
+  return null
 }
 
 function normalizeMethod(method: string): 'GET' | 'POST' | 'PUT' | 'DELETE' {
   const normalized = (method || 'POST').toUpperCase()
-  if (normalized === 'GET' || normalized === 'POST' || normalized === 'PUT' || normalized === 'DELETE') {
-    return normalized
-  }
+  return ['GET', 'POST', 'PUT', 'DELETE'].includes(normalized) ? normalized as 'GET' | 'POST' | 'PUT' | 'DELETE' : 'POST'
+}
 
-  return 'POST'
+function hasResponseErrors(response: any): boolean {
+  return Boolean(
+    response?.error
+    || (Array.isArray(response?.errors) && response.errors.length > 0)
+  )
 }
 
 function handleSave() {
@@ -163,16 +169,32 @@ function handleSave() {
     onSuccess: (response) => {
       const normalizedResponse: any = normalizeJsonResponse(response)
 
-      if (normalizedResponse?.error || (Array.isArray(normalizedResponse?.errors) && normalizedResponse.errors.length > 0)) {
+      if (hasResponseErrors(normalizedResponse)) {
         return
       }
 
-      const blockInfo = {
-        bID: Number(normalizedResponse?.bID || 0),
-        arHandle: String(normalizedResponse?.arHandle || ''),
-        cID: Number(normalizedResponse?.cID || (window as any).CCM_CID || 0),
+      const originalBlock: BlockRef = {
+        bID: props.blockId,
+        arHandle: props.areaHandle,
+        cID: props.pageId,
       }
-      alert(`[FPO] Block edit success\n${JSON.stringify(blockInfo, null, 2)}`)
+      const updatedBlock: BlockRef = {
+        bID: normalizedResponse?.bID || originalBlock.bID,
+        arHandle: normalizedResponse?.arHandle || originalBlock.arHandle,
+        cID: normalizedResponse?.cID || originalBlock.cID,
+      }
+
+      const operation: UpdateBlockOperation = {
+        id: `block.update.${String(originalBlock.bID)}.${Date.now()}`,
+        type: 'block.update',
+        status: 'queued',
+        originalBlock,
+        updatedBlock,
+        replacementHtml: typeof normalizedResponse?.html === 'string' ? normalizedResponse.html : undefined,
+        response: normalizedResponse,
+      }
+
+      uiStore.enqueuePageOperation(operation)
       emit('updated', { response: normalizedResponse })
       open.value = false
       helpTooltipOpen.value = false
