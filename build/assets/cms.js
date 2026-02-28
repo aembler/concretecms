@@ -12,11 +12,11 @@ $(function() {
 
 // cms.js
 import { defineCustomElement, createApp } from 'vue'
-import ConcreteApp from './cms/Concrete/App.ce.vue'
-import ConcreteArea from './cms/Concrete/Area.ce.vue'
-import ConcreteBlock from './cms/Concrete/Block.ce.vue'
-import ConcreteContainer from './cms/Concrete/Container.ce.vue'
-import ConcreteAreaBlockTarget from './cms/Concrete/AreaBlockTarget.ce.vue'
+import ConcreteApp from './cms/components/App.ce.vue'
+import ConcreteArea from './cms/components/Area.ce.vue'
+import ConcreteBlock from './cms/components/Block.ce.vue'
+import ConcreteContainer from './cms/components/Container.ce.vue'
+import ConcreteAreaBlockTarget from './cms/components/AreaBlockTarget.ce.vue'
 
 import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
 import postcss from 'postcss'
