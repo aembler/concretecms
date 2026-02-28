@@ -42,14 +42,6 @@
       </DialogFooter>
     </template>
   </LazyDialog>
-  <LazyBlockView
-    v-if="pendingRender"
-    :area-handle="pendingRender.arHandle"
-    :block-id="pendingRender.bID"
-    :page-id="pendingRender.cID"
-    @block-render-loaded="handleRenderLoaded"
-    @block-render-error="handleRenderError"
-  />
 </template>
 
 <script setup lang="ts">
@@ -59,10 +51,9 @@ import {
   DialogHeader,
   DialogTitle,
   LazyDialog,
+  normalizeJsonResponse,
   useAjax
 } from '@concretecms/backendui'
-import { normalizeJsonResponse } from '../../../support/block'
-import LazyBlockView from '../LazyBlockView.vue'
 
 const props = withDefaults(defineProps<{
   editAction?: string
@@ -80,19 +71,11 @@ const open = ref(false)
 const helpTooltipText = ref('')
 const helpTooltipOpen = ref(false)
 const isSubmitting = ref(false)
-const pendingSaveResponse = ref<any>(null)
-const pendingRender = ref<null | {
-  arHandle: string
-  bID: number
-  cID: number
-//  arEnableGridContainer: number
-//  tempFilename: string
-}>(null)
 const { request } = useAjax()
 const lazyDialogRef = ref<any>(null)
 
 const emit = defineEmits<{
-  (e: 'updated', payload: { response: any; html: string }): void
+  (e: 'updated', payload: { response: any }): void
 }>()
 
 function transformDialogHtml(rawHtml: string): string {
@@ -154,49 +137,6 @@ function normalizeMethod(method: string): 'GET' | 'POST' | 'PUT' | 'DELETE' {
   return 'POST'
 }
 
-function buildPendingRenderFromResponse(response: any): {
-  arHandle: string
-  bID: number
-  cID: number
-  //arEnableGridContainer: number
-  //tempFilename: string
-} {
-  const bID = Number(response.bID)
-  const arHandle = String(response.arHandle)
-  const cID = Number(response.cID || (window as any).CCM_CID || 0)
-
-  return {
-    arHandle,
-    bID,
-    cID,
-    //arEnableGridContainer: area.getEnableGridContainer() ? 1 : 0,
-    //tempFilename: response.tempFilename ? String(response.tempFilename) : '',
-  }
-}
-
-function handleRenderLoaded(html: string) {
-  console.debug('[DialogEditor] LazyBlockView loaded', {
-    htmlLength: String(html || '').length,
-    pendingRender: pendingRender.value,
-    response: pendingSaveResponse.value,
-  })
-  emit('updated', {
-    response: pendingSaveResponse.value,
-    html: String(html || ''),
-  })
-  pendingRender.value = null
-  pendingSaveResponse.value = null
-}
-
-function handleRenderError() {
-  console.error('[DialogEditor] LazyBlockView error', {
-    pendingRender: pendingRender.value,
-    response: pendingSaveResponse.value,
-  })
-  pendingRender.value = null
-  pendingSaveResponse.value = null
-}
-
 function handleSave() {
   if (isSubmitting.value) {
     return
@@ -227,9 +167,13 @@ function handleSave() {
         return
       }
 
-      const nextPendingRender = buildPendingRenderFromResponse(normalizedResponse)
-      pendingSaveResponse.value = normalizedResponse
-      pendingRender.value = nextPendingRender
+      const blockInfo = {
+        bID: Number(normalizedResponse?.bID || 0),
+        arHandle: String(normalizedResponse?.arHandle || ''),
+        cID: Number(normalizedResponse?.cID || (window as any).CCM_CID || 0),
+      }
+      alert(`[FPO] Block edit success\n${JSON.stringify(blockInfo, null, 2)}`)
+      emit('updated', { response: normalizedResponse })
       open.value = false
       helpTooltipOpen.value = false
     },

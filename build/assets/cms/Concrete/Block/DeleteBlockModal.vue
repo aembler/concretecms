@@ -82,6 +82,8 @@ import {
 
 const props = withDefaults(defineProps<{
   open: boolean
+  deleteAction: string
+  deleteAllAction: string
   message: string
   defaultsMessage?: string
   blockId: string | number

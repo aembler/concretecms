@@ -8,6 +8,7 @@
       active-outline-color="outline-concrete-green"
       active-bg-class="bg-concrete-green/30"
       @dblclick="editBlock"
+      class="min-h-[16px]"
   >
     <template #badge>
       {{ name }}
@@ -34,11 +35,6 @@
         @updated="handleUpdated"
       />
     </div>
-    <InjectedView
-      v-if="renderedBlockHtml"
-      :html="renderedBlockHtml"
-      :evaluate-scripts="false"
-    />
     <slot />
   </HotSpot>
 
@@ -77,7 +73,6 @@ import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import DialogEditor from "./Block/Editor/DialogEditor.vue";
 import ComposableEditor from "./Block/Editor/ComposableEditor.vue";
 import InlineEditor from "./Block/Editor/InlineEditor.vue";
-import InjectedView from "./Utility/InjectedView.vue";
 import { useParsedJsonProp } from '@concretecms/backendui'
 import { useUiStore } from '@concretecms/backendui'
 import {
@@ -96,7 +91,6 @@ const showDeleteModal = ref(false)
 const toastOpen = ref(false)
 const toastTitle = ref('Update Block')
 const toastDescription = ref('The block has been saved successfully.')
-const renderedBlockHtml = ref('')
 const uiStore = useUiStore()
 
 const props = defineProps({
@@ -145,14 +139,8 @@ function handleDeleted(response: any) {
   clearMenuState()
 }
 
-function handleUpdated(payload: { response: any; html: string }) {
-  console.debug('[Block.ce] Received updated payload', {
-    id: props.id,
-    htmlLength: String(payload?.html || '').length,
-    response: payload?.response,
-  })
+function handleUpdated(payload: { response: any }) {
   editMode.value = false
-  renderedBlockHtml.value = String(payload?.html || '')
 
   toastTitle.value = payload?.response?.title || 'Update Block'
   toastDescription.value = payload?.response?.message || 'The block has been saved successfully.'

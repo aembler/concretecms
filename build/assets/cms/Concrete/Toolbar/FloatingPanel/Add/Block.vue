@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useAjax, useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
-import { buildRenderUrl, normalizeJsonResponse, renderBlockHtmlAtDropTarget } from '../../../../support/block'
+import { normalizeJsonResponse, useAjax, useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 
 type PanelIcon = {
   type: string
@@ -178,11 +177,6 @@ function isPointOutsideRect(x: number, y: number, rect: DOMRect): boolean {
   return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
 }
 
-function notifyBlockAdded() {
-  const message = (window as any).ccmi18n?.addBlockMsg || 'The block has been added successfully.'
-  ;(window as any).ConcreteAlert?.notify?.({ message })
-}
-
 function submitAddBlockWithoutEditor(dropTarget: AddContentDropTarget) {
   if (isSubmittingAddWithoutEditor) {
     return
@@ -218,25 +212,18 @@ function submitAddBlockWithoutEditor(dropTarget: AddContentDropTarget) {
       if (normalizedResponse?.error || (Array.isArray(normalizedResponse?.errors) && normalizedResponse.errors.length > 0)) {
         return
       }
-
-      const renderUrl = buildRenderUrl(normalizedResponse)
-      if (!renderUrl) {
-        return
-      }
-
-      request({
-        url: renderUrl,
-        method: 'GET',
-        skipResponseValidation: true,
-        onSuccess: (html: string) => {
-          const didRender = renderBlockHtmlAtDropTarget(String(html || ''), dropTarget)
-          if (!didRender) {
-            return
-          }
-
-          notifyBlockAdded()
+      const blockInfo = {
+        bID: Number(normalizedResponse?.bID || 0),
+        arHandle: String(normalizedResponse?.arHandle || dropTarget?.areaHandle || ''),
+        cID: Number(normalizedResponse?.cID || (window as any).CCM_CID || 0),
+        dropTarget: {
+          areaId: Number(dropTarget?.areaId || 0),
+          areaHandle: String(dropTarget?.areaHandle || ''),
+          afterBlockId: Number(dropTarget?.afterBlockId || 0),
+          targetIndex: Number(dropTarget?.targetIndex || 0),
         },
-      })
+      }
+      alert(`[FPO] Add block success\n${JSON.stringify(blockInfo, null, 2)}`)
     },
     onComplete: () => {
       isSubmittingAddWithoutEditor = false
