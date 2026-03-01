@@ -4,11 +4,13 @@ import { useConcreteUiStore } from '../stores/concrete-ui'
 
 const props = withDefaults(defineProps<{
   areaId?: number | string
+  pageId?: number | string
   areaHandle?: string
   afterBlockId?: number | string
   targetIndex?: number | string
 }>(), {
   areaId: 0,
+  pageId: 0,
   areaHandle: '',
   afterBlockId: 0,
   targetIndex: 0,
@@ -36,6 +38,7 @@ const draggedItem = computed(() => pageState.value?.addContentDraggedItem ?? nul
 const isValidDraggedBlockType = computed(() => draggedItem.value?.type === 'blockType')
 
 const ownAreaId = computed(() => Number(props.areaId || 0))
+const ownPageId = computed(() => Number(props.pageId || 0))
 const ownAfterBlockId = computed(() => Number(props.afterBlockId || 0))
 const ownTargetIndex = computed(() => Number(props.targetIndex || 0))
 const ownAreaHandle = computed(() => String(props.areaHandle || ''))
@@ -47,6 +50,7 @@ const isActiveTarget = computed(() => {
   }
 
   return Number(dropTarget.areaId || 0) === ownAreaId.value
+    && Number(dropTarget.pageId || 0) === ownPageId.value
     && String(dropTarget.areaHandle || '') === ownAreaHandle.value
     && Number(dropTarget.afterBlockId || 0) === ownAfterBlockId.value
 })
@@ -75,6 +79,7 @@ function claimDropTarget() {
 
   pageState.value.addContentDropTarget = {
     areaId: ownAreaId.value,
+    pageId: ownPageId.value,
     areaHandle: ownAreaHandle.value,
     afterBlockId: ownAfterBlockId.value,
     targetIndex: ownTargetIndex.value,
@@ -148,6 +153,7 @@ onBeforeUnmount(() => {
       isActiveTarget ? 'is-active-target' : '',
     ]"
     :data-area-id="ownAreaId"
+    :data-page-id="ownPageId"
     :data-area-handle="ownAreaHandle"
     :data-after-block-id="ownAfterBlockId"
     :data-target-index="ownTargetIndex"

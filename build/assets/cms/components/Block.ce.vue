@@ -32,7 +32,7 @@
         :dialog-title="editDialogTitle"
         :dialog-width="editDialogWidth"
         :dialog-height="editDialogHeight"
-        :block-id="deleteBlockId"
+        :block-id="currentBlockId"
         :area-handle="deleteAreaHandle"
         :page-id="pageId"
         @updated="handleUpdated"
@@ -47,7 +47,7 @@
       :delete-all-action="deleteAllAction"
       :message="deleteMessage"
       :defaults-message="deleteDefaultsMessage"
-      :block-id="deleteBlockId"
+      :block-id="currentBlockId"
       :area-handle="deleteAreaHandle"
       :is-master-collection="deleteIsMasterCollection"
       :dialog-title="deleteDialogTitle"
@@ -101,6 +101,7 @@ const runningDeleteOperationId = ref<string | null>(null)
 
 const props = defineProps({
   id: String,
+  blockId: Number | String,
   name: String,
   variants: String | Array<{ file: String; name: String }>,
   blocktype: String | Object,
@@ -123,6 +124,7 @@ const props = defineProps({
 
 const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
+const currentBlockId = computed(() => props.blockId ?? props.deleteBlockId)
 
 let menuId = computed(() => props.id + '-menu')
 const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
@@ -175,7 +177,7 @@ const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
 })
 
 function matchesDeleteTarget(operation: DeleteBlockOperation) {
-  return String(operation.pageBlock.bID) === String(props.deleteBlockId)
+  return String(operation.pageBlock.bID) === String(currentBlockId.value)
     && String(operation.pageBlock.arHandle) === String(props.deleteAreaHandle)
     && String(operation.pageBlock.cID || '') === String(props.pageId || '')
 }

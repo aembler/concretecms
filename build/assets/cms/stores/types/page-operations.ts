@@ -6,6 +6,14 @@ export type BlockRef = {
   cID: string | number
 }
 
+export type AddBlockTargetRef = {
+  areaId: string | number
+  areaHandle: string
+  pageId: string | number
+  afterBlockId: string | number
+  targetIndex?: string | number
+}
+
 export type DeleteBlockOperation = {
   id: string
   type: 'block.delete'
@@ -26,4 +34,15 @@ export type UpdateBlockOperation = {
   response?: any
 }
 
-export type PageOperation = DeleteBlockOperation | UpdateBlockOperation
+export type AddBlockOperation = {
+  id: string
+  type: 'block.add'
+  status: PageOperationStatus
+  blockTypeId: number
+  blockTypeHandle?: string
+  blockTitle?: string
+  target: AddBlockTargetRef
+  response?: any
+}
+
+export type PageOperation = DeleteBlockOperation | UpdateBlockOperation | AddBlockOperation

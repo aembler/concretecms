@@ -1,4 +1,4 @@
-import type { BlockRef } from '../../stores/types/page-operations'
+import type { AddBlockTargetRef, BlockRef } from '../../stores/types/page-operations'
 
 type ScriptDescriptor = {
   src: string | null
@@ -11,6 +11,12 @@ type ScriptDescriptor = {
 
 type ReplaceBlockOptions = {
   originalBlockId: string | number
+  replacementHtml: string
+  evaluateScripts?: boolean
+}
+
+type InsertBlockOptions = {
+  target: AddBlockTargetRef
   replacementHtml: string
   evaluateScripts?: boolean
 }
@@ -56,10 +62,27 @@ export class BlockRenderer {
     return newBlockElement
   }
 
+  async insertBlock(options: InsertBlockOptions): Promise<HTMLElement> {
+    const { newBlockElement, scripts } = this.parseReplacementHtml(options.replacementHtml)
+    this.insertBlockElementAtTarget(newBlockElement, options.target)
+
+    if (options.evaluateScripts !== false) {
+      await this.executeScripts(scripts)
+    }
+
+    return newBlockElement
+  }
+
   findExistingBlockElement(blockId: string | number): HTMLElement | null {
     const rawId = String(blockId || '').replace(/^b/i, '')
     if (!rawId) {
       return null
+    }
+
+    const blockIdSelector = `concrete-block[block-id="${this.escapeAttributeSelectorValue(rawId)}"]`
+    const blockIdMatched = document.querySelector(blockIdSelector)
+    if (blockIdMatched instanceof HTMLElement) {
+      return blockIdMatched
     }
 
     return document.getElementById(`b${rawId}`)
@@ -79,6 +102,47 @@ export class BlockRenderer {
       newBlockElement: blockElement,
       scripts,
     }
+  }
+
+  private insertBlockElementAtTarget(blockElement: HTMLElement, target: AddBlockTargetRef): void {
+    const areaHandle = this.escapeAttributeSelectorValue(String(target.areaHandle || ''))
+    const pageId = String(target.pageId || '')
+    const afterBlockId = String(target.afterBlockId || 0)
+
+    const targetSelector = `concrete-area-block-target[data-page-id="${pageId}"][data-area-handle="${areaHandle}"][data-after-block-id="${afterBlockId}"]`
+    const areaTarget = document.querySelector(targetSelector)
+    if (areaTarget) {
+      areaTarget.insertAdjacentElement('afterend', blockElement)
+      return
+    }
+
+    // Fallback to direct block-anchor insertion when target markers are missing/stale.
+    const afterBlockNumericId = Number(afterBlockId || 0)
+    if (afterBlockNumericId > 0) {
+      const afterBlockElement = this.findExistingBlockElement(afterBlockNumericId)
+      if (afterBlockElement) {
+        afterBlockElement.insertAdjacentElement('afterend', blockElement)
+        return
+      }
+    }
+
+    const areaSelector = `concrete-area[page-id="${pageId}"][data-area-handle="${areaHandle}"]`
+    const areaElement = document.querySelector(areaSelector)
+    if (areaElement) {
+      const firstTarget = areaElement.querySelector('concrete-area-block-target')
+      if (firstTarget) {
+        firstTarget.insertAdjacentElement('afterend', blockElement)
+        return
+      }
+      areaElement.appendChild(blockElement)
+      return
+    }
+
+    throw new Error(`Could not find insert target for area "${String(target.areaHandle || '')}"`)
+  }
+
+  private escapeAttributeSelectorValue(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
   }
 
   private extractScripts(root: ParentNode): ScriptDescriptor[] {

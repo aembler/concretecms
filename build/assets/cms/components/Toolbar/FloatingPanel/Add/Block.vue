@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { normalizeJsonResponse, useAjax, useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
+import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../../../stores/concrete-ui'
+import type { AddBlockOperation } from '../../../../stores/types/page-operations'
 
 type PanelIcon = {
   type: string
@@ -18,6 +19,7 @@ type BlockTypeEditor = {
 
 type AddContentDropTarget = {
   areaId?: number | string
+  pageId?: number | string
   areaHandle?: string
   afterBlockId?: number | string
   targetIndex?: number | string
@@ -57,7 +59,6 @@ const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.
 const uiStore = useUiStore()
 const concreteUiStore = useConcreteUiStore()
 const floatingPanels = useFloatingPanelsStore()
-const { request } = useAjax()
 const pageState = computed(() => (concreteUiStore.page as any))
 const addPanelId = 'toolbar:add'
 const blockButton = ref<HTMLButtonElement | null>(null)
@@ -66,7 +67,6 @@ let dragPreview: HTMLElement | null = null
 let dragPreviewContainer: HTMLElement | null = null
 let dragPanelBounds: DOMRect | null = null
 let hasExitedAddPanel = false
-let isSubmittingAddWithoutEditor = false
 
 function ensureAddContentPageState() {
   if (typeof pageState.value.addContentDragInProgress === 'undefined') {
@@ -179,58 +179,31 @@ function isPointOutsideRect(x: number, y: number, rect: DOMRect): boolean {
   return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
 }
 
-function submitAddBlockWithoutEditor(dropTarget: AddContentDropTarget) {
-  if (isSubmittingAddWithoutEditor) {
+function enqueueAddBlockOperation(dropTarget: AddContentDropTarget, draggedItem: AddContentDraggedItem) {
+  const areaHandle = String(dropTarget.areaHandle || '')
+  const pageId = Number(dropTarget.pageId || 0)
+  const blockTypeId = Number(draggedItem?.payload?.blockTypeId || props.blockTypeId || 0)
+  if (!areaHandle || pageId <= 0 || blockTypeId <= 0) {
     return
   }
 
-  const arHandle = String(dropTarget?.areaHandle || '')
-  const btID = Number(props.blockTypeId || 0)
-  if (!arHandle || btID <= 0) {
-    return
+  const operation: AddBlockOperation = {
+    id: `block.add.${blockTypeId}.${Date.now()}`,
+    type: 'block.add',
+    status: 'queued',
+    blockTypeId,
+    blockTypeHandle: String(draggedItem?.payload?.blockTypeHandle || props.blockTypeHandle || ''),
+    blockTitle: String(draggedItem?.payload?.title || props.title || ''),
+    target: {
+      areaId: Number(dropTarget.areaId || 0),
+      areaHandle,
+      pageId,
+      afterBlockId: Number(dropTarget.afterBlockId || 0),
+      targetIndex: Number(dropTarget.targetIndex || 0),
+    },
   }
 
-  isSubmittingAddWithoutEditor = true
-  const cID = Number((window as any).CCM_CID || 0)
-  const ccmToken = String((window as any).CCM_SECURITY_TOKEN || '')
-  const dragAreaBlockID = Number(dropTarget?.afterBlockId || 0)
-
-  const submitParams = new URLSearchParams()
-  submitParams.set('cID', String(cID))
-  submitParams.set('arHandle', arHandle)
-  submitParams.set('btID', String(btID))
-  submitParams.set('mode', 'edit')
-  submitParams.set('add', '1')
-  submitParams.set('ccm_token', ccmToken)
-  submitParams.set('dragAreaBlockID', String(dragAreaBlockID))
-  // TODO: add legacy arCustomTemplates support when custom templates are wired into concrete UI page state.
-
-  request({
-    url: `${CCM_DISPATCHER_FILENAME}/ccm/system/dialogs/page/add_block/submit?${submitParams.toString()}`,
-    method: 'GET',
-    skipResponseValidation: true,
-    onSuccess: (response) => {
-      const normalizedResponse: any = normalizeJsonResponse(response)
-      if (normalizedResponse?.error || (Array.isArray(normalizedResponse?.errors) && normalizedResponse.errors.length > 0)) {
-        return
-      }
-      const blockInfo = {
-        bID: Number(normalizedResponse?.bID || 0),
-        arHandle: String(normalizedResponse?.arHandle || dropTarget?.areaHandle || ''),
-        cID: Number(normalizedResponse?.cID || (window as any).CCM_CID || 0),
-        dropTarget: {
-          areaId: Number(dropTarget?.areaId || 0),
-          areaHandle: String(dropTarget?.areaHandle || ''),
-          afterBlockId: Number(dropTarget?.afterBlockId || 0),
-          targetIndex: Number(dropTarget?.targetIndex || 0),
-        },
-      }
-      alert(`[FPO] Add block success\n${JSON.stringify(blockInfo, null, 2)}`)
-    },
-    onComplete: () => {
-      isSubmittingAddWithoutEditor = false
-    },
-  })
+  concreteUiStore.enqueuePageOperation(operation)
 }
 
 onMounted(() => {
@@ -277,14 +250,14 @@ onMounted(() => {
         const target = blockButton.value
         const activeDropTarget = (pageState.value.addContentDropTarget || null) as AddContentDropTarget | null
         const draggedItem = (pageState.value.addContentDraggedItem || null) as AddContentDraggedItem | null
-        const didFindValidDropZone = Boolean(activeDropTarget?.areaHandle && draggedItem?.type === 'blockType')
+        const didFindValidDropZone = Boolean(activeDropTarget?.areaHandle && activeDropTarget?.pageId && draggedItem?.type === 'blockType')
 
         removeDragPreview()
         if (didFindValidDropZone) {
           floatingPanels.close(addPanelId)
           const addEditor = draggedItem?.payload?.editor ?? null
-          if (addEditor === null && activeDropTarget) {
-            submitAddBlockWithoutEditor({ ...activeDropTarget })
+          if (addEditor === null && activeDropTarget && draggedItem) {
+            enqueueAddBlockOperation({ ...activeDropTarget }, draggedItem)
           }
         }
         setAddContentDragActive(false)
