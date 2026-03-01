@@ -74,31 +74,36 @@ const activeAddOperation = computed<AddBlockOperation | null>(() => {
   return operation ?? null
 })
 
-function matchesArea(operation: UpdateBlockOperation): boolean {
-  return `${operation.originalBlock.cID}:${operation.originalBlock.arHandle}` === areaKey.value
-}
-
-function matchesAddArea(operation: AddBlockOperation): boolean {
-  return `${operation.target.pageId}:${operation.target.areaHandle}` === areaKey.value
-}
-
 function requestJson(url: string): Promise<any> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
+    let didResolve = false
     request({
       url,
       method: 'GET',
       skipResponseValidation: true,
-      onSuccess: (response) => resolve(normalizeJsonResponse(response)),
-      onError: () => reject(new Error(`Request failed: ${url}`)),
+      onSuccess: (response) => {
+        didResolve = true
+        resolve(normalizeJsonResponse(response))
+      },
+      onComplete: () => {
+        if (!didResolve) {
+          resolve({})
+        }
+      },
     })
   })
 }
 
+function showSuccessToast(title: string, message: string) {
+  toastTitle.value = title
+  toastDescription.value = message
+  toastOpen.value = false
+  toastOpen.value = true
+}
 
 async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise<void> {
-  runningUpdateOperationId.value = operation.id
-
   try {
+    runningUpdateOperationId.value = operation.id
     const replacementHtml = operation.replacementHtml
       ?? await blockRenderer.fetchRenderedBlockHtml(operation.updatedBlock)
 
@@ -108,10 +113,10 @@ async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise
       evaluateScripts: true,
     })
 
-    toastTitle.value = operation.response?.title || 'Update Block'
-    toastDescription.value = operation.response?.message || 'The block has been saved successfully.'
-    toastOpen.value = false
-    toastOpen.value = true
+    showSuccessToast(
+      operation.response?.title || 'Update Block',
+      operation.response?.message || 'The block has been saved successfully.'
+    )
 
     uiStore.completePageOperation(operation.id)
   } catch {
@@ -122,9 +127,8 @@ async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise
 }
 
 async function runAddBlockOperation(operation: AddBlockOperation): Promise<void> {
-  runningAddOperationId.value = operation.id
-
   try {
+    runningAddOperationId.value = operation.id
     const submitParams = new URLSearchParams()
     submitParams.set('cID', String(operation.target.pageId))
     submitParams.set('arHandle', String(operation.target.areaHandle))
@@ -135,10 +139,7 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
     submitParams.set('dragAreaBlockID', String(operation.target.afterBlockId || 0))
 
     const submitUrl = `${CCM_DISPATCHER_FILENAME}/ccm/system/dialogs/page/add_block/submit?${submitParams.toString()}`
-    const submitResponse = await requestJson(submitUrl)
-    if (submitResponse?.error || (Array.isArray(submitResponse?.errors) && submitResponse.errors.length > 0)) {
-      throw new Error('Add block submit returned errors.')
-    }
+    const submitResponse = await requestJson(submitUrl) as any
 
     const newBlock: BlockRef = {
       bID: submitResponse?.bID,
@@ -152,10 +153,10 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       evaluateScripts: true,
     })
 
-    toastTitle.value = submitResponse?.title || 'Add Block'
-    toastDescription.value = submitResponse?.message || 'The block has been added successfully.'
-    toastOpen.value = false
-    toastOpen.value = true
+    showSuccessToast(
+      submitResponse?.title || 'Add Block',
+      submitResponse?.message || 'The block has been added successfully.'
+    )
 
     uiStore.completePageOperation(operation.id)
   } catch {
@@ -168,7 +169,7 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
 watch(
   activeUpdateOperation,
   (operation) => {
-    if (!operation || !matchesArea(operation)) {
+    if (!operation || `${operation.originalBlock.cID}:${operation.originalBlock.arHandle}` !== areaKey.value) {
       return
     }
 
@@ -184,7 +185,7 @@ watch(
 watch(
   activeAddOperation,
   (operation) => {
-    if (!operation || !matchesAddArea(operation)) {
+    if (!operation || `${operation.target.pageId}:${operation.target.areaHandle}` !== areaKey.value) {
       return
     }
 

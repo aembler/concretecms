@@ -101,11 +101,6 @@ const runningDeleteOperationId = ref<string | null>(null)
 
 const props = defineProps({
   id: String,
-  blockId: Number | String,
-  name: String,
-  variants: String | Array<{ file: String; name: String }>,
-  blocktype: String | Object,
-  selectedVariant: String,
   editAction: String,
   editDialogTitle: String,
   editDialogWidth: Number | String,
@@ -114,12 +109,22 @@ const props = defineProps({
   deleteAllAction: String,
   deleteMessage: String,
   deleteDefaultsMessage: String,
-  deleteBlockId: Number | String,
-  deleteAreaHandle: String,
   deleteIsMasterCollection: Boolean | String | Number,
   deleteDialogTitle: String,
   deleteProgressiveOperationTitle: String,
+
+
+
+  deleteBlockId: Number | String,
+  deleteAreaHandle: String,
+
+
   pageId: Number | String,
+  blockId: Number | String,
+  name: String,
+  variants: String | Array<{ file: String; name: String }>,
+  blocktype: String | Object,
+  selectedVariant: String,
 })
 
 const parsedVariants = useParsedJsonProp(props.variants)
