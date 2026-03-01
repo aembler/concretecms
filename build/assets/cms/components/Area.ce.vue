@@ -94,6 +94,7 @@ function requestJson(url: string): Promise<any> {
   })
 }
 
+
 async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise<void> {
   runningUpdateOperationId.value = operation.id
 

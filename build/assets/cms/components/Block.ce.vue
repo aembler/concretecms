@@ -194,7 +194,26 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
     body,
     onSuccess: (response) => {
       const normalizedResponse: any = normalizeJsonResponse(response)
-      isDeleted.value = true
+      // Remove the custom element host itself on delete. Keeping the host in place
+      // leaves stale siblings/targets around because only the inner slot content is hidden.
+      const hostId = String(props.id || '')
+      const hostElement = hostId ? document.getElementById(hostId) : null
+      const previousSibling = hostElement?.previousElementSibling || null
+      const nextSibling = hostElement?.nextElementSibling || null
+      if (hostElement) {
+        hostElement.remove()
+      } else {
+        isDeleted.value = true
+      }
+
+      // PHP renders a target before and after blocks. Once the host is removed those
+      // two targets can become adjacent duplicates, so collapse one of them.
+      const prevIsTarget = previousSibling?.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
+      const nextIsTarget = nextSibling?.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
+      if (prevIsTarget && nextIsTarget && nextSibling) {
+        nextSibling.remove()
+      }
+
       clearMenuState()
 
       toastTitle.value = normalizedResponse?.title || 'Deleted'

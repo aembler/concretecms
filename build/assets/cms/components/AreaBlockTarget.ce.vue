@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 
 const props = withDefaults(defineProps<{
@@ -19,6 +19,8 @@ const props = withDefaults(defineProps<{
 const uiStore = useConcreteUiStore()
 const targetRef = ref<HTMLElement | null>(null)
 let stickyReleaseTimer: ReturnType<typeof setTimeout> | null = null
+let activationFrameId: number | null = null
+const justActivatedDrag = ref(false)
 
 // 1) Expanded hitbox (easy to disable independently)
 const ENABLE_EXPANDED_HITBOX = true
@@ -53,6 +55,26 @@ const isActiveTarget = computed(() => {
     && Number(dropTarget.pageId || 0) === ownPageId.value
     && String(dropTarget.areaHandle || '') === ownAreaHandle.value
     && Number(dropTarget.afterBlockId || 0) === ownAfterBlockId.value
+})
+
+watch(isDragActive, (active) => {
+  if (activationFrameId !== null) {
+    cancelAnimationFrame(activationFrameId)
+    activationFrameId = null
+  }
+
+  if (!active) {
+    justActivatedDrag.value = false
+    return
+  }
+
+  // Give one paint to the base "drag-active" height transition before
+  // promoting a hovered target to the expanded active-target state.
+  justActivatedDrag.value = true
+  activationFrameId = requestAnimationFrame(() => {
+    justActivatedDrag.value = false
+    activationFrameId = null
+  })
 })
 
 function isPointerInsideTarget(
@@ -108,7 +130,7 @@ watchEffect(() => {
   const pointer = pageState.value?.addContentDragPointer ?? null
   const hitboxPaddingX = ENABLE_EXPANDED_HITBOX ? HITBOX_PADDING_X : 0
   const hitboxPaddingY = ENABLE_EXPANDED_HITBOX ? HITBOX_PADDING_Y : 0
-  if (isPointerInsideTarget(pointer, hitboxPaddingX, hitboxPaddingY)) {
+  if (!justActivatedDrag.value && isPointerInsideTarget(pointer, hitboxPaddingX, hitboxPaddingY)) {
     claimDropTarget()
     return
   }
@@ -137,6 +159,10 @@ watchEffect(() => {
 })
 
 onBeforeUnmount(() => {
+  if (activationFrameId !== null) {
+    cancelAnimationFrame(activationFrameId)
+    activationFrameId = null
+  }
   if (stickyReleaseTimer) {
     clearTimeout(stickyReleaseTimer)
     stickyReleaseTimer = null
