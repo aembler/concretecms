@@ -25,7 +25,7 @@ $router->all('/dashboard/remove_favorite', 'Dashboard::removeFavorite');
 $router->all('/page/relations', 'PageRelations::view');
 $router->all('/page', 'Page::view');
 $router->all('/page/attributes', 'Page\Attributes::view');
-$router->all('/page/check_in', 'Page\CheckIn::__construct');
+$router->all('/page/check_in', 'Page\CheckIn::view');
 $router->all('/page/check_in/submit', 'Page\CheckIn::submit');
 $router->all('/page/design', 'Page\Design::view');
 $router->all('/page/design/preview_contents', 'Page\Design::preview_contents');

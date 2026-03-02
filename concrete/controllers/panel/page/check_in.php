@@ -2,22 +2,22 @@
 namespace Concrete\Controller\Panel\Page;
 
 use Concrete\Controller\Backend\UserInterface\Page as BackendInterfacePageController;
+use Concrete\Core\Http\ResponseFactoryInterface;
 use Concrete\Core\Form\Service\Widget\DateTime;
 use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\User;
+use Concrete\Core\Config\Repository\Repository;
+use Concrete\Core\Support\Facade\Application;
+use Concrete\Core\Workflow\Request\ApprovePageRequest as ApprovePagePageWorkflowRequest;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Permissions;
 use CollectionVersion;
 use Loader;
 use Page;
-use Concrete\Core\Workflow\Request\ApprovePageRequest as ApprovePagePageWorkflowRequest;
 use PageEditResponse;
-use Concrete\Core\Http\ResponseFactoryInterface;
-use Concrete\Core\Support\Facade\Application;
-use Concrete\Core\Config\Repository\Repository;
 
 class CheckIn extends BackendInterfacePageController
 {
-    protected $viewPath = '/panels/page/check_in';
     // we need this extra because this controller gets called by another page
     // and that page needs to know how to submit it.
     protected $controllerActionPath = '/ccm/system/panels/page/check_in';
@@ -27,15 +27,57 @@ class CheckIn extends BackendInterfacePageController
         return $this->permissions->canApprovePageVersions() || $this->permissions->canEditPageContents();
     }
 
-    public function on_start()
+    public function view(): JsonResponse
     {
-        parent::on_start();
-        if ($this->page) {
-            $v = CollectionVersion::get($this->page, "RECENT");
+        $v = CollectionVersion::get($this->page, 'RECENT');
+        $publishErrors = $this->checkForPublishing();
+        $composer = $this->app->make('helper/concrete/composer');
+        $publishTitle = $composer->getPublishButtonTitle($this->page);
+        $publishButtonActivated = $composer->getPublishButtonActivated($this->page);
+        $publishActionEnabled = !(($publishErrors->has()) || !$publishButtonActivated);
+        $discardAvailable = ($this->page->isPageDraft() && $this->permissions->canDeletePage()) || $v->canDiscard();
+        $discardLabel = $this->page->isPageDraft() && $this->permissions->canDeletePage()
+            ? t('Discard Draft')
+            : t('Discard Changes');
+        $discardConfirm = $this->page->isPageDraft() && $this->permissions->canDeletePage()
+            ? t('This will remove this draft and it cannot be undone. Are you sure?')
+            : '';
 
-            $this->set('publishDate', $v->getPublishDate());
-            $this->set('publishErrors', $this->checkForPublishing());
-        }
+        return new JsonResponse([
+            'submitUrl' => (string) $this->action('submit'),
+            'requireVersionComments' => (bool) Config::get('concrete.misc.require_version_comments'),
+            'canApprovePageVersions' => (bool) $this->permissions->canApprovePageVersions(),
+            'publish' => [
+                'title' => (string) $publishTitle,
+                'enabled' => (bool) $publishActionEnabled,
+                'workflowLocked' => !$publishButtonActivated,
+                'workflowLockedMessage' => t('This version is already submitted to Workflow.'),
+                'errors' => $publishErrors->getList(),
+            ],
+            'schedule' => [
+                'publishDate' => $v->getPublishDate(),
+            ],
+            'save' => [
+                'label' => t('Save Changes'),
+            ],
+            'discard' => [
+                'available' => (bool) $discardAvailable,
+                'label' => $discardLabel,
+                'confirm' => $discardConfirm,
+            ],
+            'labels' => [
+                'title' => t('Check In'),
+                'description' => t('Save, publish, schedule, or discard your page edits.'),
+                'comments' => t('Version Comments'),
+                'schedule' => t('Schedule Publish'),
+                'publishDate' => t('Publish Date'),
+                'publishEndDate' => t('Publish End Date'),
+                'keepOtherScheduling' => t('Keep Other Scheduling'),
+                'publish' => t('Publish'),
+                'scheduleAction' => t('Schedule'),
+                'cancel' => t('Cancel'),
+            ],
+        ]);
     }
 
     protected function checkForPublishing()

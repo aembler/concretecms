@@ -1,6 +1,7 @@
 <template>
   <div class="antialiased font-[Open_Sans]">
     <Toolbar
+        :page-id="pageId"
         :logo-src="toolbarLogoSrc"
         :is-edit-mode="toolbarIsEditMode"
         :is-master-collection="toolbarIsMasterCollection"
@@ -12,6 +13,7 @@
         :is-alias="toolbarIsAlias"
         :master-collection-url="toolbarMasterCollectionUrl"
         :check-in-url="toolbarCheckInUrl"
+        :requires-check-in-panel="toolbarRequiresCheckInPanel"
         :checkout-url="toolbarCheckoutUrl"
         :add-content-url="toolbarAddContentUrl"
         :dashboard-url="toolbarDashboardUrl"
@@ -30,6 +32,7 @@ import MouseObserver from "./Support/MouseObserver.vue";
 
 // Define all the props explicitly
 const props = defineProps({
+  pageId: Number,
   toolbarLogoSrc: String,
   toolbarIsEditMode: Boolean,
   toolbarIsMasterCollection: Boolean,
@@ -44,6 +47,7 @@ const props = defineProps({
   toolbarIsAlias: Boolean,
   toolbarMasterCollectionUrl: String,
   toolbarCheckInUrl: String,
+  toolbarRequiresCheckInPanel: Boolean,
   toolbarCheckoutUrl: String,
   toolbarAddContentUrl: String,
   toolbarDashboardUrl: String,

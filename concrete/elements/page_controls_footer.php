@@ -21,6 +21,8 @@ if (isset($cp) && $cp->canViewToolbar() && (!$dh->inDashboard()) && !$view->isEd
     $dateHelper = $app->make('helper/date');
     $token = '&' . $valt->getParameter();
     $cID = $c->getCollectionID();
+    $vo = $c->getVersionObject();
+    $requiresCheckInPanel = $c->isEditMode() && ($vo->isNew() || $c->isPageDraft());
     $permissions = new Permissions($c);
     $resolver = $app->make(ResolverManagerInterface::class);
 
@@ -31,11 +33,15 @@ if (isset($cp) && $cp->canViewToolbar() && (!$dh->inDashboard()) && !$view->isEd
     ?>
 
     <concrete-app
+            page-id="<?=$c->getCollectionID()?>"
             toolbar-logo-src="<?=$cih->getToolbarLogoRealSrc()?>"
             toolbar-checkout-url="<?= h($resolver->resolve(["/ccm/system/page/checkout/{$cID}/-/" . $valt->generate()])) ?>?redirect=<?=h($request->getPath())?>"
             <?php if ($c->isEditMode()) { ?>
                 toolbar-is-edit-mode
                 toolbar-check-in-url="<?= URL::to('/ccm/system/page/check_in', $cID, $valt->generate()) ?>"
+                <?php if ($requiresCheckInPanel) { ?>
+                    toolbar-requires-check-in-panel
+                <?php } ?>
             <?php } ?>
             <?php if ($show_titles) { ?>
                 toolbar-show-titles

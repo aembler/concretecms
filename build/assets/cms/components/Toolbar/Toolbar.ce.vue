@@ -33,6 +33,7 @@
           >
             <a
                 :href="checkInUrl"
+                @click.prevent="handleExitEditMode"
                 class="c-toolbar-button c-toolbar-button-active"
             >
               <PencilIcon class="w-4 h-4" />
@@ -154,9 +155,14 @@
       <PageFloatingPanel
         v-model:open="pageSettingsOpen"
         :permissions="pageSettingsPermissions"
-        :page-id="pageSettingsPageId"
+        :page-id="pageId"
         :loading="pageSettingsLoading"
         :error="pageSettingsError"
+      />
+      <CheckInFloatingPanel
+        v-model:open="checkInOpen"
+        :loading="checkInLoading"
+        :data="checkInData"
       />
       <AddFloatingPanel
         v-model:open="addPanelOpen"
@@ -186,6 +192,7 @@ import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
 import AddFloatingPanel from './FloatingPanel/AddFloatingPanel.vue'
+import CheckInFloatingPanel from './FloatingPanel/CheckInFloatingPanel.vue'
 import {
   FloatingPanelGroup,
   useUiStore,
@@ -204,6 +211,7 @@ const floatingPanels = useFloatingPanelsStore()
 const { request } = useAjax()
 
 const props = defineProps({
+  pageId: Number,
   logoSrc: String,
   isEditMode: Boolean,
   isMasterCollection: Boolean,
@@ -215,6 +223,7 @@ const props = defineProps({
   isAlias: Boolean,
   masterCollectionUrl: String,
   checkInUrl: String,
+  requiresCheckInPanel: Boolean,
   checkoutUrl: String,
   addContentUrl: String,
   dashboardUrl: String,
@@ -227,6 +236,7 @@ const props = defineProps({
 const resolvedTheme = ref('light')
 const teleportTarget = useTemplateRef('teleportTarget')
 const pageSettingsPanelId = 'toolbar:page-settings'
+const checkInPanelId = 'toolbar:check-in'
 const addPanelId = 'toolbar:add'
 const pageSettingsOpen = computed({
   get: () => floatingPanels.activePanel === pageSettingsPanelId,
@@ -241,7 +251,19 @@ const pageSettingsOpen = computed({
 const pageSettingsLoading = ref(false)
 const pageSettingsError = ref<string | null>(null)
 const pageSettingsPermissions = ref<Record<string, boolean> | null>(null)
-const pageSettingsPageId = ref<number | null>(null)
+const checkInOpen = computed({
+  get: () => floatingPanels.activePanel === checkInPanelId,
+  set: (isOpen: boolean) => {
+    if (isOpen) {
+      floatingPanels.open(checkInPanelId)
+      return
+    }
+    floatingPanels.close(checkInPanelId)
+  },
+})
+const checkInLoading = ref(false)
+const checkInError = ref<string | null>(null)
+const checkInData = ref<any>(null)
 const addPanelOpen = computed({
   get: () => floatingPanels.activePanel === addPanelId,
   set: (isOpen: boolean) => {
@@ -317,7 +339,6 @@ const launchPageSettings = () => {
   pageSettingsLoading.value = true
   pageSettingsError.value = null
   pageSettingsPermissions.value = null
-  pageSettingsPageId.value = null
   pageSettingsOpen.value = true
   const currentCollectionId = Number((window as any).CCM_CID ?? 0)
   const pageSettingsUrl = currentCollectionId > 0
@@ -331,12 +352,10 @@ const launchPageSettings = () => {
       if (data?.error) {
         pageSettingsError.value = data.error
         pageSettingsPermissions.value = null
-        pageSettingsPageId.value = null
         return
       }
 
       pageSettingsPermissions.value = data?.permissions ?? null
-      pageSettingsPageId.value = Number.isInteger(data?.pageId) ? data.pageId : null
     },
     onError: () => {
       pageSettingsError.value = 'Unable to load page settings.'
@@ -344,6 +363,45 @@ const launchPageSettings = () => {
     onComplete: () => {
       pageSettingsLoading.value = false
     },
+  })
+}
+
+const handleExitEditMode = () => {
+  if (!props.requiresCheckInPanel) {
+    if (props.checkInUrl) {
+      window.location.href = props.checkInUrl
+    }
+    return
+  }
+
+  if (checkInLoading.value) {
+    return
+  }
+
+  if (checkInOpen.value) {
+    checkInOpen.value = false
+    return
+  }
+
+  checkInData.value = null
+
+  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
+  const checkInPanelUrl = currentCollectionId > 0
+    ? `/ccm/system/panels/page/check_in?cID=${currentCollectionId}`
+    : '/ccm/system/panels/page/check_in'
+
+  request({
+    url: checkInPanelUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        checkInData.value = null
+        checkInOpen.value = true
+        return
+      }
+
+      checkInData.value = data
+    }
   })
 }
 
