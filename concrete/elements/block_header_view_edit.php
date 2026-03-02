@@ -24,7 +24,6 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
 <?php } else {
 
     $blockTypeData = app(BlockTypeTransformer::class)->transform($blockType);
-    $blockTypeData['editor'] = $blockTypeData['editors']['edit'] ?? null;
     $isMasterCollection = $c->isMasterCollection();
     $defaultsMessage = '';
     if ($isMasterCollection) {
@@ -70,8 +69,7 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     delete-all-action="<?=h($deleteAllAction)?>"
     delete-message="<?=h($deleteMessage)?>"
     delete-defaults-message="<?=h($defaultsMessage)?>"
-    delete-block-id="<?=$b->getBlockID()?>"
-    delete-area-handle="<?=h($a->getAreaHandle())?>"
+    area-handle="<?=h($a->getAreaHandle())?>"
     delete-is-master-collection="<?=$isMasterCollection ? '1' : '0'?>"
     delete-dialog-title="<?=h(t('Delete'))?>"
     delete-progressive-operation-title="<?=h(t('Delete Blocks'))?>"

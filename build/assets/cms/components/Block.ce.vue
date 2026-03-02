@@ -32,8 +32,8 @@
         :dialog-title="editDialogTitle"
         :dialog-width="editDialogWidth"
         :dialog-height="editDialogHeight"
-        :block-id="currentBlockId"
-        :area-handle="deleteAreaHandle"
+        :block-id="blockId"
+        :area-handle="areaHandle"
         :page-id="pageId"
         @updated="handleUpdated"
       />
@@ -47,8 +47,8 @@
       :delete-all-action="deleteAllAction"
       :message="deleteMessage"
       :defaults-message="deleteDefaultsMessage"
-      :block-id="currentBlockId"
-      :area-handle="deleteAreaHandle"
+      :block-id="blockId"
+      :area-handle="areaHandle"
       :is-master-collection="deleteIsMasterCollection"
       :dialog-title="deleteDialogTitle"
       :progressive-operation-title="deleteProgressiveOperationTitle"
@@ -100,7 +100,11 @@ const { request } = useAjax()
 const runningDeleteOperationId = ref<string | null>(null)
 
 const props = defineProps({
-  id: String,
+  id: String, // Needed as a separate prop for DOM operations, menu objserver.
+  blockId: Number | String,
+  areaHandle: String,
+  pageId: Number | String,
+
   editAction: String,
   editDialogTitle: String,
   editDialogWidth: Number | String,
@@ -112,15 +116,6 @@ const props = defineProps({
   deleteIsMasterCollection: Boolean | String | Number,
   deleteDialogTitle: String,
   deleteProgressiveOperationTitle: String,
-
-
-
-  deleteBlockId: Number | String,
-  deleteAreaHandle: String,
-
-
-  pageId: Number | String,
-  blockId: Number | String,
   name: String,
   variants: String | Array<{ file: String; name: String }>,
   blocktype: String | Object,
@@ -129,7 +124,6 @@ const props = defineProps({
 
 const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
-const currentBlockId = computed(() => props.blockId ?? props.deleteBlockId)
 
 let menuId = computed(() => props.id + '-menu')
 const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
@@ -159,7 +153,7 @@ const editorComponents: Record<string, any> = {
 }
 
 const currentEditorComponent = computed(() => {
-  const editorComponentKey = parseBlockType?.editors?.edit?.component ?? parseBlockType?.editor?.component
+  const editorComponentKey = parseBlockType?.editors?.edit?.component
   if (!editorComponentKey || typeof editorComponentKey !== 'string') {
     return null
   }
@@ -182,8 +176,8 @@ const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
 })
 
 function matchesDeleteTarget(operation: DeleteBlockOperation) {
-  return String(operation.pageBlock.bID) === String(currentBlockId.value)
-    && String(operation.pageBlock.arHandle) === String(props.deleteAreaHandle)
+  return String(operation.pageBlock.bID) === String(props.blockId)
+    && String(operation.pageBlock.arHandle) === String(props.areaHandle)
     && String(operation.pageBlock.cID || '') === String(props.pageId || '')
 }
 
