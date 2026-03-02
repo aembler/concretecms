@@ -15,6 +15,7 @@ type PanelIcon = {
 
 type BlockTypeEditor = {
   component: string
+  props?: Record<string, unknown>
 } | null
 
 type AddContentDropTarget = {

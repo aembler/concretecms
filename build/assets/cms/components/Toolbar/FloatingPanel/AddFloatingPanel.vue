@@ -31,6 +31,7 @@ type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
 
 type BlockTypeEditor = {
   component: string
+  props?: Record<string, unknown>
 } | null
 
 type BlockType = {

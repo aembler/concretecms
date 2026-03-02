@@ -2,17 +2,17 @@
   <LazyDialog
     ref="lazyDialogRef"
     v-model:open="open"
-    :src="props.editAction"
-    :dialog-title="props.dialogTitle || 'Edit Block'"
-    :dialog-width="props.dialogWidth"
-    :dialog-height="props.dialogHeight"
+    :src="editActionUrl"
+    :dialog-title="dialogTitle"
+    :dialog-width="dialogWidth"
+    :dialog-height="dialogHeight"
     :allow-script-execution="true"
     :content-transform="transformDialogHtml"
   >
     <template #header>
       <DialogHeader>
         <div class="flex w-full min-w-0 items-center gap-2">
-          <DialogTitle>{{ props.dialogTitle || 'Edit Block' }}</DialogTitle>
+          <DialogTitle>{{ dialogTitle }}</DialogTitle>
           <div
             v-if="helpTooltipText"
             class="tooltip tooltip-left dialog-help-tooltip ms-auto me-1"
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   DialogFooter,
   DialogHeader,
@@ -58,18 +58,19 @@ import { useConcreteUiStore } from '../../../stores/concrete-ui'
 import type { BlockRef, UpdateBlockOperation } from '../../../stores/types/page-operations'
 
 const props = withDefaults(defineProps<{
-  editAction?: string
-  dialogTitle?: string
-  dialogWidth?: string | number
-  dialogHeight?: string | number
+  editor?: {
+    component: string
+    props?: {
+      dialogTitle?: string
+      dialogWidth?: string | number
+      dialogHeight?: string | number
+    }
+  } | null
   blockId: string | number
   areaHandle: string
   pageId: string | number
 }>(), {
-  editAction: '',
-  dialogTitle: '',
-  dialogWidth: 'auto',
-  dialogHeight: 'auto',
+  editor: null,
 })
 
 const open = ref(false)
@@ -83,6 +84,18 @@ const uiStore = useConcreteUiStore()
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any }): void
 }>()
+
+const dialogTitle = computed(() => props.editor?.props?.dialogTitle || 'Edit Block')
+const dialogWidth = computed(() => props.editor?.props?.dialogWidth || 'auto')
+const dialogHeight = computed(() => props.editor?.props?.dialogHeight || 'auto')
+const editActionUrl = computed(() => {
+  const params = new URLSearchParams({
+    cID: String(props.pageId),
+    bID: String(props.blockId),
+    arHandle: props.areaHandle,
+  })
+  return `/ccm/system/dialogs/block/edit?${params.toString()}`
+})
 
 function transformDialogHtml(rawHtml: string): string {
   const parser = document.createElement('div')
@@ -154,7 +167,7 @@ function handleSave() {
   }
 
   const formData = new FormData(form)
-  const url = form.getAttribute('action') || props.editAction || ''
+  const url = form.getAttribute('action') || editActionUrl.value
   const method = normalizeMethod(form.getAttribute('method') || 'POST')
   if (!url) {
     return
@@ -211,7 +224,7 @@ function handleCancel() {
 }
 
 onMounted(() => {
-  if (!props.editAction) {
+  if (!editActionUrl.value) {
     return
   }
 

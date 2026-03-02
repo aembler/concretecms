@@ -255,7 +255,10 @@ const addPanelOpen = computed({
 const addPanelLoading = ref(false)
 const addPanelError = ref<string | null>(null)
 const addPanelDefaultTab = ref<'blocks' | 'clipboard' | 'library' | 'layouts'>('blocks')
-type BlockTypeEditor = { component: string } | null
+type BlockTypeEditor = {
+  component: string
+  props?: Record<string, unknown>
+} | null
 const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{
   id: number
   handle: string

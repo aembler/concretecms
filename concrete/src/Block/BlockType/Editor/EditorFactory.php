@@ -42,7 +42,11 @@ class EditorFactory
             return new ComposableEditor();
         }
 
-        return new DialogEditor();
+        return new DialogEditor(
+            t('Edit %s', t($blockType->getBlockTypeName())),
+            (string) $blockType->getBlockTypeInterfaceWidth(),
+            (string) $blockType->getBlockTypeInterfaceHeight()
+        );
     }
 
     protected function supportsMode(BlockType $blockType, string $mode): bool

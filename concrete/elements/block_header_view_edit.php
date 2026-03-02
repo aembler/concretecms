@@ -44,12 +44,8 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
         . '&bID=' . $b->getBlockID()
         . '&arHandle=' . urlencode($a->getAreaHandle())
         . '&ccm_token=' . urlencode($token);
-    $editQuery = '&cID=' . $c->getCollectionID()
-        . '&bID=' . $b->getBlockID()
-        . '&arHandle=' . urlencode($a->getAreaHandle());
     $deleteAction = (string) Url::to('/ccm/system/dialogs/block/delete/submit') . '?' . ltrim($query, '&');
     $deleteAllAction = (string) Url::to('/ccm/system/dialogs/block/delete/submit_all') . '?' . ltrim($query, '&');
-    $editAction = (string) Url::to('/ccm/system/dialogs/block/edit') . '?' . ltrim($editQuery, '&');
 
     ?>
 
@@ -61,10 +57,6 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     blocktype='<?=h(json_encode($blockTypeData))?>'
     selected-variant="<?=$b->getBlockFilename()?>"
     variants='<?=json_encode($blockType->getBlockTypeCustomTemplates($b))?>'
-    edit-action="<?=h($editAction)?>"
-    edit-dialog-title="<?=h(t('Edit %s', t($blockType->getBlockTypeName())))?>"
-    edit-dialog-width="<?=h((string) $blockType->getBlockTypeInterfaceWidth())?>"
-    edit-dialog-height="<?=h((string) $blockType->getBlockTypeInterfaceHeight())?>"
     delete-action="<?=h($deleteAction)?>"
     delete-all-action="<?=h($deleteAllAction)?>"
     delete-message="<?=h($deleteMessage)?>"

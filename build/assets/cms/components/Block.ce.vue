@@ -28,10 +28,7 @@
         v-if="currentEditorComponent"
         :key="editorRenderKey"
         :block-type-id="parseBlockType?.id"
-        :edit-action="editAction"
-        :dialog-title="editDialogTitle"
-        :dialog-width="editDialogWidth"
-        :dialog-height="editDialogHeight"
+        :editor="parseBlockType?.editors?.edit ?? null"
         :block-id="blockId"
         :area-handle="areaHandle"
         :page-id="pageId"
@@ -104,11 +101,6 @@ const props = defineProps({
   blockId: Number | String,
   areaHandle: String,
   pageId: Number | String,
-
-  editAction: String,
-  editDialogTitle: String,
-  editDialogWidth: Number | String,
-  editDialogHeight: Number | String,
   deleteAction: String,
   deleteAllAction: String,
   deleteMessage: String,
