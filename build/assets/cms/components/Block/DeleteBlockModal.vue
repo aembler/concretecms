@@ -5,13 +5,7 @@
         <DialogTitle>{{ dialogTitle }}</DialogTitle>
       </DialogHeader>
 
-      <form
-        method="post"
-        data-form="delete-block"
-        :data-action-delete-all="deleteAllAction"
-        :data-action="deleteAction"
-        @submit.prevent
-      >
+      <form method="post" data-form="delete-block" @submit.prevent>
         <p>{{ message }}</p>
 
         <template v-if="isMasterCollection">
@@ -57,25 +51,16 @@ import {
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../../stores/types/page-operations'
+import { getDeleteBlockI18n } from '../../support/dom/DeleteBlock'
 
 const props = withDefaults(defineProps<{
   open: boolean
-  deleteAction: string
-  deleteAllAction: string
-  message: string
-  defaultsMessage?: string
   blockId: string | number
   areaHandle: string
   isMasterCollection?: boolean | string | number
-  dialogTitle?: string
-  progressiveOperationTitle?: string
-  pageId?: string | number
+  pageId: string | number
 }>(), {
-  defaultsMessage: '',
   isMasterCollection: false,
-  dialogTitle: 'Delete',
-  progressiveOperationTitle: 'Delete Blocks',
-  pageId: '',
 })
 
 const emit = defineEmits<{
@@ -84,6 +69,10 @@ const emit = defineEmits<{
 
 const deleteAll = ref('0')
 const uiStore = useConcreteUiStore()
+const i18n = getDeleteBlockI18n()
+const dialogTitle = i18n.dialogTitle
+const message = i18n.message
+const defaultsMessage = i18n.defaultsMessage
 
 const isMasterCollection = computed(() => {
   if (typeof props.isMasterCollection === 'boolean') {
@@ -107,10 +96,8 @@ function submitDelete() {
     pageBlock: {
       bID: props.blockId,
       arHandle: props.areaHandle,
-      cID: props.pageId || '',
+      cID: props.pageId,
     },
-    deleteAction: props.deleteAction,
-    deleteAllAction: props.deleteAllAction,
     deleteAll: useDeleteAll,
   }
 

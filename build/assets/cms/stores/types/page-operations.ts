@@ -19,8 +19,6 @@ export type DeleteBlockOperation = {
   type: 'block.delete'
   status: PageOperationStatus
   pageBlock: BlockRef
-  deleteAction: string
-  deleteAllAction: string
   deleteAll: boolean
 }
 

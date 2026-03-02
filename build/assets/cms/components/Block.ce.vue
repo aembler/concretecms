@@ -40,15 +40,9 @@
 
   <DeleteBlockModal
       :open="showDeleteModal"
-      :delete-action="deleteAction"
-      :delete-all-action="deleteAllAction"
-      :message="deleteMessage"
-      :defaults-message="deleteDefaultsMessage"
       :block-id="blockId"
       :area-handle="areaHandle"
-      :is-master-collection="deleteIsMasterCollection"
-      :dialog-title="deleteDialogTitle"
-      :progressive-operation-title="deleteProgressiveOperationTitle"
+      :is-master-collection="isMasterCollection"
       :page-id="pageId"
       @update:open="showDeleteModal = $event"
   />
@@ -76,6 +70,7 @@ import InlineEditor from "./Block/Editor/InlineEditor.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
+import { buildDeleteBlockUrl } from '../support/dom/DeleteBlock'
 import {
   Toast,
   ToastClose,
@@ -101,13 +96,7 @@ const props = defineProps({
   blockId: Number | String,
   areaHandle: String,
   pageId: Number | String,
-  deleteAction: String,
-  deleteAllAction: String,
-  deleteMessage: String,
-  deleteDefaultsMessage: String,
-  deleteIsMasterCollection: Boolean | String | Number,
-  deleteDialogTitle: String,
-  deleteProgressiveOperationTitle: String,
+  isMasterCollection: Boolean | String | Number,
   name: String,
   variants: String | Array<{ file: String; name: String }>,
   blocktype: String | Object,
@@ -176,7 +165,12 @@ function matchesDeleteTarget(operation: DeleteBlockOperation) {
 function runDeleteOperation(operation: DeleteBlockOperation) {
   runningDeleteOperationId.value = operation.id
 
-  const url = operation.deleteAll ? operation.deleteAllAction : operation.deleteAction
+  const url = buildDeleteBlockUrl(
+    operation.pageBlock.cID,
+    operation.pageBlock.bID,
+    operation.pageBlock.arHandle,
+    operation.deleteAll
+  )
   const body = operation.deleteAll ? { deleteAll: 1 } : {}
 
   request({
