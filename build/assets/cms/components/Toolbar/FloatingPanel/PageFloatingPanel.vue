@@ -47,16 +47,8 @@ type PagePermissions = Record<PermissionKey, boolean>
 
 const props = withDefaults(defineProps<{
   open?: boolean
-  permissions?: Partial<PagePermissions> | null
-  pageId?: number | null
-  loading?: boolean
-  error?: string | null
 }>(), {
   open: false,
-  permissions: null,
-  pageId: null,
-  loading: false,
-  error: null,
 })
 
 const emit = defineEmits<{
@@ -103,6 +95,9 @@ const activeContent = ref<string | null>(null)
 const toastOpen = ref(false)
 const toastTitle = ref('Page Updated')
 const toastMessage = ref('Full page caching settings saved.')
+const pagePermissions = ref<Partial<PagePermissions> | null>(null)
+const pageId = ref<number | null>(null)
+const hasLoaded = ref(false)
 
 const fallbackPermissions: PagePermissions = {
   composer: false,
@@ -120,16 +115,16 @@ const fallbackPermissions: PagePermissions = {
 
 const resolvedPermissions = computed<PagePermissions>(() => ({
   ...fallbackPermissions,
-  ...(props.permissions ?? {}),
+  ...(pagePermissions.value ?? {}),
 }))
 
 const withPageId = (path: string): string => {
-  if (!props.pageId) {
+  if (!pageId.value) {
     return path
   }
 
   const separator = path.includes('?') ? '&' : '?'
-  return `${path}${separator}cID=${props.pageId}`
+  return `${path}${separator}cID=${pageId.value}`
 }
 
 const menuGroups = computed(() => [
@@ -242,6 +237,33 @@ watch(
   },
 )
 
+function loadPanelData() {
+  if (hasLoaded.value) {
+    return
+  }
+  hasLoaded.value = true
+
+  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
+  const panelUrl = currentCollectionId > 0
+    ? `/ccm/system/panels/page?cID=${currentCollectionId}`
+    : '/ccm/system/panels/page'
+
+  request({
+    url: panelUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      pagePermissions.value = data?.permissions ?? null
+      pageId.value = Number.isInteger(data?.pageId) ? data.pageId : null
+    },
+  })
+}
+
+watch(() => props.open, (isOpen) => {
+  if (isOpen) {
+    loadPanelData()
+  }
+})
+
 function loadCacheSettings() {
   if (cacheSettingsLoading.value) {
     activeContent.value = 'caching'
@@ -266,10 +288,6 @@ function loadCacheSettings() {
       }
 
       cacheSettingsData.value = data as CachePanelPayload
-    },
-    onError: () => {
-      cacheSettingsError.value = 'Unable to load cache settings.'
-      cacheSettingsData.value = null
     },
     onComplete: () => {
       cacheSettingsLoading.value = false

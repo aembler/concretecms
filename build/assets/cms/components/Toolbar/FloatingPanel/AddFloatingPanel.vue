@@ -8,6 +8,7 @@ import {
   FloatingPanelMenuTitle,
   FloatingPanelMenuItem,
   FloatingPanelSearch,
+  useAjax,
   useFuzzySearch,
 } from '@concretecms/backendui'
 import {
@@ -65,22 +66,15 @@ type BlockSearchRecord = {
 
 const props = withDefaults(defineProps<{
   open?: boolean
-  loading?: boolean
-  error?: string | null
-  defaultTab?: AddTabId
-  blockSets?: BlockSet[]
 }>(), {
   open: false,
-  loading: false,
-  error: null,
-  defaultTab: 'blocks',
-  blockSets: () => [],
 })
 
 const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
 const uiStore = useConcreteUiStore()
+const { request } = useAjax()
 
 const modelOpen = computed({
   get: () => props.open,
@@ -90,16 +84,8 @@ const modelOpen = computed({
 const isExpanded = ref(false)
 const activeTab = ref<AddTabId>('blocks')
 const searchKeywords = ref('')
-
-watch(
-  () => props.defaultTab,
-  (tab) => {
-    if (tab) {
-      activeTab.value = tab
-    }
-  },
-  { immediate: true },
-)
+const blockSets = ref<BlockSet[]>([])
+const hasLoaded = ref(false)
 
 const tabs = [
   { id: 'blocks' as AddTabId, icon: PuzzlePieceIcon, label: 'Blocks' },
@@ -126,7 +112,7 @@ const layoutItems = [
   { name: 'Sidebar + Main Content', detail: 'Navigation-led layout', icon: RectangleGroupIcon },
 ]
 
-const visibleBlockSets = computed(() => props.blockSets.filter((set) => set.blockTypes.length > 0))
+const visibleBlockSets = computed(() => blockSets.value.filter((set) => set.blockTypes.length > 0))
 
 const searchPlaceholder = computed(() => {
   if (activeTab.value === 'blocks') return 'Search blocks'
@@ -204,6 +190,41 @@ const addPanelDragStyle = computed(() => {
       : 'transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease-out',
   }
 })
+
+function loadData() {
+  if (hasLoaded.value) {
+    return
+  }
+  hasLoaded.value = true
+
+  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
+  const addPanelUrl = currentCollectionId > 0
+    ? `/ccm/system/panels/add?cID=${currentCollectionId}`
+    : '/ccm/system/panels/add'
+
+  request({
+    url: addPanelUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      const selectedTab = (data?.selectedTab ?? data?.defaultTab ?? 'blocks') as string
+      if (selectedTab === 'clipboard') {
+        activeTab.value = 'clipboard'
+      } else if (selectedTab === 'stacks' || selectedTab === 'containers') {
+        activeTab.value = 'layouts'
+      } else {
+        activeTab.value = 'blocks'
+      }
+
+      blockSets.value = Array.isArray(data?.blocks?.sets) ? data.blocks.sets : []
+    },
+  })
+}
+
+watch(() => props.open, (isOpen) => {
+  if (isOpen) {
+    loadData()
+  }
+})
 </script>
 
 <template>
@@ -238,11 +259,7 @@ const addPanelDragStyle = computed(() => {
       </template>
 
       <template #default>
-      <div v-if="loading" class="px-3 py-3 text-sm text-slate-600">Loading add panel contents...</div>
-      <div v-else-if="error" class="px-3 py-3 rounded-lg bg-error/10 text-error text-sm">
-        {{ error }}
-      </div>
-      <template v-else-if="activeTab === 'blocks'">
+      <template v-if="activeTab === 'blocks'">
         <template v-if="!isExpanded">
           <div class="px-2 pb-3">
             <div

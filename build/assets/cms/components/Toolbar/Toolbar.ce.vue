@@ -153,23 +153,17 @@
       :backdrop-class="floatingPanelBackdropClass"
     >
       <PageFloatingPanel
-        v-model:open="pageSettingsOpen"
-        :permissions="pageSettingsPermissions"
-        :page-id="pageId"
-        :loading="pageSettingsLoading"
-        :error="pageSettingsError"
+        :open="pageSettingsOpen"
+        @update:open="setPanelOpen(pageSettingsPanelId, $event)"
       />
       <CheckInFloatingPanel
-        v-model:open="checkInOpen"
-        :loading="checkInLoading"
-        :data="checkInData"
+        :open="checkInOpen"
+        :page-id="pageId"
+        @update:open="setPanelOpen(checkInPanelId, $event)"
       />
       <AddFloatingPanel
-        v-model:open="addPanelOpen"
-        :loading="addPanelLoading"
-        :error="addPanelError"
-        :default-tab="addPanelDefaultTab"
-        :block-sets="addPanelBlockSets"
+        :open="addPanelOpen"
+        @update:open="setPanelOpen(addPanelId, $event)"
       />
     </FloatingPanelGroup>
   </div>
@@ -196,7 +190,6 @@ import CheckInFloatingPanel from './FloatingPanel/CheckInFloatingPanel.vue'
 import {
   FloatingPanelGroup,
   useUiStore,
-  useAjax,
   useFloatingPanelsStore,
   DropdownMenu,
   DropdownMenuTrigger,
@@ -208,7 +201,6 @@ import { useConcreteUiStore } from '../../stores/concrete-ui'
 const ui = useUiStore()
 const concreteUi = useConcreteUiStore()
 const floatingPanels = useFloatingPanelsStore()
-const { request } = useAjax()
 
 const props = defineProps({
   pageId: Number,
@@ -238,66 +230,9 @@ const teleportTarget = useTemplateRef('teleportTarget')
 const pageSettingsPanelId = 'toolbar:page-settings'
 const checkInPanelId = 'toolbar:check-in'
 const addPanelId = 'toolbar:add'
-const pageSettingsOpen = computed({
-  get: () => floatingPanels.activePanel === pageSettingsPanelId,
-  set: (isOpen: boolean) => {
-    if (isOpen) {
-      floatingPanels.open(pageSettingsPanelId)
-      return
-    }
-    floatingPanels.close(pageSettingsPanelId)
-  },
-})
-const pageSettingsLoading = ref(false)
-const pageSettingsError = ref<string | null>(null)
-const pageSettingsPermissions = ref<Record<string, boolean> | null>(null)
-const checkInOpen = computed({
-  get: () => floatingPanels.activePanel === checkInPanelId,
-  set: (isOpen: boolean) => {
-    if (isOpen) {
-      floatingPanels.open(checkInPanelId)
-      return
-    }
-    floatingPanels.close(checkInPanelId)
-  },
-})
-const checkInLoading = ref(false)
-const checkInError = ref<string | null>(null)
-const checkInData = ref<any>(null)
-const addPanelOpen = computed({
-  get: () => floatingPanels.activePanel === addPanelId,
-  set: (isOpen: boolean) => {
-    if (isOpen) {
-      floatingPanels.open(addPanelId)
-      return
-    }
-    floatingPanels.close(addPanelId)
-  },
-})
-const addPanelLoading = ref(false)
-const addPanelError = ref<string | null>(null)
-const addPanelDefaultTab = ref<'blocks' | 'clipboard' | 'library' | 'layouts'>('blocks')
-type BlockTypeEditor = {
-  component: string
-  props?: Record<string, unknown>
-} | null
-const addPanelBlockSets = ref<Array<{ name: string, blockTypes: Array<{
-  id: number
-  handle: string
-  name: string
-  description?: string
-  editors?: {
-    add?: BlockTypeEditor
-    edit?: BlockTypeEditor
-  }
-  icon?: {
-    type: string
-    src?: string
-    alt?: string
-    className?: string
-    svg?: string
-  }
-}> }>>([])
+const pageSettingsOpen = computed(() => floatingPanels.activePanel === pageSettingsPanelId)
+const checkInOpen = computed(() => floatingPanels.activePanel === checkInPanelId)
+const addPanelOpen = computed(() => floatingPanels.activePanel === addPanelId)
 const isAddContentDragActive = computed(() => concreteUi.page.addContentDragActive)
 const floatingPanelBackdropClass = computed(() =>
   isAddContentDragActive.value
@@ -306,6 +241,34 @@ const floatingPanelBackdropClass = computed(() =>
 
 function handleSearch() {
 
+}
+
+function setActivePanel(panelId: string | null) {
+  if (panelId) {
+    floatingPanels.open(panelId)
+    return
+  }
+
+  const currentPanel = floatingPanels.activePanel
+  if (currentPanel) {
+    floatingPanels.close(currentPanel)
+  }
+}
+
+function togglePanel(panelId: string) {
+  if (floatingPanels.activePanel === panelId) {
+    setActivePanel(null)
+    return
+  }
+  setActivePanel(panelId)
+}
+
+function setPanelOpen(panelId: string, isOpen: boolean) {
+  if (isOpen) {
+    setActivePanel(panelId)
+  } else if (floatingPanels.activePanel === panelId) {
+    setActivePanel(null)
+  }
 }
 
 onMounted(() => {
@@ -327,43 +290,7 @@ watch(() => addPanelOpen.value, (isOpen) => {
 })
 
 const launchPageSettings = () => {
-  if (pageSettingsLoading.value) {
-    return
-  }
-
-  if (pageSettingsOpen.value) {
-    pageSettingsOpen.value = false
-    return
-  }
-
-  pageSettingsLoading.value = true
-  pageSettingsError.value = null
-  pageSettingsPermissions.value = null
-  pageSettingsOpen.value = true
-  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
-  const pageSettingsUrl = currentCollectionId > 0
-    ? `/ccm/system/panels/page?cID=${currentCollectionId}`
-    : '/ccm/system/panels/page'
-
-  request({
-    url: pageSettingsUrl,
-    method: 'GET',
-    onSuccess: (data: any) => {
-      if (data?.error) {
-        pageSettingsError.value = data.error
-        pageSettingsPermissions.value = null
-        return
-      }
-
-      pageSettingsPermissions.value = data?.permissions ?? null
-    },
-    onError: () => {
-      pageSettingsError.value = 'Unable to load page settings.'
-    },
-    onComplete: () => {
-      pageSettingsLoading.value = false
-    },
-  })
+  togglePanel(pageSettingsPanelId)
 }
 
 const handleExitEditMode = () => {
@@ -374,85 +301,11 @@ const handleExitEditMode = () => {
     return
   }
 
-  if (checkInLoading.value) {
-    return
-  }
-
-  if (checkInOpen.value) {
-    checkInOpen.value = false
-    return
-  }
-
-  checkInData.value = null
-
-  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
-  const checkInPanelUrl = currentCollectionId > 0
-    ? `/ccm/system/panels/page/check_in?cID=${currentCollectionId}`
-    : '/ccm/system/panels/page/check_in'
-
-  request({
-    url: checkInPanelUrl,
-    method: 'GET',
-    onSuccess: (data: any) => {
-      if (data?.error) {
-        checkInData.value = null
-        checkInOpen.value = true
-        return
-      }
-
-      checkInData.value = data
-    }
-  })
+  togglePanel(checkInPanelId)
 }
 
 const launchAddPanel = () => {
-  if (addPanelLoading.value) {
-    return
-  }
-
-  if (addPanelOpen.value) {
-    addPanelOpen.value = false
-    return
-  }
-
-  addPanelLoading.value = true
-  addPanelError.value = null
-  addPanelBlockSets.value = []
-  addPanelDefaultTab.value = 'blocks'
-  addPanelOpen.value = true
-  const currentCollectionId = Number((window as any).CCM_CID ?? 0)
-  const addPanelUrl = currentCollectionId > 0
-    ? `/ccm/system/panels/add?cID=${currentCollectionId}`
-    : '/ccm/system/panels/add'
-
-  request({
-    url: addPanelUrl,
-    method: 'GET',
-    onSuccess: (data: any) => {
-      if (data?.error) {
-        addPanelError.value = data.error
-        addPanelBlockSets.value = []
-        return
-      }
-
-      const selectedTab = (data?.selectedTab ?? data?.defaultTab ?? 'blocks') as string
-      if (selectedTab === 'clipboard') {
-        addPanelDefaultTab.value = 'clipboard'
-      } else if (selectedTab === 'stacks' || selectedTab === 'containers') {
-        addPanelDefaultTab.value = 'layouts'
-      } else {
-        addPanelDefaultTab.value = 'blocks'
-      }
-      addPanelBlockSets.value = Array.isArray(data?.blocks?.sets) ? data.blocks.sets : []
-    },
-    onError: () => {
-      addPanelError.value = 'Unable to load add panel.'
-      addPanelBlockSets.value = []
-    },
-    onComplete: () => {
-      addPanelLoading.value = false
-    },
-  })
+  togglePanel(addPanelId)
 }
 
 const launchSitemap = () => {

@@ -6,53 +6,51 @@ import {
   useAjax,
   normalizeJsonResponse,
 } from '@concretecms/backendui'
+import { ClockIcon } from '@heroicons/vue/24/outline'
 
 type CheckInPanelData = {
   submitUrl: string
-  requireVersionComments?: boolean
-  canApprovePageVersions?: boolean
-  publish?: {
-    title?: string
-    enabled?: boolean
-    workflowLocked?: boolean
-    workflowLockedMessage?: string
-    errors?: string[]
+  requireVersionComments: boolean
+  canApprovePageVersions: boolean
+  publish: {
+    buttonTitle: string
+    enabled: boolean
+    workflowLocked: boolean
+    workflowLockedMessage: string
+    errors: string[]
   }
-  schedule?: {
-    publishDate?: string | null
+  schedule: {
+    publishDate: string | null
   }
-  save?: {
-    label?: string
+  save: {
+    label: string
   }
-  discard?: {
-    available?: boolean
-    label?: string
-    confirm?: string
+  discard: {
+    available: boolean
+    label: string
+    confirm: string
   }
-  labels?: {
-    title?: string
-    description?: string
-    comments?: string
-    schedule?: string
-    publishDate?: string
-    publishEndDate?: string
-    keepOtherScheduling?: string
-    publish?: string
-    scheduleAction?: string
-    cancel?: string
+  labels: {
+    title: string
+    description: string
+    comments: string
+    schedule: string
+    publishDate: string
+    publishEndDate: string
+    keepOtherSchedulingLabel: string
+    keepOtherSchedulingHelpUnchecked: string
+    keepOtherSchedulingHelpChecked: string
+    publish: string
+    scheduleAction: string
+    cancel: string
   }
 }
 
 const props = withDefaults(defineProps<{
-  open?: boolean
-  loading?: boolean
-  error?: string | null
-  data?: CheckInPanelData | null
+  pageId: Number,
+  open?: boolean,
 }>(), {
   open: false,
-  loading: false,
-  error: null,
-  data: null,
 })
 
 const emit = defineEmits<{
@@ -60,48 +58,33 @@ const emit = defineEmits<{
 }>()
 
 const { request } = useAjax()
-const isExpanded = ref(false)
 const comments = ref('')
-const scheduleOpen = ref(false)
+const scheduleModeActive = ref(false)
 const scheduleDate = ref('')
 const scheduleEndDate = ref('')
 const keepOtherScheduling = ref(false)
 const isSubmitting = ref(false)
 const submissionErrors = ref<string[]>([])
+const panelData = ref<CheckInPanelData | null>(null)
+const hasLoaded = ref(false)
+const isPanelReady = computed(() => panelData.value !== null)
 
 const modelOpen = computed({
-  get: () => props.open,
+  get: () => props.open && isPanelReady.value,
   set: (value: boolean) => emit('update:open', value),
 })
 
-const labels = computed(() => props.data?.labels ?? {})
-const panelTitle = computed(() => labels.value.title || 'Check In')
-const panelDescription = computed(() => labels.value.description || 'Save, publish, schedule, or discard your page edits.')
-const commentsLabel = computed(() => labels.value.comments || 'Version Comments')
-const scheduleLabel = computed(() => labels.value.schedule || 'Schedule Publish')
-const publishDateLabel = computed(() => labels.value.publishDate || 'Publish Date')
-const publishEndDateLabel = computed(() => labels.value.publishEndDate || 'Publish End Date')
-const keepOtherSchedulingLabel = computed(() => labels.value.keepOtherScheduling || 'Keep Other Scheduling')
-const publishLabel = computed(() => props.data?.publish?.title || labels.value.publish || 'Publish')
-const scheduleActionLabel = computed(() => labels.value.scheduleAction || 'Schedule')
-const cancelLabel = computed(() => labels.value.cancel || 'Cancel')
-const saveLabel = computed(() => props.data?.save?.label || 'Save Changes')
-const discardLabel = computed(() => props.data?.discard?.label || 'Discard Changes')
-
-const publishErrors = computed(() => props.data?.publish?.errors ?? [])
-const canPublish = computed(() => Boolean(props.data?.canApprovePageVersions))
-const publishEnabled = computed(() => Boolean(props.data?.publish?.enabled))
-const discardAvailable = computed(() => Boolean(props.data?.discard?.available))
-
 watch(
-  () => props.data,
+  () => panelData.value,
   (data) => {
-    comments.value = ''
-    scheduleOpen.value = Boolean(data?.schedule?.publishDate)
-    scheduleDate.value = toDateTimeLocal(data?.schedule?.publishDate)
-    scheduleEndDate.value = ''
-    keepOtherScheduling.value = false
-    submissionErrors.value = []
+    if (data) {
+      comments.value = ''
+      scheduleModeActive.value = false
+      scheduleDate.value = data.schedule.publishDate
+      scheduleEndDate.value = ''
+      keepOtherScheduling.value = false
+      submissionErrors.value = []
+    }
   },
   { immediate: true }
 )
@@ -115,51 +98,31 @@ watch(
   }
 )
 
-function toDateTimeLocal(value: string | null | undefined): string {
-  if (!value) {
-    return ''
-  }
-  const normalized = String(value).trim().replace(' ', 'T')
-  return normalized.length >= 16 ? normalized.slice(0, 16) : normalized
-}
-
-function toSqlDateTime(value: string): string {
-  if (!value) {
-    return ''
-  }
-  const normalized = String(value).trim().replace('T', ' ')
-  return normalized.length === 16 ? `${normalized}:00` : normalized
-}
-
 function submit(action: 'save' | 'publish' | 'schedule' | 'discard') {
-  if (isSubmitting.value || !props.data?.submitUrl) {
-    return
-  }
-
-  if (action === 'discard' && props.data?.discard?.confirm && !window.confirm(props.data.discard.confirm)) {
+  if (!panelData.value) {
     return
   }
 
   submissionErrors.value = []
   isSubmitting.value = true
 
-  const body = new URLSearchParams()
-  body.set('comments', comments.value)
-  body.set('action', action)
-  body.set('approve', 'PREVIEW')
+  const data = new FormData()
+  data.set('comments', comments.value)
+  data.set('action', action)
+  data.set('approve', 'PREVIEW')
 
   if (action === 'schedule') {
-    body.set('cvPublishDate', toSqlDateTime(scheduleDate.value))
+    data.set('cvPublishDate', scheduleDate.value)
     if (scheduleEndDate.value) {
-      body.set('cvPublishEndDate', toSqlDateTime(scheduleEndDate.value))
+      data.set('cvPublishEndDate', scheduleEndDate.value)
     }
-    body.set('keepOtherScheduling', keepOtherScheduling.value ? '1' : '0')
+    data.set('keepOtherScheduling', keepOtherScheduling.value ? '1' : '0')
   }
-
+  
   request({
-    url: props.data.submitUrl,
+    url: panelData.value.submitUrl,
     method: 'POST',
-    body,
+    data,
     skipResponseValidation: true,
     onSuccess: (response: any) => {
       const normalized: any = normalizeJsonResponse(response)
@@ -176,121 +139,139 @@ function submit(action: 'save' | 'publish' | 'schedule' | 'discard') {
 
       modelOpen.value = false
     },
-    onError: () => {
-      submissionErrors.value = ['Unable to complete check in.']
-    },
     onComplete: () => {
       isSubmitting.value = false
     },
   })
 }
+
+function loadPanelData() {
+  if (hasLoaded.value) {
+    return
+  }
+  hasLoaded.value = true
+  const panelUrl = `/ccm/system/panels/page/check_in?cID=${props.pageId}`
+  request({
+    url: panelUrl,
+    method: 'GET',
+    onSuccess: (data: any) => {
+      panelData.value = data ?? null
+    },
+  })
+}
+
+watch(() => props.open, (isOpen) => {
+  if (isOpen) {
+    loadPanelData()
+  }
+})
 </script>
 
 <template>
   <div class="fixed left-6 right-6 top-[5.25rem] z-[var(--index-layer-panel)]">
     <FloatingPanel
       v-model:open="modelOpen"
-      v-model:expanded="isExpanded"
       width="min(92vw, 30rem)"
     >
       <template #header>
         <FloatingPanelHeader
-          :title="panelTitle"
-          :description="panelDescription"
+          :title="panelData?.labels?.title"
+          :description="panelData?.labels?.description"
           :closeable="true"
           :expandable="false"
         />
       </template>
 
       <template #default>
-        <div v-if="loading" class="px-4 py-4 text-sm text-slate-600">Loading check in options...</div>
-        <div v-else-if="error" class="alert alert-error mx-4 my-4 text-sm">{{ error }}</div>
-        <div v-else-if="data" class="space-y-4 px-4 py-4">
+        <div class="space-y-3 px-4 py-3">
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ commentsLabel }}</legend>
+            <legend class="fieldset-legend">{{ panelData.labels.comments }}</legend>
             <textarea
               v-model="comments"
               class="textarea textarea-bordered w-full min-h-24"
-              :required="Boolean(data.requireVersionComments)"
+              :required="Boolean(panelData?.requireVersionComments)"
             />
           </fieldset>
 
-          <div v-if="canPublish" class="space-y-2">
-            <div class="join w-full">
+          <div class="mb-4">
+            <div class="join w-full" v-if="panelData.publish.enabled">
               <button
-                type="button"
-                class="btn btn-primary join-item flex-1"
-                :disabled="!publishEnabled || isSubmitting"
-                @click="submit('publish')"
+                  type="button"
+                  class="btn btn-primary join-item flex-1"
+                  :disabled="isSubmitting || scheduleModeActive"
+                  @click="submit('publish')"
               >
-                {{ publishLabel }}
+                {{ panelData?.publish.buttonTitle }}
               </button>
               <button
-                type="button"
-                class="btn btn-primary join-item"
-                :disabled="!publishEnabled || isSubmitting"
-                @click="scheduleOpen = !scheduleOpen"
+                  type="button"
+                  class="btn btn-primary join-item"
+                  :disabled="isSubmitting"
+                  @click="scheduleModeActive = !scheduleModeActive"
               >
-                {{ scheduleActionLabel }}
+                <ClockIcon class="w-4 h-4" />
               </button>
             </div>
+          </div>
 
-            <div v-if="data.publish?.workflowLocked" class="alert alert-info text-sm">
-              {{ data.publish.workflowLockedMessage }}
-            </div>
 
-            <div v-if="publishErrors.length" class="space-y-2">
-              <div
-                v-for="(errorMessage, index) in publishErrors"
-                :key="`publish-error-${index}`"
-                class="alert alert-warning text-sm"
-              >
-                {{ errorMessage }}
+          <div v-if="panelData?.canApprovePageVersions">
+
+            <div v-if="scheduleModeActive" class="rounded-box border border-base-300 bg-base-100 p-3 text-sm">
+              <div class="flex flex-col gap-3">
+                <label class="form-control w-full">
+                  <span class="label-text mb-1">{{ panelData?.labels?.publishDate }}</span>
+                  <input v-model="scheduleDate" type="datetime-local" class="input input-bordered w-full" />
+                </label>
+                <label class="form-control w-full">
+                  <span class="label-text mb-1">{{ panelData?.labels?.publishEndDate }}</span>
+                  <input v-model="scheduleEndDate" type="datetime-local" class="input input-bordered w-full" />
+                </label>
+                <label class="label cursor-pointer justify-start gap-3">
+                  <input v-model="keepOtherScheduling" type="checkbox" class="toggle toggle-primary" />
+                  <span class="label-text">{{ panelData?.labels?.keepOtherSchedulingLabel }}</span>
+                </label>
+                <div class="alert alert-info text-sm">
+                  {{
+                    keepOtherScheduling
+                      ? panelData?.labels?.keepOtherSchedulingHelpChecked
+                      : panelData?.labels?.keepOtherSchedulingHelpUnchecked
+                  }}
+                </div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    :disabled="!panelData?.publish?.enabled || !scheduleDate || isSubmitting"
+                    @click="submit('schedule')"
+                >
+                  {{ panelData?.labels?.scheduleAction }}
+                </button>
               </div>
             </div>
 
-            <div v-if="scheduleOpen" class="rounded-box border border-base-300 bg-base-100 p-3 space-y-3">
-              <p class="text-sm font-semibold">{{ scheduleLabel }}</p>
-              <label class="form-control w-full">
-                <span class="label-text mb-1">{{ publishDateLabel }}</span>
-                <input v-model="scheduleDate" type="datetime-local" class="input input-bordered w-full" />
-              </label>
-              <label class="form-control w-full">
-                <span class="label-text mb-1">{{ publishEndDateLabel }}</span>
-                <input v-model="scheduleEndDate" type="datetime-local" class="input input-bordered w-full" />
-              </label>
-              <label class="label cursor-pointer justify-start gap-2">
-                <input v-model="keepOtherScheduling" type="checkbox" class="checkbox checkbox-sm" />
-                <span class="label-text">{{ keepOtherSchedulingLabel }}</span>
-              </label>
-              <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                :disabled="!publishEnabled || !scheduleDate || isSubmitting"
-                @click="submit('schedule')"
-              >
-                {{ scheduleActionLabel }}
-              </button>
+            <div v-if="panelData.publish?.workflowLocked" class="alert alert-info text-sm">
+              {{ panelData.publish.workflowLockedMessage }}
             </div>
+
           </div>
 
           <div class="divider my-2" />
 
           <div class="flex flex-wrap gap-2">
             <button type="button" class="btn btn-success" :disabled="isSubmitting" @click="submit('save')">
-              {{ saveLabel }}
+              {{ panelData?.save?.label }}
             </button>
             <button
-              v-if="discardAvailable"
+              v-if="panelData?.discard?.available"
               type="button"
               class="btn btn-error"
               :disabled="isSubmitting"
               @click="submit('discard')"
             >
-              {{ discardLabel }}
+              {{ panelData?.discard?.label }}
             </button>
             <button type="button" class="btn btn-ghost ms-auto" :disabled="isSubmitting" @click="modelOpen = false">
-              {{ cancelLabel }}
+              {{ panelData?.labels?.cancel }}
             </button>
           </div>
 

@@ -32,7 +32,7 @@ class CheckIn extends BackendInterfacePageController
         $v = CollectionVersion::get($this->page, 'RECENT');
         $publishErrors = $this->checkForPublishing();
         $composer = $this->app->make('helper/concrete/composer');
-        $publishTitle = $composer->getPublishButtonTitle($this->page);
+        $publishButtonTitle = $composer->getPublishButtonTitle($this->page);
         $publishButtonActivated = $composer->getPublishButtonActivated($this->page);
         $publishActionEnabled = !(($publishErrors->has()) || !$publishButtonActivated);
         $discardAvailable = ($this->page->isPageDraft() && $this->permissions->canDeletePage()) || $v->canDiscard();
@@ -48,7 +48,7 @@ class CheckIn extends BackendInterfacePageController
             'requireVersionComments' => (bool) Config::get('concrete.misc.require_version_comments'),
             'canApprovePageVersions' => (bool) $this->permissions->canApprovePageVersions(),
             'publish' => [
-                'title' => (string) $publishTitle,
+                'buttonTitle' => (string) $publishButtonTitle,
                 'enabled' => (bool) $publishActionEnabled,
                 'workflowLocked' => !$publishButtonActivated,
                 'workflowLockedMessage' => t('This version is already submitted to Workflow.'),
@@ -72,7 +72,9 @@ class CheckIn extends BackendInterfacePageController
                 'schedule' => t('Schedule Publish'),
                 'publishDate' => t('Publish Date'),
                 'publishEndDate' => t('Publish End Date'),
-                'keepOtherScheduling' => t('Keep Other Scheduling'),
+                'keepOtherSchedulingLabel' => t('Remove current live version'),
+                'keepOtherSchedulingHelpUnchecked' => t('Activate to remove the current live version in favor of this scheduled version'),
+                'keepOtherSchedulingHelpChecked' => t('Deactivate to leave this scheduled version alongside any other scheduled, approved versions.'),
                 'publish' => t('Publish'),
                 'scheduleAction' => t('Schedule'),
                 'cancel' => t('Cancel'),
