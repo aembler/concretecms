@@ -3,7 +3,8 @@ import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../../../stores/concrete-ui'
-import type { AddBlockOperation } from '../../../../stores/types/page-operations'
+import type { AddBlockOperation, AddBlockTargetRef } from '../../../../stores/types/page-operations'
+import DialogEditor from '../../../Block/Editor/DialogEditor.vue'
 
 type PanelIcon = {
   type: string
@@ -17,6 +18,15 @@ type BlockTypeEditor = {
   component: string
   props?: Record<string, unknown>
 } | null
+
+type DialogBlockTypeEditor = {
+  component: 'DialogEditor'
+  props: {
+    dialogTitle: string
+    dialogWidth: string | number
+    dialogHeight: string | number
+  }
+}
 
 type AddContentDropTarget = {
   areaId?: number | string
@@ -68,6 +78,9 @@ let dragPreview: HTMLElement | null = null
 let dragPreviewContainer: HTMLElement | null = null
 let dragPanelBounds: DOMRect | null = null
 let hasExitedAddPanel = false
+const addDialogEditor = ref<DialogBlockTypeEditor | null>(null)
+const addDialogTarget = ref<AddBlockTargetRef | null>(null)
+const addDialogKey = ref(0)
 
 function ensureAddContentPageState() {
   if (typeof pageState.value.addContentDragInProgress === 'undefined') {
@@ -207,6 +220,51 @@ function enqueueAddBlockOperation(dropTarget: AddContentDropTarget, draggedItem:
   concreteUiStore.enqueuePageOperation(operation)
 }
 
+function toAddBlockTarget(dropTarget: AddContentDropTarget): AddBlockTargetRef {
+  return {
+    areaId: Number(dropTarget.areaId || 0),
+    areaHandle: String(dropTarget.areaHandle || ''),
+    pageId: Number(dropTarget.pageId || 0),
+    afterBlockId: Number(dropTarget.afterBlockId || 0),
+    targetIndex: Number(dropTarget.targetIndex || 0),
+  }
+}
+
+function openAddDialog(dropTarget: AddContentDropTarget, draggedItem: AddContentDraggedItem) {
+  const editor = draggedItem?.payload?.editor
+  if (!isDialogEditor(editor)) {
+    return
+  }
+
+  addDialogEditor.value = editor
+  addDialogTarget.value = toAddBlockTarget(dropTarget)
+  addDialogKey.value += 1
+}
+
+function isDialogEditor(editor: BlockTypeEditor): editor is DialogBlockTypeEditor {
+  return Boolean(
+    editor
+    && editor.component === 'DialogEditor'
+    && editor.props
+    && typeof editor.props.dialogTitle === 'string'
+    && (typeof editor.props.dialogWidth === 'string' || typeof editor.props.dialogWidth === 'number')
+    && (typeof editor.props.dialogHeight === 'string' || typeof editor.props.dialogHeight === 'number')
+  )
+}
+
+function handleAddDialogUpdated() {
+  addDialogEditor.value = null
+  addDialogTarget.value = null
+  setAddContentDragActive(false)
+  floatingPanels.close(addPanelId)
+}
+
+function handleAddDialogClosed() {
+  addDialogEditor.value = null
+  addDialogTarget.value = null
+  setAddContentDragActive(false)
+}
+
 onMounted(() => {
   ensureAddContentPageState()
   if (!blockButton.value) {
@@ -252,16 +310,20 @@ onMounted(() => {
         const activeDropTarget = (pageState.value.addContentDropTarget || null) as AddContentDropTarget | null
         const draggedItem = (pageState.value.addContentDraggedItem || null) as AddContentDraggedItem | null
         const didFindValidDropZone = Boolean(activeDropTarget?.areaHandle && activeDropTarget?.pageId && draggedItem?.type === 'blockType')
+        let keepAddPanelHidden = false
 
         removeDragPreview()
         if (didFindValidDropZone) {
-          floatingPanels.close(addPanelId)
           const addEditor = draggedItem?.payload?.editor ?? null
           if (addEditor === null && activeDropTarget && draggedItem) {
+            floatingPanels.close(addPanelId)
             enqueueAddBlockOperation({ ...activeDropTarget }, draggedItem)
+          } else if (addEditor?.component === 'DialogEditor' && activeDropTarget && draggedItem) {
+            keepAddPanelHidden = true
+            openAddDialog(activeDropTarget, draggedItem)
           }
         }
-        setAddContentDragActive(false)
+        setAddContentDragActive(keepAddPanelHidden)
         setAddContentDragInProgress(false)
         clearAddContentDragPointer()
         clearAddContentDraggedItem()
@@ -332,6 +394,20 @@ onBeforeUnmount(() => {
       <div class="line-clamp-2 text-xs font-semibold leading-tight text-slate-800">{{ props.title }}</div>
     </template>
   </button>
+
+  <DialogEditor
+    v-if="addDialogEditor && addDialogTarget"
+    :key="addDialogKey"
+    :editor="addDialogEditor"
+    mode="add"
+    :block-type-id="props.blockTypeId || 0"
+    :block-id="0"
+    :area-handle="addDialogTarget.areaHandle"
+    :page-id="addDialogTarget.pageId"
+    :add-target="addDialogTarget"
+    @updated="handleAddDialogUpdated"
+    @closed="handleAddDialogClosed"
+  />
 </template>
 
 <style>

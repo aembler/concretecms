@@ -129,17 +129,20 @@ async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise
 async function runAddBlockOperation(operation: AddBlockOperation): Promise<void> {
   try {
     runningAddOperationId.value = operation.id
-    const submitParams = new URLSearchParams()
-    submitParams.set('cID', String(operation.target.pageId))
-    submitParams.set('arHandle', String(operation.target.areaHandle))
-    submitParams.set('btID', String(operation.blockTypeId))
-    submitParams.set('mode', 'edit')
-    submitParams.set('add', '1')
-    submitParams.set('ccm_token', String((window as any).CCM_SECURITY_TOKEN || ''))
-    submitParams.set('dragAreaBlockID', String(operation.target.afterBlockId || 0))
+    let submitResponse = operation.response || null
+    if (!submitResponse?.bID) {
+      const submitParams = new URLSearchParams()
+      submitParams.set('cID', String(operation.target.pageId))
+      submitParams.set('arHandle', String(operation.target.areaHandle))
+      submitParams.set('btID', String(operation.blockTypeId))
+      submitParams.set('mode', 'edit')
+      submitParams.set('add', '1')
+      submitParams.set('ccm_token', String((window as any).CCM_SECURITY_TOKEN || ''))
+      submitParams.set('dragAreaBlockID', String(operation.target.afterBlockId || 0))
 
-    const submitUrl = `${CCM_DISPATCHER_FILENAME}/ccm/system/dialogs/page/add_block/submit?${submitParams.toString()}`
-    const submitResponse = await requestJson(submitUrl) as any
+      const submitUrl = `${CCM_DISPATCHER_FILENAME}/ccm/system/dialogs/page/add_block/submit?${submitParams.toString()}`
+      submitResponse = await requestJson(submitUrl) as any
+    }
 
     const newBlock: BlockRef = {
       bID: submitResponse?.bID,

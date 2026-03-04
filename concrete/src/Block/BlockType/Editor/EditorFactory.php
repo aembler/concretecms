@@ -43,7 +43,9 @@ class EditorFactory
         }
 
         return new DialogEditor(
-            t('Edit %s', t($blockType->getBlockTypeName())),
+            $mode === self::MODE_ADD
+                ? t('Add %s', t($blockType->getBlockTypeName()))
+                : t('Edit %s', t($blockType->getBlockTypeName())),
             (string) $blockType->getBlockTypeInterfaceWidth(),
             (string) $blockType->getBlockTypeInterfaceHeight()
         );

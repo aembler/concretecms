@@ -28,7 +28,7 @@
         v-if="currentEditorComponent"
         :key="editorRenderKey"
         :block-type-id="parseBlockType?.id"
-        :editor="parseBlockType?.editors?.edit ?? null"
+        :editor="parseBlockType?.editors?.edit"
         :block-id="blockId"
         :area-handle="areaHandle"
         :page-id="pageId"

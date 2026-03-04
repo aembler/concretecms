@@ -2,7 +2,7 @@
   <LazyDialog
     ref="lazyDialogRef"
     v-model:open="open"
-    :src="editActionUrl"
+    :src="dialogUrl"
     :dialog-title="dialogTitle"
     :dialog-width="dialogWidth"
     :dialog-height="dialogHeight"
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   DialogFooter,
   DialogHeader,
@@ -55,23 +55,24 @@ import {
   useAjax
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../../stores/concrete-ui'
-import type { BlockRef, UpdateBlockOperation } from '../../../stores/types/page-operations'
+import type { AddBlockOperation, AddBlockTargetRef, BlockRef, UpdateBlockOperation } from '../../../stores/types/page-operations'
 
-const props = withDefaults(defineProps<{
-  editor?: {
+const props = defineProps<{
+  editor: {
     component: string
-    props?: {
-      dialogTitle?: string
-      dialogWidth?: string | number
-      dialogHeight?: string | number
+    props: {
+      dialogTitle: string
+      dialogWidth: string | number
+      dialogHeight: string | number
     }
-  } | null
+  }
+  mode?: 'add' | 'edit'
+  blockTypeId?: number
   blockId: string | number
   areaHandle: string
   pageId: string | number
-}>(), {
-  editor: null,
-})
+  addTarget?: AddBlockTargetRef
+}>()
 
 const open = ref(false)
 const helpTooltipText = ref('')
@@ -83,17 +84,23 @@ const uiStore = useConcreteUiStore()
 
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any }): void
+  (e: 'closed'): void
 }>()
 
-const dialogTitle = computed(() => props.editor?.props?.dialogTitle || 'Edit Block')
-const dialogWidth = computed(() => props.editor?.props?.dialogWidth || 'auto')
-const dialogHeight = computed(() => props.editor?.props?.dialogHeight || 'auto')
-const editActionUrl = computed(() => {
+const dialogTitle = computed(() => props.editor.props.dialogTitle)
+const dialogWidth = computed(() => props.editor.props.dialogWidth)
+const dialogHeight = computed(() => props.editor.props.dialogHeight)
+const editorMode = computed(() => props.mode ?? 'edit')
+const dialogUrl = computed(() => {
   const params = new URLSearchParams({
     cID: String(props.pageId),
-    bID: String(props.blockId),
-    arHandle: props.areaHandle,
+    arHandle: String(props.areaHandle),
   })
+  if (editorMode.value === 'add') {
+    params.set('btID', String(props.blockTypeId || 0))
+    return `/ccm/system/dialogs/page/add_block?${params.toString()}`
+  }
+  params.set('bID', String(props.blockId))
   return `/ccm/system/dialogs/block/edit?${params.toString()}`
 })
 
@@ -167,7 +174,10 @@ function handleSave() {
   }
 
   const formData = new FormData(form)
-  const url = form.getAttribute('action') || editActionUrl.value
+  if (editorMode.value === 'add' && props.addTarget) {
+    formData.set('dragAreaBlockID', String(props.addTarget.afterBlockId || 0))
+  }
+  const url = form.getAttribute('action') || dialogUrl.value
   const method = normalizeMethod(form.getAttribute('method') || 'POST')
   if (!url) {
     return
@@ -186,28 +196,40 @@ function handleSave() {
         return
       }
 
-      const originalBlock: BlockRef = {
-        bID: props.blockId,
-        arHandle: props.areaHandle,
-        cID: props.pageId,
-      }
-      const updatedBlock: BlockRef = {
-        bID: normalizedResponse?.bID || originalBlock.bID,
-        arHandle: normalizedResponse?.arHandle || originalBlock.arHandle,
-        cID: normalizedResponse?.cID || originalBlock.cID,
-      }
+      if (editorMode.value === 'add' && props.addTarget) {
+        const operation: AddBlockOperation = {
+          id: `block.add.${String(props.blockTypeId || 0)}.${Date.now()}`,
+          type: 'block.add',
+          status: 'queued',
+          blockTypeId: Number(props.blockTypeId || 0),
+          target: props.addTarget,
+          response: normalizedResponse,
+        }
+        uiStore.enqueuePageOperation(operation)
+      } else {
+        const originalBlock: BlockRef = {
+          bID: props.blockId,
+          arHandle: props.areaHandle,
+          cID: props.pageId,
+        }
+        const updatedBlock: BlockRef = {
+          bID: normalizedResponse?.bID || originalBlock.bID,
+          arHandle: normalizedResponse?.arHandle || originalBlock.arHandle,
+          cID: normalizedResponse?.cID || originalBlock.cID,
+        }
 
-      const operation: UpdateBlockOperation = {
-        id: `block.update.${String(originalBlock.bID)}.${Date.now()}`,
-        type: 'block.update',
-        status: 'queued',
-        originalBlock,
-        updatedBlock,
-        replacementHtml: typeof normalizedResponse?.html === 'string' ? normalizedResponse.html : undefined,
-        response: normalizedResponse,
-      }
+        const operation: UpdateBlockOperation = {
+          id: `block.update.${String(originalBlock.bID)}.${Date.now()}`,
+          type: 'block.update',
+          status: 'queued',
+          originalBlock,
+          updatedBlock,
+          replacementHtml: typeof normalizedResponse?.html === 'string' ? normalizedResponse.html : undefined,
+          response: normalizedResponse,
+        }
 
-      uiStore.enqueuePageOperation(operation)
+        uiStore.enqueuePageOperation(operation)
+      }
       emit('updated', { response: normalizedResponse })
       open.value = false
       helpTooltipOpen.value = false
@@ -223,11 +245,13 @@ function handleCancel() {
   helpTooltipOpen.value = false
 }
 
-onMounted(() => {
-  if (!editActionUrl.value) {
-    return
+watch(open, (isOpen) => {
+  if (!isOpen) {
+    emit('closed')
   }
+})
 
+onMounted(() => {
   document.addEventListener('click', handleDocumentClick)
   open.value = true
 })
