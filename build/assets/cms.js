@@ -21,6 +21,7 @@ import ConcreteAreaBlockTarget from './cms/components/AreaBlockTarget.ce.vue'
 import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
 import postcss from 'postcss'
 import { createConcretePinia } from './cms/stores/pinia'
+import { ConcreteAssetLoader } from './cms/support/LegacyAssetLoader'
 
 // Extract only @property rules
 function extractPropertyRules(css) {
@@ -91,3 +92,6 @@ customElements.define('concrete-area', ConcreteAreaElement)
 customElements.define('concrete-block', ConcreteBlockElement)
 customElements.define('concrete-container', ConcreteContainerElement)
 customElements.define('concrete-area-block-target', ConcreteAreaBlockTargetElement)
+
+// Legacy compatibility global for classic blocks that dynamically load CSS/JS.
+window.ConcreteAssetLoader = ConcreteAssetLoader
