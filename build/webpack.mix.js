@@ -68,6 +68,18 @@ if (mix.inProduction()) {
     // Moment JS
     mix.copy('node_modules/moment/min/moment.min.js', '../concrete/js/moment.js');
     mix.copy('node_modules/moment/min/moment.min.js.map', '../concrete/js/moment.min.js.map');
+
+    // Ckeditor
+    mix.copy('node_modules/ckeditor4/adapters', '../concrete/js/ckeditor/adapters');
+    mix.copy('node_modules/ckeditor4/ckeditor.js', '../concrete/js/ckeditor/ckeditor.js');
+    mix.copy('node_modules/ckeditor4/config.js', '../concrete/js/ckeditor/config.js');
+    mix.copy('node_modules/ckeditor4/contents.css', '../concrete/js/ckeditor/contents.css');
+    mix.copy('node_modules/ckeditor4/lang', '../concrete/js/ckeditor/lang');
+    mix.copy('node_modules/ckeditor4/plugins', '../concrete/js/ckeditor/plugins');
+    mix.copy('node_modules/ckeditor4/skins', '../concrete/js/ckeditor/skins');
+    mix.copy('node_modules/ckeditor4/styles.js', '../concrete/js/ckeditor/styles.js');
+    mix.copy('node_modules/ckeditor4/vendor', '../concrete/js/ckeditor/vendor');
+
 } else {
     mix.copy('node_modules/vue/dist/vue.global.js', '../concrete/js/vue.js');
 }

@@ -1,7 +1,7 @@
 <template>
-  <DialogEditor v-bind="$attrs" />
+  <div><slot /></div>
 </template>
 
 <script setup lang="ts">
-import DialogEditor from './DialogEditor.vue'
+
 </script>
