@@ -2,11 +2,11 @@
 
 namespace Concrete\Core\Block\BlockType\Editor;
 
-interface EditorInterface extends \JsonSerializable
+use Concrete\Core\Application\UserInterface\Component\ComponentInterface;
+
+interface EditorInterface extends ComponentInterface
 {
 
     public function getComponentKey(): string;
-
-    public function getComponentProps(): array;
 
 }

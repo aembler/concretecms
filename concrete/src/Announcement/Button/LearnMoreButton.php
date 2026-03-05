@@ -3,7 +3,7 @@
 namespace Concrete\Core\Announcement\Button;
 
 use Concrete\Core\Announcement\Button\ButtonInterface;
-use Concrete\Core\Announcement\Component\AbstractComponent;
+use Concrete\Core\Application\UserInterface\Component\AbstractComponent;
 
 class LearnMoreButton extends AbstractComponent implements ButtonInterface
 {

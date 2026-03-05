@@ -2,7 +2,7 @@
 
 namespace Concrete\Core\Announcement\Slide;
 
-use Concrete\Core\Announcement\Component\ComponentInterface;
+use Concrete\Core\Application\UserInterface\Component\ComponentInterface;
 
 interface SlideInterface extends ComponentInterface
 {

@@ -2,7 +2,7 @@
 
 namespace Concrete\Core\Announcement\Button;
 
-use Concrete\Core\Announcement\Component\ComponentInterface;
+use Concrete\Core\Application\UserInterface\Component\ComponentInterface;
 
 interface ButtonInterface extends ComponentInterface
 {
