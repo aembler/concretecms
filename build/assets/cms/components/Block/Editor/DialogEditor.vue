@@ -60,7 +60,7 @@ import type { AddBlockOperation, AddBlockTargetRef, BlockRef, UpdateBlockOperati
 const props = defineProps<{
   editor: {
     component: string
-    props: {
+    componentProps: {
       dialogTitle: string
       dialogWidth: string | number
       dialogHeight: string | number

@@ -4,8 +4,7 @@ namespace Concrete\Core\Application\UserInterface\Component;
 
 abstract class AbstractComponent implements ComponentInterface
 {
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return [
             'component' => $this->getComponent(),
