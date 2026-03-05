@@ -2,10 +2,13 @@
 
 namespace Concrete\Block\Content;
 
+use Concrete\Core\Application\UserInterface\Icon\IconInterface;
+use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Block\BlockType\Editor\AbstractEditor;
 use Concrete\Core\Block\BlockType\Editor\EditorInterface;
 use Concrete\Core\Block\ProvidesEditorInterface;
+use Concrete\Core\Block\ProvidesIconInterface;
 use Concrete\Core\Editor\LinkAbstractor;
 use Concrete\Core\Feature\Features;
 use Concrete\Core\Feature\UsesFeatureInterface;
@@ -22,7 +25,7 @@ use Concrete\Core\File\Tracker\RichTextExtractor;
  * @copyright  Copyright (c) 2003-2022 concreteCMS. (http://www.concretecms.org)
  * @license    http://www.concretecms.org/license/     MIT License
  */
-class Controller extends BlockController implements FileTrackableInterface, UsesFeatureInterface, ProvidesEditorInterface
+class Controller extends BlockController implements FileTrackableInterface, UsesFeatureInterface, ProvidesEditorInterface, ProvidesIconInterface
 {
     /**
      * @var string
@@ -116,6 +119,11 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
     public function getBlockTypeName()
     {
         return t('Content');
+    }
+
+    public function getIcon(): IconInterface
+    {
+        return new InlineSvgIcon('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 5.75A1.75 1.75 0 0 1 7.75 4h8.5A1.75 1.75 0 0 1 18 5.75v12.5A1.75 1.75 0 0 1 16.25 20h-8.5A1.75 1.75 0 0 1 6 18.25V5.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M9 9.25h6M9 12h6M9 14.75h3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>');
     }
 
     public function cacheBlockOutputForRegisteredUsers()

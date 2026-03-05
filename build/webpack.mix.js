@@ -38,13 +38,23 @@ mix.webpackConfig({
     },
     resolve: {
         symlinks: false,
-        extensions: ["*", ".js", ".jsx", ".vue", ".ts", ".tsx"]
+        extensions: ["*", ".js", ".jsx", ".vue", ".ts", ".tsx"],
+        modules: [
+            path.resolve(__dirname, 'node_modules'),
+            'node_modules',
+        ],
     },
     externals: {
         jquery: 'jQuery',
         bootstrap: true,
         vue: 'Vue',
         moment: 'moment'
+    },
+    output: {
+        // Dynamic imports used by the CMS editor registry must load from the concrete asset root.
+        // Keep async chunks in concrete/js instead of themes/concrete so URLs are stable.
+        publicPath: '/concrete/',
+        chunkFilename: 'js/[name].js'
     }
 });
 

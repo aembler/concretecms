@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkconcreteCMS=self.webpackChunkconcreteCMS||[]).push([[425],{6425:(e,n,t)=>{t.r(n),t.d(n,{default:()=>r});var c=t(4061),o=t(3728);const r=(0,c.defineComponent)({__name:"Editor",props:{blockTypeId:{}},setup:function(e){(0,o.ku)().request;return function(e,n){return(0,c.openBlock)(),(0,c.createElementBlock)("div",null," EDITOR!! ")}}})}}]);

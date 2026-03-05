@@ -4,7 +4,8 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../../../stores/concrete-ui'
 import type { AddBlockOperation, AddBlockTargetRef } from '../../../../stores/types/page-operations'
-import DialogEditor from '../../../Block/Editor/DialogEditor.vue'
+import type { BlockTypeEditor } from '../../../../stores/types/block-editors'
+import { useBlockEditorRegistry } from '../../../../stores/block-editor-registry'
 
 type PanelIcon = {
   type: string
@@ -13,11 +14,6 @@ type PanelIcon = {
   className?: string
   svg?: string
 }
-
-type BlockTypeEditor = {
-  component: string
-  componentProps?: Record<string, unknown>
-} | null
 
 type DialogBlockTypeEditor = {
   component: 'DialogEditor'
@@ -69,6 +65,7 @@ const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ?
 const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 const uiStore = useUiStore()
 const concreteUiStore = useConcreteUiStore()
+const blockEditorRegistry = useBlockEditorRegistry()
 const floatingPanels = useFloatingPanelsStore()
 const pageState = computed(() => (concreteUiStore.page as any))
 const addPanelId = 'toolbar:add'
@@ -81,6 +78,9 @@ let hasExitedAddPanel = false
 const addDialogEditor = ref<DialogBlockTypeEditor | null>(null)
 const addDialogTarget = ref<AddBlockTargetRef | null>(null)
 const addDialogKey = ref(0)
+const addDialogComponent = computed(() => {
+  return blockEditorRegistry.resolveEditorComponent(addDialogEditor.value?.component)
+})
 
 function ensureAddContentPageState() {
   if (typeof pageState.value.addContentDragInProgress === 'undefined') {
@@ -318,7 +318,7 @@ onMounted(() => {
           if (addEditor === null && activeDropTarget && draggedItem) {
             floatingPanels.close(addPanelId)
             enqueueAddBlockOperation({ ...activeDropTarget }, draggedItem)
-          } else if (addEditor?.component === 'DialogEditor' && activeDropTarget && draggedItem) {
+          } else if (blockEditorRegistry.hasEditorComponent(addEditor?.component) && activeDropTarget && draggedItem) {
             keepAddPanelHidden = true
             openAddDialog(activeDropTarget, draggedItem)
           }
@@ -395,8 +395,9 @@ onBeforeUnmount(() => {
     </template>
   </button>
 
-  <DialogEditor
-    v-if="addDialogEditor && addDialogTarget"
+  <component
+    :is="addDialogComponent"
+    v-if="addDialogEditor && addDialogTarget && addDialogComponent"
     :key="addDialogKey"
     :editor="addDialogEditor"
     mode="add"

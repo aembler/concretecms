@@ -6,6 +6,7 @@ use Concrete\Core\Application\Service\Urls;
 use Concrete\Core\Application\UserInterface\Icon\IconInterface;
 use Concrete\Core\Application\UserInterface\Icon\ImageFileIcon;
 use Concrete\Core\Backup\ContentImporter;
+use Concrete\Core\Block\ProvidesIconInterface;
 use Concrete\Core\Cache\Level\RequestCache;
 use Concrete\Core\Database\Connection\Connection;
 use Concrete\Core\Entity\Block\BlockType\BlockType as BlockTypeEntity;
@@ -18,6 +19,12 @@ class BlockType
 {
     public function getBlockTypeIcon(BlockTypeEntity $blockType): IconInterface
     {
+
+        $controller = $blockType->getController();
+        if ($controller instanceof ProvidesIconInterface) {
+            return $controller->getIcon();
+        }
+
         /** @var Urls $urls */
         $urls = app(Urls::class);
 

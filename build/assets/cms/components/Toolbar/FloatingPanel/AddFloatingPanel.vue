@@ -27,23 +27,16 @@ import {
 } from '@heroicons/vue/24/outline'
 import AddBlock from './Add/Block.vue'
 import { useConcreteUiStore } from '../../../stores/concrete-ui'
+import type { BlockTypeEditors } from '../../../stores/types/block-editors'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
-
-type BlockTypeEditor = {
-  component: string
-  props?: Record<string, unknown>
-} | null
 
 type BlockType = {
   id: number
   handle: string
   name: string
   description?: string
-  editors?: {
-    add?: BlockTypeEditor
-    edit?: BlockTypeEditor
-  }
+  editors?: BlockTypeEditors
   icon?: {
     type: string
     src?: string

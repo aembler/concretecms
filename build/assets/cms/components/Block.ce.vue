@@ -89,13 +89,11 @@ import { computed, onBeforeUnmount, ref, watch } from "vue"
 import HotSpot from "./Ui/HotSpot.vue"
 import Menu from "./Block/Menu.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
-import DialogEditor from "./Block/Editor/DialogEditor.vue";
-import ComposableEditor from "./Block/Editor/ComposableEditor.vue";
-import InlineEditor from "./Block/Editor/InlineEditor.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
 import { buildDeleteBlockUrl } from '../support/dom/DeleteBlock'
+import { useBlockEditorRegistry } from '../stores/block-editor-registry'
 import {
   Toast,
   ToastClose,
@@ -113,6 +111,7 @@ const toastOpen = ref(false)
 const toastTitle = ref('Deleted')
 const toastDescription = ref('Block deleted successfully.')
 const uiStore = useConcreteUiStore()
+const blockEditorRegistry = useBlockEditorRegistry()
 const { request } = useAjax()
 const runningDeleteOperationId = ref<string | null>(null)
 
@@ -167,8 +166,9 @@ function handleEditorClosed() {
 }
 
 const currentEditorComponent = computed(() => {
-  return parseBlockType?.editors?.edit?.component ?? null;
-});
+  const editorComponentName = parseBlockType?.editors?.edit?.component
+  return blockEditorRegistry.resolveEditorComponent(editorComponentName)
+})
 
 const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
   const operationId = uiStore.page.activeOperationId

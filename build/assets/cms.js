@@ -17,8 +17,6 @@ import ConcreteArea from './cms/components/Area.ce.vue'
 import ConcreteBlock from './cms/components/Block.ce.vue'
 import ConcreteContainer from './cms/components/Container.ce.vue'
 import ConcreteAreaBlockTarget from './cms/components/AreaBlockTarget.ce.vue'
-import DialogEditor from './cms/components/Block/Editor/DialogEditor.vue'
-import ComposableEditor from './cms/components/Block/Editor/ComposableEditor.vue'
 
 import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
 import postcss from 'postcss'
@@ -58,8 +56,6 @@ injectGlobalStyles(propertyCss)
 const app = createApp();
 const pinia = createConcretePinia();
 app.use(pinia);
-app.component('DialogEditor', DialogEditor)
-app.component('ComposableEditor', ComposableEditor)
 
 // For custom elements we must merge component-local SFC styles with the shared
 // backend UI stylesheet. Passing only `styles: [cleanedCss]` can overwrite the
