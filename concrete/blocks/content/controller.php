@@ -3,6 +3,9 @@
 namespace Concrete\Block\Content;
 
 use Concrete\Core\Block\BlockController;
+use Concrete\Core\Block\BlockType\Editor\AbstractEditor;
+use Concrete\Core\Block\BlockType\Editor\EditorInterface;
+use Concrete\Core\Block\ProvidesEditorInterface;
 use Concrete\Core\Editor\LinkAbstractor;
 use Concrete\Core\Feature\Features;
 use Concrete\Core\Feature\UsesFeatureInterface;
@@ -19,7 +22,7 @@ use Concrete\Core\File\Tracker\RichTextExtractor;
  * @copyright  Copyright (c) 2003-2022 concreteCMS. (http://www.concretecms.org)
  * @license    http://www.concretecms.org/license/     MIT License
  */
-class Controller extends BlockController implements FileTrackableInterface, UsesFeatureInterface
+class Controller extends BlockController implements FileTrackableInterface, UsesFeatureInterface, ProvidesEditorInterface
 {
     /**
      * @var string
@@ -59,16 +62,6 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
     /**
      * @var bool
      */
-    protected $btSupportsInlineEdit = true;
-
-    /**
-     * @var bool
-     */
-    protected $btSupportsInlineAdd = true;
-
-    /**
-     * @var bool
-     */
     protected $btCacheBlockOutputForRegisteredUsers = null;
 
     /**
@@ -87,6 +80,17 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
      * @see \Concrete\Core\Block\BlockController::$btExportContentColumns
      */
     protected $btExportContentColumns = ['content'];
+
+    public function getEditor(string $mode): ?EditorInterface
+    {
+        return new class() extends AbstractEditor {
+
+            public function getComponent(): string
+            {
+                return 'ConcreteBlockContentEditor';
+            }
+        };
+    }
 
     /**
      * {@inhertdoc}.

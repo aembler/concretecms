@@ -90,9 +90,9 @@ const emit = defineEmits<{
   (e: 'closed'): void
 }>()
 
-const dialogTitle = computed(() => props.editor.props.dialogTitle)
-const dialogWidth = computed(() => props.editor.props.dialogWidth)
-const dialogHeight = computed(() => props.editor.props.dialogHeight)
+const dialogTitle = computed(() => props.editor.componentProps.dialogTitle)
+const dialogWidth = computed(() => props.editor.componentProps.dialogWidth)
+const dialogHeight = computed(() => props.editor.componentProps.dialogHeight)
 const editorMode = computed(() => props.mode ?? 'edit')
 const dialogUrl = computed(() => {
   const params = new URLSearchParams({

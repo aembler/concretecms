@@ -4,7 +4,7 @@ namespace Concrete\Core\Block\BlockType\Editor;
 
 class InlineEditor extends AbstractEditor
 {
-    public function getComponentKey(): string
+    public function getComponent(): string
     {
         return 'InlineEditor';
     }

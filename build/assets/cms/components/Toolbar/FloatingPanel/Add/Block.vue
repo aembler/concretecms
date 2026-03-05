@@ -16,12 +16,12 @@ type PanelIcon = {
 
 type BlockTypeEditor = {
   component: string
-  props?: Record<string, unknown>
+  componentProps?: Record<string, unknown>
 } | null
 
 type DialogBlockTypeEditor = {
   component: 'DialogEditor'
-  props: {
+  componentProps: {
     dialogTitle: string
     dialogWidth: string | number
     dialogHeight: string | number
@@ -245,10 +245,10 @@ function isDialogEditor(editor: BlockTypeEditor): editor is DialogBlockTypeEdito
   return Boolean(
     editor
     && editor.component === 'DialogEditor'
-    && editor.props
-    && typeof editor.props.dialogTitle === 'string'
-    && (typeof editor.props.dialogWidth === 'string' || typeof editor.props.dialogWidth === 'number')
-    && (typeof editor.props.dialogHeight === 'string' || typeof editor.props.dialogHeight === 'number')
+    && editor.componentProps
+    && typeof editor.componentProps.dialogTitle === 'string'
+    && (typeof editor.componentProps.dialogWidth === 'string' || typeof editor.componentProps.dialogWidth === 'number')
+    && (typeof editor.componentProps.dialogHeight === 'string' || typeof editor.componentProps.dialogHeight === 'number')
   )
 }
 

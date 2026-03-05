@@ -7,6 +7,4 @@ use Concrete\Core\Application\UserInterface\Component\ComponentInterface;
 interface EditorInterface extends ComponentInterface
 {
 
-    public function getComponentKey(): string;
-
 }

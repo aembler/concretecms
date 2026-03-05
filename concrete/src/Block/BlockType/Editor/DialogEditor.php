@@ -11,7 +11,7 @@ class DialogEditor extends AbstractEditor
     ) {
     }
 
-    public function getComponentKey(): string
+    public function getComponent(): string
     {
         return 'DialogEditor';
     }

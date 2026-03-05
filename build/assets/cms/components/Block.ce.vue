@@ -166,19 +166,8 @@ function handleEditorClosed() {
   editMode.value = false
 }
 
-const editorComponents: Record<string, any> = {
-  DialogEditor,
-  ComposableEditor,
-  InlineEditor,
-}
-
 const currentEditorComponent = computed(() => {
-  const editorComponentKey = parseBlockType?.editors?.edit?.component
-  if (!editorComponentKey || typeof editorComponentKey !== 'string') {
-    return null
-  }
-
-  return editorComponents[editorComponentKey] ?? null
+  return parseBlockType?.editors?.edit?.component ?? null;
 });
 
 const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
