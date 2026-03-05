@@ -1,42 +1,67 @@
 <template>
-  <HotSpot
-      v-if="!isDeleted"
-      :item-id="id"
-      :menu-id="menuId"
-      :active="!isAddContentDragActive"
-      hover-outline-color="outline-concrete-green"
-      active-outline-color="outline-concrete-green"
-      active-bg-class="bg-concrete-green/30"
-      @dblclick="editBlock"
-      class="min-h-[16px]"
-  >
-    <template #badge>
-      {{ name }}
-    </template>
-    <template #menu>
-      <Menu
-          :variants="parsedVariants"
-          :selected-variant="selectedVariant"
-          @edit="editBlock"
-          @delete="showDeleteModal = true"
-      >
-      </Menu>
-    </template>
-    <div v-if="editMode">
-      <component
-        :is="currentEditorComponent"
-        v-if="currentEditorComponent"
-        :key="editorRenderKey"
-        :block-type-id="parseBlockType?.id"
-        :editor="parseBlockType?.editors?.edit"
+  <template v-if="!isDeleted">
+    <HotSpot
+        v-if="isInteractionsEnabled"
+        :item-id="id"
+        :menu-id="menuId"
+        :active="isHotSpotActive"
+        hover-outline-color="outline-concrete-green"
+        active-outline-color="outline-concrete-green"
+        active-bg-class="bg-concrete-green/30"
+        @dblclick="editBlock"
+        class="min-h-[16px]"
+    >
+      <template #badge>
+        {{ name }}
+      </template>
+      <template #menu>
+        <Menu
+            :variants="parsedVariants"
+            :selected-variant="selectedVariant"
+            @edit="editBlock"
+            @delete="showDeleteModal = true"
+        >
+        </Menu>
+      </template>
+      <div v-if="editMode">
+        <component
+          :is="currentEditorComponent"
+          v-if="currentEditorComponent"
+          :key="editorRenderKey"
+          :block-type-id="parseBlockType?.id"
+          :editor="parseBlockType?.editors?.edit"
         :block-id="blockId"
         :area-handle="areaHandle"
         :page-id="pageId"
         @updated="handleUpdated"
+        @closed="handleEditorClosed"
       />
+      </div>
+      <div :id="contentTargetId">
+        <slot />
+      </div>
+    </HotSpot>
+
+    <div v-else class="min-h-[16px]">
+      <div v-if="editMode">
+        <component
+          :is="currentEditorComponent"
+          v-if="currentEditorComponent"
+          :key="editorRenderKey"
+          :block-type-id="parseBlockType?.id"
+          :editor="parseBlockType?.editors?.edit"
+          :block-id="blockId"
+          :area-handle="areaHandle"
+          :page-id="pageId"
+          @updated="handleUpdated"
+          @closed="handleEditorClosed"
+        />
+      </div>
+      <div :id="contentTargetId">
+        <slot />
+      </div>
     </div>
-    <slot />
-  </HotSpot>
+  </template>
 
   <DeleteBlockModal
       :open="showDeleteModal"
@@ -60,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { computed, onBeforeUnmount, ref, watch } from "vue"
 import HotSpot from "./Ui/HotSpot.vue"
 import Menu from "./Block/Menu.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
@@ -108,8 +133,16 @@ const parseBlockType = useParsedJsonProp(props.blocktype)
 
 let menuId = computed(() => props.id + '-menu')
 const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
+const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const isHotSpotActive = computed(() => isInteractionsEnabled.value && !isAddContentDragActive.value)
+const contentTargetId = computed(() => `concrete-block-content-${String(props.id || props.blockId || '')}`)
 
 function editBlock() {
+  if (!currentEditorComponent.value) {
+    return
+  }
+
+  uiStore.setPageInteractionsEnabled(false)
   editMode.value = true
   editorRenderKey.value += 1
 }
@@ -124,6 +157,12 @@ function clearMenuState() {
 }
 
 function handleUpdated() {
+  uiStore.setPageInteractionsEnabled(true)
+  editMode.value = false
+}
+
+function handleEditorClosed() {
+  uiStore.setPageInteractionsEnabled(true)
   editMode.value = false
 }
 
@@ -232,5 +271,11 @@ watch(
   },
   { immediate: true }
 )
+
+onBeforeUnmount(() => {
+  if (editMode.value) {
+    uiStore.setPageInteractionsEnabled(true)
+  }
+})
 
 </script>

@@ -35,7 +35,8 @@ const STICKY_RELEASE_DELAY_MS = 120
 
 const pageState = computed(() => (uiStore.page as any))
 const isDragInProgress = computed(() => Boolean(pageState.value?.addContentDragInProgress))
-const isDragActive = computed(() => Boolean(pageState.value?.addContentDragActive) && isDragInProgress.value)
+const isInteractionsEnabled = computed(() => Boolean(pageState.value?.interactionsEnabled ?? true))
+const isDragActive = computed(() => isInteractionsEnabled.value && Boolean(pageState.value?.addContentDragActive) && isDragInProgress.value)
 const draggedItem = computed(() => pageState.value?.addContentDraggedItem ?? null)
 const isValidDraggedBlockType = computed(() => draggedItem.value?.type === 'blockType')
 

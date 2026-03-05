@@ -22,6 +22,7 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       useLargeFont: false,
     },
     page: {
+      interactionsEnabled: true,
       addContentDragActive: false,
       addContentDragInProgress: false,
       addContentDragPointer: null as DragPointer,
@@ -53,6 +54,9 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     setPageOperationsDebug(enabled: boolean) {
       this.page.operationsDebug = enabled
       this.logPageOperation('debug.toggled', { enabled })
+    },
+    setPageInteractionsEnabled(enabled: boolean) {
+      this.page.interactionsEnabled = enabled
     },
     updateScroll(y: number) {
       const direction = y < this.scroll.y ? 'up' : 'down'

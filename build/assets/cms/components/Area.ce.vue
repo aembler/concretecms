@@ -1,5 +1,5 @@
 <template>
-  <div class="outline-2 outline-concrete-area rounded-2 mb-8 relative">
+  <div class="outline-2 outline-concrete-area rounded-2 mb-8 relative" :class="{ 'ccm-area-interactions-disabled': !isInteractionsEnabled }">
     <div class="relative">
       <slot />
     </div>
@@ -51,6 +51,7 @@ const blockRenderer = new BlockRenderer()
 const runningUpdateOperationId = ref<string | null>(null)
 const runningAddOperationId = ref<string | null>(null)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
+const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
 const toastOpen = ref(false)
 const toastTitle = ref('Update Block')
 const toastDescription = ref('The block has been saved successfully.')
@@ -202,3 +203,9 @@ watch(
 )
 
 </script>
+
+<style>
+.ccm-area-interactions-disabled concrete-area-block-target {
+  display: none !important;
+}
+</style>

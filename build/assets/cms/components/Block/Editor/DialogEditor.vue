@@ -78,6 +78,9 @@ const open = ref(false)
 const helpTooltipText = ref('')
 const helpTooltipOpen = ref(false)
 const isSubmitting = ref(false)
+const closeEmitTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const pendingUpdatedResponse = ref<any | null>(null)
+const DIALOG_CLOSE_TRANSITION_MS = 240
 const { request } = useAjax()
 const lazyDialogRef = ref<any>(null)
 const uiStore = useConcreteUiStore()
@@ -230,7 +233,7 @@ function handleSave() {
 
         uiStore.enqueuePageOperation(operation)
       }
-      emit('updated', { response: normalizedResponse })
+      pendingUpdatedResponse.value = normalizedResponse
       open.value = false
       helpTooltipOpen.value = false
     },
@@ -247,7 +250,26 @@ function handleCancel() {
 
 watch(open, (isOpen) => {
   if (!isOpen) {
-    emit('closed')
+    if (closeEmitTimer.value) {
+      clearTimeout(closeEmitTimer.value)
+    }
+
+    closeEmitTimer.value = setTimeout(() => {
+      closeEmitTimer.value = null
+      const response = pendingUpdatedResponse.value
+      pendingUpdatedResponse.value = null
+      if (response) {
+        emit('updated', { response })
+      }
+      emit('closed')
+    }, DIALOG_CLOSE_TRANSITION_MS)
+    return
+  }
+
+  pendingUpdatedResponse.value = null
+  if (closeEmitTimer.value) {
+    clearTimeout(closeEmitTimer.value)
+    closeEmitTimer.value = null
   }
 })
 
@@ -257,6 +279,11 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (closeEmitTimer.value) {
+    clearTimeout(closeEmitTimer.value)
+    closeEmitTimer.value = null
+  }
+
   document.removeEventListener('click', handleDocumentClick)
 })
 </script>
