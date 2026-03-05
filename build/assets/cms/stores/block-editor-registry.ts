@@ -3,7 +3,6 @@ import { defineAsyncComponent, type Component } from 'vue'
 const blockEditorComponents: Record<string, Component> = {
   DialogEditor: defineAsyncComponent(() => import('../components/Block/Editor/DialogEditor.vue')),
   ComposableEditor: defineAsyncComponent(() => import('../components/Block/Editor/ComposableEditor.vue')),
-  InlineEditor: defineAsyncComponent(() => import('../components/Block/Editor/InlineEditor.vue')),
   ConcreteBlockContentEditor: defineAsyncComponent(() => import ('../../../../concrete/blocks/content/Editor.vue')),
 }
 

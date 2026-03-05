@@ -19,31 +19,17 @@
       <slot name="badge" />
     </div>
 
-    <!-- Menu: stays absolutely positioned, with dynamic top -->
-    <!-- need data-theme=light for daisyUI variables -->
-    <teleport v-if="props.active" :to="uiStore.menuContainer">
-      <Transition
-          enter-active-class="transition-opacity duration-200"
-          enter-from-class="opacity-0"
-          enter-to-class="opacity-100"
-          leave-active-class="transition-opacity duration-200"
-          leave-from-class="opacity-100"
-          leave-to-class="opacity-0"
+    <MenuContainer>
+      <div
+          :id="menuId"
+          v-show="isStoreActiveMatch"
+          class="flex absolute z-50 pointer-events-auto -translate-x-1/2"
+          ref="menuEl"
+          :style="{ top: menuTop, left: menuLeft }"
       >
-        <div
-            :id="menuId"
-            v-show="true"
-            :class="[
-        'flex absolute z-50 pointer-events-auto -translate-x-1/2 transition-opacity duration-200',
-        isStoreActiveMatch ? 'opacity-100 visible' : 'opacity-0 invisible'
-      ]"
-            ref="menuEl"
-            :style="{ top: menuTop, left: menuLeft }"
-        >
-          <slot name="menu" />
-        </div>
-      </Transition>
-    </teleport>
+        <slot name="menu" />
+      </div>
+    </MenuContainer>
 
 
     <slot />
@@ -60,9 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useUiStore } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
+import MenuContainer from './MenuContainer.vue'
 
 const props = withDefaults(
     defineProps<{
@@ -123,7 +110,6 @@ async function updateMenuTop() {
   const xOnPage = rect.left
   const yOnPage = rect.top
   const menuHeight = menuEl.value.offsetHeight
-  const menuWidth = menuEl.value.offsetWidth
   const elementWidth = rect.width
 
   const menuLeftTmp = xOnPage + elementWidth / 2
@@ -141,12 +127,21 @@ onMounted(() => {
   updateMenuTop()
 })
 watch([() => concreteUiStore.scroll.y, () => isStoreActiveMatch.value], updateMenuTop)
-watch(() => isStoreActiveMatch.value, () => {
+watch(() => isStoreActiveMatch.value, async (activeMatch) => {
   if (!props.active) {
     return
   }
 
-  concreteUiStore.clickProxy.activeElementMenuId = props.menuId
+  if (activeMatch) {
+    concreteUiStore.clickProxy.activeElementMenuId = props.menuId
+    await nextTick()
+    await updateMenuTop()
+    return
+  }
+
+  if (concreteUiStore.clickProxy.activeElementMenuId === props.menuId) {
+    concreteUiStore.clickProxy.activeElementMenuId = ''
+  }
 })
 watch(() => isStoreDoubleClickMatch.value, (value) => {
   if (value) {

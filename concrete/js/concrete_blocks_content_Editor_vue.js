@@ -75,20 +75,12 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*@__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   __name: 'Editor',
-  props: {
-    blockTypeId: {
-      type: Number,
-      required: true
-    }
-  },
   setup: function setup(__props, _ref) {
     var __expose = _ref.expose;
     __expose();
-    var props = __props;
     var _useAjax = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.useAjax)(),
       request = _useAjax.request;
     var __returned__ = {
-      props: props,
       request: request
     };
     Object.defineProperty(__returned__, '__isScriptSetup', {
