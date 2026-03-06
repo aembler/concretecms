@@ -7,17 +7,6 @@
       <div class="mx-auto font-semibold uppercase rounded-full py-1 px-6 text-xs bg-concrete-area text-gray-400">Empty {{name}}</div>
     </div>
   </div>
-
-  <ToastProvider :duration="3000" swipe-direction="right">
-    <Toast :open="toastOpen" variant="success" @update:open="toastOpen = $event">
-      <div class="grid gap-1">
-        <ToastTitle>{{ toastTitle }}</ToastTitle>
-        <ToastDescription>{{ toastDescription }}</ToastDescription>
-      </div>
-      <ToastClose />
-    </Toast>
-    <ToastViewport />
-  </ToastProvider>
 </template>
 
 <script setup lang="ts">
@@ -25,13 +14,8 @@ import { computed, ref, watch } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../stores/types/page-operations'
 import { BlockRenderer } from '../support/dom/BlockRenderer'
+import { useToast } from '../utilities/toast'
 import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
   normalizeJsonResponse,
   useAjax,
 } from '@concretecms/backendui'
@@ -52,9 +36,7 @@ const runningUpdateOperationId = ref<string | null>(null)
 const runningAddOperationId = ref<string | null>(null)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
-const toastOpen = ref(false)
-const toastTitle = ref('Update Block')
-const toastDescription = ref('The block has been saved successfully.')
+const toast = useToast()
 const { request } = useAjax()
 
 const activeUpdateOperation = computed<UpdateBlockOperation | null>(() => {
@@ -96,10 +78,7 @@ function requestJson(url: string): Promise<any> {
 }
 
 function showSuccessToast(title: string, message: string) {
-  toastTitle.value = title
-  toastDescription.value = message
-  toastOpen.value = false
-  toastOpen.value = true
+  toast.success(title, message)
 }
 
 async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise<void> {

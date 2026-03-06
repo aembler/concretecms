@@ -5,6 +5,7 @@
     class="w-full fixed top-0 left-0 z-[var(--index-layer-toolbar-wrapper)]"
   >
     <div ref="teleportTarget"></div>
+    <div ref="toastTeleportTarget"></div>
     <div id="ccm-toolbar" class="relative z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center px-6 py-4 bg-base-100 shadow-[inset_-2px_-2px_10px_rgba(0,0,0,0.1)]">
       <div class="flex items-center space-x-1">
         <!-- Logo -->
@@ -166,6 +167,7 @@
         @update:open="setPanelOpen(addPanelId, $event)"
       />
     </FloatingPanelGroup>
+    <ToastContainer />
   </div>
 </template>
 
@@ -184,6 +186,7 @@ import {
 import { computed, ref, onMounted, useTemplateRef, watch } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
+import ToastContainer from '../Ui/ToastContainer.vue'
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
 import AddFloatingPanel from './FloatingPanel/AddFloatingPanel.vue'
 import CheckInFloatingPanel from './FloatingPanel/CheckInFloatingPanel.vue'
@@ -227,6 +230,7 @@ const props = defineProps({
 
 const resolvedTheme = ref('light')
 const teleportTarget = useTemplateRef('teleportTarget')
+const toastTeleportTarget = useTemplateRef('toastTeleportTarget')
 const pageSettingsPanelId = 'toolbar:page-settings'
 const checkInPanelId = 'toolbar:check-in'
 const addPanelId = 'toolbar:add'
@@ -279,6 +283,7 @@ onMounted(() => {
   }
 
   ui.menuContainer = teleportTarget.value ?? 'body'
+  concreteUi.toastContainer = toastTeleportTarget.value ?? 'body'
   document.querySelector('html').classList.add('ccm-toolbar-visible')
 
 })

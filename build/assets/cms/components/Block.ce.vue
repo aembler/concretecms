@@ -72,17 +72,6 @@
       :page-id="pageId"
       @update:open="showDeleteModal = $event"
   />
-
-  <ToastProvider :duration="3000" swipe-direction="right">
-    <Toast :open="toastOpen" variant="success" @update:open="toastOpen = $event">
-      <div class="grid gap-1">
-        <ToastTitle>{{ toastTitle }}</ToastTitle>
-        <ToastDescription>{{ toastDescription }}</ToastDescription>
-      </div>
-      <ToastClose />
-    </Toast>
-    <ToastViewport />
-  </ToastProvider>
 </template>
 
 <script setup lang="ts">
@@ -94,22 +83,13 @@ import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
 import { buildDeleteBlockUrl } from '../support/dom/DeleteBlock'
 import { useBlockEditorRegistry } from '../stores/block-editor-registry'
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport
-} from '@concretecms/backendui'
+import { useToast } from '../utilities/toast'
 
 const rootEl = ref<HTMLElement | null>()
 const editMode = ref(false)
 const isDeleted = ref(false)
 const showDeleteModal = ref(false)
-const toastOpen = ref(false)
-const toastTitle = ref('Deleted')
-const toastDescription = ref('Block deleted successfully.')
+const toast = useToast()
 const uiStore = useConcreteUiStore()
 const blockEditorRegistry = useBlockEditorRegistry()
 const { request } = useAjax()
@@ -234,6 +214,11 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
     body,
     onSuccess: (response) => {
       const normalizedResponse: any = normalizeJsonResponse(response)
+      toast.success(
+        normalizedResponse?.title || 'Deleted',
+        normalizedResponse?.message || 'Block deleted successfully.'
+      )
+
       // Remove the custom element host itself on delete. Keeping the host in place
       // leaves stale siblings/targets around because only the inner slot content is hidden.
       const hostId = String(props.id || '')
@@ -255,11 +240,6 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
       }
 
       clearMenuState()
-
-      toastTitle.value = normalizedResponse?.title || 'Deleted'
-      toastDescription.value = normalizedResponse?.message || 'Block deleted successfully.'
-      toastOpen.value = false
-      toastOpen.value = true
 
       uiStore.completePageOperation(operation.id)
     },

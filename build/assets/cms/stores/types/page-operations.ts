@@ -43,4 +43,16 @@ export type AddBlockOperation = {
   response?: any
 }
 
+export type ToastVariant = 'success' | 'error' | 'info' | 'warning'
+
+export type ToastOperation = {
+  id: string
+  type: 'toast.show'
+  status: PageOperationStatus
+  title: string
+  message: string
+  variant?: ToastVariant
+  duration?: number
+}
+
 export type PageOperation = DeleteBlockOperation | UpdateBlockOperation | AddBlockOperation
