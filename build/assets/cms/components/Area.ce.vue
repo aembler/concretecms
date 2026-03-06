@@ -1,10 +1,11 @@
 <template>
-  <div class="outline-2 outline-concrete-area rounded-2 mb-8 relative" :class="{ 'ccm-area-interactions-disabled': !isInteractionsEnabled }">
-    <div class="relative">
+  <!-- In-page custom elements render without shadow DOM, so Tailwind utility classes are not available here. -->
+  <div class="concrete-area" :class="{ 'ccm-area-interactions-disabled': !isInteractionsEnabled }">
+    <div class="concrete-area-inner">
       <slot />
     </div>
-    <div v-if="totalBlocks === 0" class="absolute inset-0 flex items-center pointer-events-none">
-      <div class="mx-auto font-semibold uppercase rounded-full py-1 px-6 text-xs bg-concrete-area text-gray-400">Empty {{name}}</div>
+    <div v-if="totalBlocks === 0" class="concrete-area-empty-overlay">
+      <div class="concrete-area-empty-pill">Empty {{name}}</div>
     </div>
   </div>
 </template>
@@ -182,9 +183,3 @@ watch(
 )
 
 </script>
-
-<style>
-.ccm-area-interactions-disabled concrete-area-block-target {
-  display: none !important;
-}
-</style>

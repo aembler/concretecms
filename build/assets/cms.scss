@@ -1,8 +1,8 @@
-//@import "../../concrete/css/backendui.css";
-
 // Support classes for toolbar that are not contained within the toolbar themselves
-// (Things like body and ccm-page auxiliary classes)
+// And things that are in the page that are not contained within shadow DOM.
+@import "./cms/scss/variables";
 @import "./cms/scss/toolbar";
+@import "./cms/scss/area";
 
 // Support classes for backendUI that cannot be contained within the components themselves.
 @import '~@concretecms/backendui/src/scss/cms';

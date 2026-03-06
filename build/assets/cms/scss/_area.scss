@@ -1,0 +1,29 @@
+.concrete-area {
+  position: relative;
+  outline: 2px solid var(--color-concrete-area);
+  margin-bottom: 50px;
+}
+
+.concrete-area-inner {
+  position: relative;
+}
+
+.concrete-area-empty-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.concrete-area-empty-pill {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.25rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgb(156 163 175);
+  background-color: var(--color-concrete-area);
+}
