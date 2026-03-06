@@ -1,65 +1,66 @@
 <template>
   <template v-if="!isDeleted">
-    <HotSpot
-        v-if="isInteractionsEnabled"
-        :item-id="id"
-        :menu-id="menuId"
-        :active="isHotSpotActive"
-        hover-outline-color="outline-concrete-green"
-        active-outline-color="outline-concrete-green"
-        active-bg-class="bg-concrete-green/30"
-        @dblclick="editBlock"
-        class="min-h-[16px]"
-    >
-      <template #badge>
-        {{ name }}
-      </template>
-      <template #menu>
-        <Menu
-            :variants="parsedVariants"
-            :selected-variant="selectedVariant"
-            @edit="editBlock"
-            @delete="showDeleteModal = true"
-        >
-        </Menu>
-      </template>
-      <div v-if="editMode">
-        <component
-          :is="currentEditorComponent"
-          v-if="currentEditorComponent"
-          :key="editorRenderKey"
-          :block-type-id="parseBlockType?.id"
-          :editor="parseBlockType?.editors?.edit"
-        :block-id="blockId"
-        :area-handle="areaHandle"
-        :page-id="pageId"
-        @updated="handleUpdated"
-        @closed="handleEditorClosed"
-      />
-      </div>
-      <div :id="contentTargetId">
-        <slot />
-      </div>
-    </HotSpot>
 
-    <div v-else class="min-h-[16px]">
+    <!-- Clickable outline, the hotspot that covers everything //-->
+    <div
+        ref="rootEl"
+        :class="[
+      'min-h-[16px] select-none z-1 relative outline-3 transition-all duration-200',
+      isBlockClicked || isBlockHovered ? 'cursor-pointer' : 'cursor-default',
+      outlineColor,
+    ]">
+
+      <!-- Block Menu //-->
+      <Menu
+          :block-element="rootEl"
+          :show="isBlockClicked"
+          :id="menuId"
+          :variants="parsedVariants"
+          :selected-variant="selectedVariant"
+          @edit="editBlock"
+          @delete="showDeleteModal = true"
+      >
+      </Menu>
+
+      <!-- Floating green block name badge //-->
+      <div
+          :class="[
+        'absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none',
+        isBlockClicked || isBlockHovered ? 'animate-hotSpotBadge' : 'opacity-0',
+        'z-3 shadow-sm text-xs font-semibold uppercase rounded-full py-1 px-2 inline-block bg-concrete-green'
+      ]"
+      >{{ name }}
+      </div>
+
+      <!-- Edit Mode for the block //-->
       <div v-if="editMode">
         <component
           :is="currentEditorComponent"
           v-if="currentEditorComponent"
-          :key="editorRenderKey"
           :block-type-id="parseBlockType?.id"
-          :editor="parseBlockType?.editors?.edit"
+          :editor="parseEditor"
           :block-id="blockId"
           :area-handle="areaHandle"
           :page-id="pageId"
           @updated="handleUpdated"
           @closed="handleEditorClosed"
-        />
+      />
       </div>
-      <div :id="contentTargetId">
+
+      <!-- Actual Block View //-->
+      <div>
         <slot />
       </div>
+
+      <!-- Background/hover overlay //-->
+      <div
+          :class="[
+        'absolute inset-0 z-10 transition-all duration-200',
+        isInteractionsEnabled ? 'pointer-events-auto' : 'pointer-events-none',
+        isBlockClicked && 'bg-concrete-green/30'
+      ]"
+      ></div>
+
     </div>
   </template>
 
@@ -86,7 +87,6 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue"
-import HotSpot from "./Ui/HotSpot.vue"
 import Menu from "./Block/Menu.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
@@ -103,8 +103,8 @@ import {
   ToastViewport
 } from '@concretecms/backendui'
 
+const rootEl = ref<HTMLElement | null>()
 const editMode = ref(false)
-const editorRenderKey = ref(0)
 const isDeleted = ref(false)
 const showDeleteModal = ref(false)
 const toastOpen = ref(false)
@@ -116,25 +116,49 @@ const { request } = useAjax()
 const runningDeleteOperationId = ref<string | null>(null)
 
 const props = defineProps({
-  id: String, // Needed as a separate prop for DOM operations, menu objserver.
+  id: String, // Needed as a separate prop for DOM operations, menu observer.
   blockId: Number | String,
   areaHandle: String,
   pageId: Number | String,
   isMasterCollection: Boolean | String | Number,
   name: String,
   variants: String | Array<{ file: String; name: String }>,
-  blocktype: String | Object,
+  blocktype: Object,
+  editor: Object | null,
   selectedVariant: String,
 })
 
 const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
+const parseEditor = useParsedJsonProp(props.editor)
+
+const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.id)
+const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.id)
+const isBlockHovered = computed(() => {
+  if (!isInteractionsEnabled.value) {
+    return false
+  }
+
+  if (!uiStore.clickProxy.activeElementId) {
+    return uiStore.clickProxy.hoverElementId === props.id
+  }
+})
+
+watch(isBlockDoubleClicked, (value) => {
+  editBlock()
+})
+
+const clickedOutlineColor = 'outline-concrete-green';
+const hoveredOutlineColor = 'outline-concrete-green';
+const outlineColor = computed(() => {
+  if (isBlockClicked.value) return clickedOutlineColor
+  if (isBlockHovered.value) return hoveredOutlineColor
+  return 'outline-transparent'
+})
 
 let menuId = computed(() => props.id + '-menu')
 const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
-const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
-const isHotSpotActive = computed(() => isInteractionsEnabled.value && !isAddContentDragActive.value)
-const contentTargetId = computed(() => `concrete-block-content-${String(props.id || props.blockId || '')}`)
 
 function editBlock() {
   if (!currentEditorComponent.value) {
@@ -143,7 +167,6 @@ function editBlock() {
 
   uiStore.setPageInteractionsEnabled(false)
   editMode.value = true
-  editorRenderKey.value += 1
 }
 
 function clearMenuState() {
@@ -166,7 +189,7 @@ function handleEditorClosed() {
 }
 
 const currentEditorComponent = computed(() => {
-  const editorComponentName = parseBlockType?.editors?.edit?.component
+  const editorComponentName = parseEditor?.component
   return blockEditorRegistry.resolveEditorComponent(editorComponentName)
 })
 

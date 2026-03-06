@@ -1,5 +1,6 @@
 <?php
 use Concrete\Core\Api\Fractal\Transformer\BlockTypeTransformer;
+use Concrete\Core\Block\BlockType\Editor\EditorFactory;
 
 defined('C5_EXECUTE') or die("Access Denied.");
 $blockType = $b->getBlockTypeObject();
@@ -22,6 +23,7 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
 <?php } else {
 
     $blockTypeData = app(BlockTypeTransformer::class)->transform($blockType);
+    $editor = app(EditorFactory::class)->createForBlock($b, EditorFactory::MODE_EDIT);
     $isMasterCollection = $c->isMasterCollection();
     ?>
 
@@ -31,6 +33,7 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     page-id="<?=$c->getCollectionID()?>"
     name="<?=t($blockType->getBlockTypeName())?>"
     blocktype='<?=h(json_encode($blockTypeData))?>'
+    editor='<?=h(json_encode($editor))?>'
     selected-variant="<?=$b->getBlockFilename()?>"
     variants='<?=json_encode($blockType->getBlockTypeCustomTemplates($b))?>'
     area-handle="<?=h($a->getAreaHandle())?>"

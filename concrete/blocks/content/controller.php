@@ -86,11 +86,23 @@ class Controller extends BlockController implements FileTrackableInterface, Uses
 
     public function getEditor(string $mode): ?EditorInterface
     {
-        return new class() extends AbstractEditor {
+        $content = $mode === 'edit' ? $this->getContentEditMode() : '';
+
+        return new class($content) extends AbstractEditor {
+            public function __construct(protected string $content)
+            {
+            }
 
             public function getComponent(): string
             {
                 return 'ConcreteBlockContentEditor';
+            }
+
+            public function getComponentProps(): array
+            {
+                return [
+                    'content' => $this->content,
+                ];
             }
         };
     }

@@ -76,6 +76,7 @@ const ConcreteAreaElement = defineCustomElement(ConcreteArea, {
 })
 const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
     styles: getMergedElementStyles(ConcreteBlock),
+   // shadowRoot: false,
     plugins: [pinia]
 })
 const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {

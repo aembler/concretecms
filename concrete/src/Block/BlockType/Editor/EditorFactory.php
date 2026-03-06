@@ -2,6 +2,7 @@
 
 namespace Concrete\Core\Block\BlockType\Editor;
 
+use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
 use Concrete\Core\Block\ProvidesEditorInterface;
 use Concrete\Core\Entity\Block\BlockType\BlockType;
@@ -13,19 +14,25 @@ class EditorFactory
     public const MODE_ADD = 'add';
     public const MODE_EDIT = 'edit';
 
-    public function createForBlockType(BlockType $blockType, string $mode = self::MODE_EDIT): ?EditorInterface
+    public function createForBlock(BlockType|Block $object, string $mode = self::MODE_EDIT): ?EditorInterface
     {
+
+        if ($object instanceof Block) {
+            $blockType = $object->getBlockTypeObject();
+        } else {
+            $blockType = $object;
+        }
 
         // Support for new composable block types:
         /** @var FileLocator $locator */
         $locator = Application::getFacadeApplication()->make(FileLocator::class);
-        $packageHandle = (string) $blockType->getPackageHandle();
+        $packageHandle = (string) $object->getPackageHandle();
         if ($packageHandle !== '') {
             $locator->addPackageLocation($packageHandle);
         }
         $record = $locator->getRecord(
             BlockTypeService::getBlockTypeRelativePath(
-                $blockType->getBlockTypeHandle(),
+                $object->getBlockTypeHandle(),
                 'manifest.xml',
                 $packageHandle,
                 $blockType->getBlockTypeActiveVersion()
@@ -37,8 +44,8 @@ class EditorFactory
 
         // Support for v1 block controllers that define their own
         // editors
-        if ($blockType->getController() instanceof ProvidesEditorInterface) {
-            return $blockType->getController()->getEditor($mode);
+        if ($object->getController() instanceof ProvidesEditorInterface) {
+            return $object->getController()->getEditor($mode);
         }
 
         // Note: no support for legacy inline editing. If you need this,

@@ -1,0 +1,30 @@
+@keyframes hotSpotBadge {
+    0% {
+        transform: translateY(-5px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(5px);
+        opacity: 1;
+    }
+}
+
+@keyframes hotSpotBadgeOut {
+    0% {
+        transform: translateY(5px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+
+
+.animate-hotSpotBadge {
+    animation: hotSpotBadge 0.3s var(--default-transition-timing-function) forwards;
+}
+
+.animate-hotSpotBadgeOut {
+    animation: hotSpotBadgeOut 0.3s var(--default-transition-timing-function) forwards;
+}

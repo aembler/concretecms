@@ -9,6 +9,7 @@ use Concrete\Core\Area\Area;
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockType\BlockType;
 use Concrete\Core\Block\BlockType\BlockTypeList;
+use Concrete\Core\Block\BlockType\Editor\EditorFactory;
 use Concrete\Core\Block\BlockType\Set as BlockTypeSet;
 use Concrete\Core\Entity\Block\BlockType\BlockType as BlockTypeEntity;
 use Concrete\Core\Block\View\BlockView;
@@ -414,6 +415,8 @@ class Add extends BackendInterfacePageController
             foreach ($blockTypes as $blockType) {
                 $icon = $blockTypeService->getBlockTypeIcon($blockType);
                 $blockTypeData = $blockTypeTransformer->transform($blockType);
+                $blockTypeData['editor'] = $this->app->make(EditorFactory::class)
+                    ->createForBlock($blockType, EditorFactory::MODE_ADD);
                 $blockTypeData['icon'] = $icon->jsonSerialize();
                 $serializedSet['blockTypes'][] = $blockTypeData;
             }

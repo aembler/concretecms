@@ -27,7 +27,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import AddBlock from './Add/Block.vue'
 import { useConcreteUiStore } from '../../../stores/concrete-ui'
-import type { BlockTypeEditors } from '../../../stores/types/block-editors'
+import type {BlockTypeEditor, BlockTypeEditors} from '../../../stores/types/block-editors'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
 
@@ -36,7 +36,7 @@ type BlockType = {
   handle: string
   name: string
   description?: string
-  editors?: BlockTypeEditors
+  editor?: BlockTypeEditor
   icon?: {
     type: string
     src?: string
@@ -270,7 +270,7 @@ watch(() => props.open, (isOpen) => {
                   :description="blockType.description"
                   :block-type-id="blockType.id"
                   :block-type-handle="blockType.handle"
-                  :editor="blockType.editors?.add ?? null"
+                  :editor="blockType.editor ?? null"
                 />
               </div>
             </div>
@@ -297,7 +297,7 @@ watch(() => props.open, (isOpen) => {
                   :expanded="true"
                   :block-type-id="blockType.id"
                   :block-type-handle="blockType.handle"
-                  :editor="blockType.editors?.add ?? null"
+                  :editor="blockType.editor ?? null"
                 />
               </div>
             </div>
