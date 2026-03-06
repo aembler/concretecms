@@ -26,7 +26,6 @@
       @input="handleInput"
     ></div>
 
-    <p v-if="errorMessage" class="mt-2 text-xs text-error">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -66,7 +65,6 @@ const uiStore = useConcreteUiStore()
 const editableEl = ref<HTMLElement | null>(null)
 const menuEl = ref<HTMLElement | null>(null)
 const isSubmitting = ref(false)
-const errorMessage = ref('')
 const contentHtml = ref('')
 const alwaysEnabled = ref(true)
 
@@ -83,12 +81,6 @@ const dialogUrl = computed(() => {
   return `/ccm/system/dialogs/block/edit?${params.toString()}`
 })
 
-function hasResponseErrors(response: any): boolean {
-  return Boolean(
-    response?.error
-    || (Array.isArray(response?.errors) && response.errors.length > 0)
-  )
-}
 
 function handleInput() {
   contentHtml.value = editableEl.value?.innerHTML ?? ''
@@ -103,7 +95,6 @@ function handleSave() {
   }
 
   isSubmitting.value = true
-  errorMessage.value = ''
 
   const body = new FormData()
   body.set('content', contentHtml.value)
@@ -116,10 +107,6 @@ function handleSave() {
     skipResponseValidation: true,
     onSuccess: (response) => {
       const normalizedResponse: any = normalizeJsonResponse(response)
-      if (hasResponseErrors(normalizedResponse)) {
-        errorMessage.value = 'The block could not be saved. Please check the content and try again.'
-        return
-      }
 
       const originalBlock: BlockRef = {
         bID: props.blockId,

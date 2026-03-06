@@ -73,7 +73,7 @@ function handleGlobalClick(event: MouseEvent) {
       concreteUiStore.clickProxy.hoverElementId = firstElementWithId?.id || ''
       concreteUiStore.clickProxy.activeElementId = ''
       concreteUiStore.clickProxy.activeElementMenuId = ''
-      concreteUiStore.clickProxy.doubleClickedElementId = ''
+      concreteUiStore.clearDoubleClickedElementId()
       event.stopPropagation()
     }
   } else if (concreteUiStore.clickProxy.hoverElementId) {
@@ -90,7 +90,7 @@ function handleGlobalDoubleClick(event: MouseEvent) {
         (el as HTMLElement).id === activeId
     )
     if (clickedInsideActive) {
-      concreteUiStore.clickProxy.doubleClickedElementId = activeId
+      concreteUiStore.setDoubleClickedElementId(activeId)
     }
   }
 }

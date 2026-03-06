@@ -66,17 +66,24 @@ function getMergedElementStyles(component) {
     return [...localStyles, cleanedCss]
 }
 
+// Master App component. This component hosts all UI components, including block editors. It has full access
+// To tailwind classes.
 const ConcreteAppElement = defineCustomElement(ConcreteApp, {
     styles: getMergedElementStyles(ConcreteApp),
     plugins: [pinia]
 })
+
+// Inner page components – NO access to Tailwind because we don't want tailwind bleeding into the page. Uses
+// custom classes defined in cms.scss if necessary (but ideally there would be very few UI classes in any of these)
+// Additionally, all of these have NO shadow root because we want theme stylings to be able to bleed into these components
+// in order to facilitate inline editing, etc..., live rendering of blocks, etc...
 const ConcreteAreaElement = defineCustomElement(ConcreteArea, {
-    styles: getMergedElementStyles(ConcreteArea),
+    shadowRoot: false,
     plugins: [pinia]
 })
+
 const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
     styles: getMergedElementStyles(ConcreteBlock),
-   // shadowRoot: false,
     plugins: [pinia]
 })
 const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {

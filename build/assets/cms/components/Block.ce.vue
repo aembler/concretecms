@@ -146,6 +146,10 @@ const isBlockHovered = computed(() => {
 })
 
 watch(isBlockDoubleClicked, (value) => {
+  if (!value) {
+    return
+  }
+
   editBlock()
 })
 

@@ -113,7 +113,6 @@ __webpack_require__.r(__webpack_exports__);
     var editableEl = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
     var menuEl = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
     var isSubmitting = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(false);
-    var errorMessage = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)('');
     var contentHtml = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)('');
     var alwaysEnabled = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(true);
     var menuPos = (0,_build_assets_cms_utilities_menu__WEBPACK_IMPORTED_MODULE_3__.useMenuPositioner)(editableEl, menuEl, alwaysEnabled);
@@ -131,9 +130,6 @@ __webpack_require__.r(__webpack_exports__);
       });
       return "/ccm/system/dialogs/block/edit?".concat(params.toString());
     });
-    function hasResponseErrors(response) {
-      return Boolean((response === null || response === void 0 ? void 0 : response.error) || Array.isArray(response === null || response === void 0 ? void 0 : response.errors) && response.errors.length > 0);
-    }
     function handleInput() {
       var _editableEl$value$inn, _editableEl$value;
       contentHtml.value = (_editableEl$value$inn = (_editableEl$value = editableEl.value) === null || _editableEl$value === void 0 ? void 0 : _editableEl$value.innerHTML) !== null && _editableEl$value$inn !== void 0 ? _editableEl$value$inn : '';
@@ -146,7 +142,6 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
       isSubmitting.value = true;
-      errorMessage.value = '';
       var body = new FormData();
       body.set('content', contentHtml.value);
       body.set('ccm_token', String(window.CCM_SECURITY_TOKEN || ''));
@@ -157,10 +152,6 @@ __webpack_require__.r(__webpack_exports__);
         skipResponseValidation: true,
         onSuccess: function onSuccess(response) {
           var normalizedResponse = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.normalizeJsonResponse)(response);
-          if (hasResponseErrors(normalizedResponse)) {
-            errorMessage.value = 'The block could not be saved. Please check the content and try again.';
-            return;
-          }
           var originalBlock = {
             bID: props.blockId,
             arHandle: props.areaHandle,
@@ -212,14 +203,12 @@ __webpack_require__.r(__webpack_exports__);
       editableEl: editableEl,
       menuEl: menuEl,
       isSubmitting: isSubmitting,
-      errorMessage: errorMessage,
       contentHtml: contentHtml,
       alwaysEnabled: alwaysEnabled,
       menuPos: menuPos,
       menuLeft: menuLeft,
       menuTop: menuTop,
       dialogUrl: dialogUrl,
-      hasResponseErrors: hasResponseErrors,
       handleInput: handleInput,
       handleSave: handleSave,
       handleCancel: handleCancel,
@@ -259,10 +248,6 @@ __webpack_require__.r(__webpack_exports__);
 
 var _hoisted_1 = {
   "class": "relative"
-};
-var _hoisted_2 = {
-  key: 0,
-  "class": "mt-2 text-xs text-error"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["MenuContainer"], null, {
@@ -310,7 +295,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "min-h-[48px] rounded border border-concrete-green/30 bg-base-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-concrete-green/30",
     contenteditable: "true",
     onInput: $setup.handleInput
-  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), $setup.errorMessage ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.errorMessage), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
+  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */)]);
 }
 
 /***/ })

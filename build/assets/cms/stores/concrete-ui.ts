@@ -58,6 +58,17 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     setPageInteractionsEnabled(enabled: boolean) {
       this.page.interactionsEnabled = enabled
     },
+    setDoubleClickedElementId(id: string) {
+      this.clickProxy.doubleClickedElementId = id
+      queueMicrotask(() => {
+        if (this.clickProxy.doubleClickedElementId === id) {
+          this.clickProxy.doubleClickedElementId = ''
+        }
+      })
+    },
+    clearDoubleClickedElementId() {
+      this.clickProxy.doubleClickedElementId = ''
+    },
     updateScroll(y: number) {
       const direction = y < this.scroll.y ? 'up' : 'down'
       this.scroll.direction = direction
