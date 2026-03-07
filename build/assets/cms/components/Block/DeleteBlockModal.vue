@@ -51,16 +51,21 @@ import {
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../../stores/types/page-operations'
-import { getDeleteBlockI18n } from '../../support/dom/DeleteBlock'
 
 const props = withDefaults(defineProps<{
   open: boolean
   blockId: string | number
   areaHandle: string
-  isMasterCollection?: boolean | string | number
+  isMasterCollection?: boolean
   pageId: string | number
+  lang?: {
+    dialogTitle?: string
+    dialogMessage?: string
+    defaultsDialogMessage?: string
+  } | null
 }>(), {
   isMasterCollection: false,
+  lang: null,
 })
 
 const emit = defineEmits<{
@@ -69,17 +74,14 @@ const emit = defineEmits<{
 
 const deleteAll = ref('0')
 const uiStore = useConcreteUiStore()
-const i18n = getDeleteBlockI18n()
-const dialogTitle = i18n.dialogTitle
-const message = i18n.message
-const defaultsMessage = i18n.defaultsMessage
+const dialogTitle = computed(() => props.lang?.dialogTitle || 'Delete Block')
+const message = computed(() => props.lang?.dialogMessage || 'Are you sure you want to remove this block?')
+const defaultsMessage = computed(() => (
+  props.lang?.defaultsDialogMessage
+  || 'Warning! This block is contained in the page type defaults. Any blocks aliased from this block in the site will be deleted. This cannot be undone.'
+))
 
-const isMasterCollection = computed(() => {
-  if (typeof props.isMasterCollection === 'boolean') {
-    return props.isMasterCollection
-  }
-  return props.isMasterCollection === '1' || props.isMasterCollection === 1 || props.isMasterCollection === 'true'
-})
+const isMasterCollection = computed(() => props.isMasterCollection === true)
 
 watch(() => props.open, (isOpen) => {
   if (isOpen) {

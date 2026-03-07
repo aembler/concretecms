@@ -68,8 +68,9 @@
       :open="showDeleteModal"
       :block-id="blockId"
       :area-handle="areaHandle"
-      :is-master-collection="isMasterCollection"
+      :is-master-collection="isMasterCollectionBool"
       :page-id="pageId"
+      :lang="parseLang?.delete ?? null"
       @update:open="showDeleteModal = $event"
   />
 </template>
@@ -81,7 +82,6 @@ import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
-import { buildDeleteBlockUrl } from '../support/dom/DeleteBlock'
 import { useBlockEditorRegistry } from '../stores/block-editor-registry'
 import { useToast } from '../utilities/toast'
 
@@ -100,19 +100,26 @@ const props = defineProps({
   blockId: Number | String,
   areaHandle: String,
   pageId: Number | String,
-  isMasterCollection: Boolean | String | Number,
+  isMasterCollection: [Boolean, String, Number],
   name: String,
   variants: String | Array<{ file: String; name: String }>,
   blocktype: Object,
   editor: Object | null,
+  lang: Object | String | null,
   selectedVariant: String,
+  deleteToken: String
 })
 
 const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
 const parseEditor = useParsedJsonProp(props.editor)
+const parseLang = useParsedJsonProp(props.lang)
 
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const isMasterCollectionBool = computed(() => {
+  const value = props.isMasterCollection
+  return value === true || value === 1 || value === '1' || value === 'true'
+})
 const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.id)
 const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.id)
 const isBlockHovered = computed(() => {
@@ -200,12 +207,18 @@ function matchesDeleteTarget(operation: DeleteBlockOperation) {
 function runDeleteOperation(operation: DeleteBlockOperation) {
   runningDeleteOperationId.value = operation.id
 
-  const url = buildDeleteBlockUrl(
-    operation.pageBlock.cID,
-    operation.pageBlock.bID,
-    operation.pageBlock.arHandle,
-    operation.deleteAll
-  )
+  const endpoint = isMasterCollectionBool.value
+      ? '/ccm/system/dialogs/block/delete/submit_all'
+      : '/ccm/system/dialogs/block/delete/submit';
+
+  const params = new URLSearchParams({
+    cID: props.pageId,
+    bID: props.blockId,
+    arHandle: props.areaHandle,
+    ccm_token: props.deleteToken,
+  })
+
+  const url = window.CCM_DISPATCHER_FILENAME + endpoint + '?' + params.toString();
   const body = operation.deleteAll ? { deleteAll: 1 } : {}
 
   request({

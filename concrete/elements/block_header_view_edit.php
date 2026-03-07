@@ -25,6 +25,13 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     $blockTypeData = app(BlockTypeTransformer::class)->transform($blockType);
     $editor = app(EditorFactory::class)->createForBlock($b, EditorFactory::MODE_EDIT);
     $isMasterCollection = $c->isMasterCollection();
+    $lang = [
+        'delete' => [
+            'dialogTitle' => t('Delete Block'),
+            'dialogMessage' => t('Are you sure you want to remove this block?'),
+            'defaultsDialogMessage' => t('Warning! This block is contained in the page type defaults. Any blocks aliased from this block in the site will be deleted. This cannot be undone.'),
+        ],
+    ];
     ?>
 
 <concrete-block
@@ -34,9 +41,11 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     name="<?=t($blockType->getBlockTypeName())?>"
     blocktype='<?=h(json_encode($blockTypeData))?>'
     editor='<?=h(json_encode($editor))?>'
+    lang='<?=h(json_encode($lang))?>'
     selected-variant="<?=$b->getBlockFilename()?>"
     variants='<?=json_encode($blockType->getBlockTypeCustomTemplates($b))?>'
     area-handle="<?=h($a->getAreaHandle())?>"
+    delete-token="<?=app('token')->generate('delete_block')?>",
     is-master-collection="<?=$isMasterCollection ? '1' : '0'?>"
 >
 

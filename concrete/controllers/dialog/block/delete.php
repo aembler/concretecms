@@ -10,6 +10,7 @@ class Delete extends BackendInterfaceBlockController
 {
     protected $viewPath = '/dialogs/block/delete';
     protected $controllerActionPath = '/ccm/system/dialogs/block/delete';
+    protected $validationToken = 'delete_block';
 
     protected function canAccess()
     {
