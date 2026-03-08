@@ -1,12 +1,12 @@
 <template>
   <!-- In-page custom elements render without shadow DOM, so Tailwind utility classes are not available here. -->
   <!-- To edit the styles for classes used here, look for _area.scss in the cms.scss file. //-->
-  <div class="concrete-area"
-       @mouseover="handleAreaHover"
-       @mouseout="handleAreaOut"
+  <div
+    ref="rootEl"
+    class="concrete-area"
        :class="{
          'concrete-area-empty': totalBlocks === 0,
-         'concrete-area-hover': uiStore.page.hoverArea === areaKey,
+         'concrete-area-hover': isHovered,
          'concrete-area-interactions-disabled': !isInteractionsEnabled
        }">
     <div class="concrete-area-inner">
@@ -43,8 +43,32 @@ const uiStore = useConcreteUiStore()
 const blockRenderer = new BlockRenderer()
 const runningUpdateOperationId = ref<string | null>(null)
 const runningAddOperationId = ref<string | null>(null)
+const rootEl = ref<HTMLElement | null>(null)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const hoveredBlockId = computed(() => uiStore.clickProxy.hoverElementId)
+const hasHoveredBlockArea = computed(() => {
+  if (!hoveredBlockId.value) {
+    return false
+  }
+
+  const paths = uiStore.blockAreaMap[hoveredBlockId.value] || []
+  if (paths.length > 0) {
+    return paths.includes(areaKey.value)
+  }
+
+  if (!isInteractionsEnabled.value || !rootEl.value) {
+    return false
+  }
+
+  const hoveredElement = document.getElementById(hoveredBlockId.value)
+  if (!hoveredElement) {
+    return false
+  }
+
+  return rootEl.value.contains(hoveredElement)
+})
+const isHovered = computed(() => isInteractionsEnabled.value && hasHoveredBlockArea.value)
 const toast = useToast()
 const { request } = useAjax()
 
@@ -65,16 +89,6 @@ const activeAddOperation = computed<AddBlockOperation | null>(() => {
   )
   return operation ?? null
 })
-
-function handleAreaHover() {
-  uiStore.page.hoverArea = areaKey.value
-}
-
-function handleAreaOut() {
-  if (uiStore.page.hoverArea === areaKey.value) {
-    uiStore.page.hoverArea = null;
-  }
-}
 
 function requestJson(url: string): Promise<any> {
   return new Promise((resolve) => {

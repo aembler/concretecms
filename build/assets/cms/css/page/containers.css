@@ -1,9 +1,5 @@
 .concrete-container {
-  position: relative;
-  outline-width: 2px;
-  outline-style: solid;
-  outline-color: transparent;
-  margin-bottom: 50px;
+  @apply transition-all duration-200 relative outline-3 outline-offset-[3px] outline-solid outline-transparent mb-[50px];
 
   &.concrete-container-hover {
     @apply outline-[#800080];

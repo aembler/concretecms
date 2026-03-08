@@ -114,6 +114,52 @@ const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
 const parseEditor = useParsedJsonProp(props.editor)
 const parseLang = useParsedJsonProp(props.lang)
+const blockElementId = computed(() => String(props.id || ''))
+const blockAreaPath = computed(() => {
+  const rootNode = rootEl.value?.getRootNode()
+  const hostElement = rootNode instanceof ShadowRoot ? rootNode.host : rootEl.value
+  const startElement = (hostElement as HTMLElement | null) || rootEl.value?.parentElement
+  if (!hostElement) {
+    return []
+  }
+
+  const paths: string[] = []
+  let current: HTMLElement | null = startElement
+  while (current) {
+    if (current.tagName === 'CONCRETE-AREA') {
+      const areaPageId = current.getAttribute('page-id')
+      const areaHandle = current.getAttribute('area-handle')
+
+      if (areaPageId && areaHandle) {
+        paths.push(`${areaPageId}:${areaHandle}`)
+      }
+    } else if (current.tagName === 'CONCRETE-CONTAINER') {
+      const containerBlockId = current.getAttribute('container-block-id')
+      if (containerBlockId) {
+        paths.push(`container:${containerBlockId}`)
+      }
+    }
+    current = current.parentElement
+  }
+
+  return paths
+})
+
+watch(
+  [blockElementId, blockAreaPath],
+  ([newBlockId, newPaths], [oldBlockId]) => {
+    if (oldBlockId) {
+      uiStore.clearBlockAreaMap(oldBlockId)
+    }
+
+    if (!newBlockId) {
+      return
+    }
+
+    uiStore.setBlockAreaMap(newBlockId, newPaths)
+  },
+  { immediate: true, deep: true }
+)
 
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
 const isMasterCollectionBool = computed(() => {
@@ -284,6 +330,10 @@ watch(
 onBeforeUnmount(() => {
   if (editMode.value) {
     uiStore.setPageInteractionsEnabled(true)
+  }
+
+  if (blockElementId.value) {
+    uiStore.clearBlockAreaMap(blockElementId.value)
   }
 })
 

@@ -37,6 +37,7 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       hoverArea: null as String | null
     },
     toastContainer: null as HTMLElement | string | null,
+    blockAreaMap: {} as Record<string, string[]>,
     clickProxy: {
       activeElementId: '',
       hoverElementId: '',
@@ -78,6 +79,12 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       const direction = y < this.scroll.y ? 'up' : 'down'
       this.scroll.direction = direction
       this.scroll.y = y
+    },
+    setBlockAreaMap(blockId: string, areaPath: string[]) {
+      this.blockAreaMap[blockId] = areaPath
+    },
+    clearBlockAreaMap(blockId: string) {
+      delete this.blockAreaMap[blockId]
     },
     enqueuePageOperation(operation: PageOperation) {
       this.page.operationsQueue.push(operation)
