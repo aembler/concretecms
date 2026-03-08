@@ -12,7 +12,7 @@
     <div class="concrete-area-inner">
       <slot />
     </div>
-    <div class="concrete-area-empty-pill" v-if="totalBlocks === 0">{{name}} Area</div>
+    <div class="concrete-area-badge" :class="{ 'concrete-area-badge-visible': totalBlocks === 0 || isHovered }">{{name}} Area</div>
   </div>
 </template>
 

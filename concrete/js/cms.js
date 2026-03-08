@@ -24364,10 +24364,6 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "concrete-area-inner"
 };
-var _hoisted_2 = {
-  key: 0,
-  "class": "concrete-area-empty-pill"
-};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" In-page custom elements render without shadow DOM, so Tailwind utility classes are not available here. "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" To edit the styles for classes used here, look for _area.scss in the cms.scss file. //"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     ref: "rootEl",
@@ -24376,7 +24372,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       'concrete-area-hover': $setup.isHovered,
       'concrete-area-interactions-disabled': !$setup.isInteractionsEnabled
     }])
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.renderSlot)(_ctx.$slots, "default")]), $props.totalBlocks === 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.name) + " Area", 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 2 /* CLASS */)], 2112 /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */);
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.renderSlot)(_ctx.$slots, "default")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["concrete-area-badge", {
+      'concrete-area-badge-visible': $props.totalBlocks === 0 || $setup.isHovered
+    }])
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.name) + " Area", 3 /* TEXT, CLASS */)], 2 /* CLASS */)], 2112 /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */);
 }
 
 /***/ }),
