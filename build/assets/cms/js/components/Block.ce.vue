@@ -5,7 +5,7 @@
     <div
         ref="rootEl"
         :class="[
-      'min-h-[16px] select-none z-1 relative outline-3 transition-all duration-200',
+      'min-h-[16px] select-none z-1 relative outline-3 outline-offset-[-2px] transition-all duration-200',
       isBlockClicked || isBlockHovered ? 'cursor-pointer' : 'cursor-default',
       outlineColor,
     ]">

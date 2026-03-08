@@ -3,6 +3,8 @@
   <!-- To edit the styles for classes used here, look for _area.scss in the cms.scss file. //-->
   <div
     ref="rootEl"
+    @pointerenter="isPointerOver = true"
+    @pointerleave="isPointerOver = false"
     class="concrete-area"
        :class="{
          'concrete-area-empty': totalBlocks === 0,
@@ -42,9 +44,11 @@ const blockRenderer = new BlockRenderer()
 const runningUpdateOperationId = ref<string | null>(null)
 const runningAddOperationId = ref<string | null>(null)
 const rootEl = ref<HTMLElement | null>(null)
+const isPointerOver = ref(false)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
 const effectiveHoveredBlockId = computed(() => uiStore.clickProxy.activeElementId || uiStore.clickProxy.hoverElementId)
+const activeElementId = computed(() => uiStore.clickProxy.activeElementId)
 const hasHoveredBlockArea = computed(() => {
   if (!effectiveHoveredBlockId.value) {
     return false
@@ -66,7 +70,9 @@ const hasHoveredBlockArea = computed(() => {
 
   return rootEl.value.contains(hoveredElement)
 })
-const isHovered = computed(() => isInteractionsEnabled.value && hasHoveredBlockArea.value)
+const isHovered = computed(() =>
+  isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockArea.value || isPointerOver.value)
+)
 const toast = useToast()
 const { request } = useAjax()
 

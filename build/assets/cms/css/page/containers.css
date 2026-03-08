@@ -1,7 +1,7 @@
 .concrete-container {
   --index-layer-container-badge: 100;
 
-  @apply transition-all duration-200 relative outline-3 outline-offset-[3px] outline-solid outline-transparent mb-[50px];
+  @apply transition-all duration-200 relative outline-3 outline-offset-[-3px] outline-solid outline-transparent mb-[50px];
 
   &.concrete-container-hover {
     @apply outline-[#800080];
@@ -9,7 +9,7 @@
 }
 
 .concrete-container-badge {
-  @apply pointer-events-none absolute left-0 right-0 top-[8px] mx-auto -translate-y-1/2 inline-block rounded-full bg-purple-600 px-[1.5rem] py-[0.25rem] text-[0.75rem]
+  @apply pointer-events-none absolute left-0 right-0 top-[13px] mx-auto -translate-y-1/2 inline-block rounded-full bg-purple-600 px-[1.5rem] py-[0.25rem] text-[0.75rem]
   font-semibold uppercase text-white transition-opacity duration-200;
   z-index: var(--index-layer-container-badge);
   opacity: 0;

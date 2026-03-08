@@ -3,6 +3,8 @@
   <!-- To edit the styles for classes used here, look for _containers.scss in the cms.scss file. // -->
   <div
     ref="rootEl"
+    @pointerenter="isPointerOver = true"
+    @pointerleave="isPointerOver = false"
     :class="[
       'concrete-container',
       isHovered ? 'concrete-container-hover' : ''
@@ -29,7 +31,9 @@ const props = withDefaults(defineProps<{
 
 const uiStore = useConcreteUiStore()
 const rootEl = ref<HTMLElement | null>(null)
+const isPointerOver = ref(false)
 const effectiveHoveredBlockId = computed(() => uiStore.clickProxy.activeElementId || uiStore.clickProxy.hoverElementId)
+const activeElementId = computed(() => uiStore.clickProxy.activeElementId)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
 const containerKey = computed(() =>
   props.containerBlockId ? `container:${props.containerBlockId}` : ''
@@ -56,5 +60,7 @@ const hasHoveredBlockContainer = computed(() => {
 
   return rootEl.value.contains(hoveredElement)
 })
-const isHovered = computed(() => isInteractionsEnabled.value && hasHoveredBlockContainer.value)
+const isHovered = computed(() =>
+  isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockContainer.value || isPointerOver.value)
+)
 </script>
