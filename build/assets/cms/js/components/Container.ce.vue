@@ -24,13 +24,13 @@ const props = withDefaults(defineProps<{
 
 const uiStore = useConcreteUiStore()
 const rootEl = ref<HTMLElement | null>(null)
-const hoveredBlockId = computed(() => uiStore.clickProxy.hoverElementId)
+const effectiveHoveredBlockId = computed(() => uiStore.clickProxy.activeElementId || uiStore.clickProxy.hoverElementId)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
 const containerKey = computed(() =>
   props.containerBlockId ? `container:${props.containerBlockId}` : ''
 )
 const hasHoveredBlockContainer = computed(() => {
-  const activeHover = hoveredBlockId.value
+  const activeHover = effectiveHoveredBlockId.value
   if (!activeHover) {
     return false
   }

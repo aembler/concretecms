@@ -12,9 +12,7 @@
     <div class="concrete-area-inner">
       <slot />
     </div>
-    <div v-show="totalBlocks === 0">
-      <div class="concrete-area-empty-pill" v-if="totalBlocks === 0">Empty {{name}}</div>
-    </div>
+    <div class="concrete-area-empty-pill" v-if="totalBlocks === 0">{{name}} Area</div>
   </div>
 </template>
 
@@ -46,13 +44,13 @@ const runningAddOperationId = ref<string | null>(null)
 const rootEl = ref<HTMLElement | null>(null)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
-const hoveredBlockId = computed(() => uiStore.clickProxy.hoverElementId)
+const effectiveHoveredBlockId = computed(() => uiStore.clickProxy.activeElementId || uiStore.clickProxy.hoverElementId)
 const hasHoveredBlockArea = computed(() => {
-  if (!hoveredBlockId.value) {
+  if (!effectiveHoveredBlockId.value) {
     return false
   }
 
-  const paths = uiStore.blockAreaMap[hoveredBlockId.value] || []
+  const paths = uiStore.blockAreaMap[effectiveHoveredBlockId.value] || []
   if (paths.length > 0) {
     return paths.includes(areaKey.value)
   }
@@ -61,7 +59,7 @@ const hasHoveredBlockArea = computed(() => {
     return false
   }
 
-  const hoveredElement = document.getElementById(hoveredBlockId.value)
+  const hoveredElement = document.getElementById(effectiveHoveredBlockId.value)
   if (!hoveredElement) {
     return false
   }
