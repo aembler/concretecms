@@ -22305,6 +22305,11 @@ __webpack_require__.r(__webpack_exports__);
       type: [Number, String],
       required: false,
       "default": ''
+    },
+    containerName: {
+      type: String,
+      required: false,
+      "default": 'Container'
     }
   },
   setup: function setup(__props, _ref) {
@@ -24774,7 +24779,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" In-page custom elements render without shadow DOM, so Tailwind utility classes are not available here. "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" To edit the styles for classes used here, look for _containers.scss in the cms.scss file. // "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     ref: "rootEl",
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(['concrete-container', $setup.isHovered ? 'concrete-container-hover' : ''])
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.renderSlot)(_ctx.$slots, "default")], 2 /* CLASS */)], 2112 /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */);
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["concrete-container-badge", {
+      'concrete-container-badge-visible': $setup.isHovered
+    }])
+  }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.containerName), 3 /* TEXT, CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderSlot)(_ctx.$slots, "default")], 2 /* CLASS */)], 2112 /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */);
 }
 
 /***/ }),

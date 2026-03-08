@@ -8,6 +8,9 @@
       isHovered ? 'concrete-container-hover' : ''
     ]"
   >
+    <div class="concrete-container-badge" :class="{ 'concrete-container-badge-visible': isHovered }">
+      {{ containerName }}
+    </div>
     <slot />
   </div>
 </template>
@@ -17,9 +20,11 @@ import { computed, ref } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 
 const props = withDefaults(defineProps<{
-  containerBlockId?: number | string
+  containerBlockId?: number | string,
+  containerName?: string
 }>(), {
   containerBlockId: '',
+  containerName: 'Container'
 })
 
 const uiStore = useConcreteUiStore()
