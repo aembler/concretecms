@@ -45,7 +45,7 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     selected-variant="<?=$b->getBlockFilename()?>"
     variants='<?=json_encode($blockType->getBlockTypeCustomTemplates($b))?>'
     area-handle="<?=h($a->getAreaHandle())?>"
-    delete-token="<?=app('token')->generate('delete_block')?>",
+    delete-token="<?=app('token')->generate('delete_block')?>"
     is-master-collection="<?=$isMasterCollection ? '1' : '0'?>"
 >
 

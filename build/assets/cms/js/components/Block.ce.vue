@@ -103,8 +103,8 @@ const props = defineProps({
   isMasterCollection: [Boolean, String, Number],
   name: String,
   variants: String | Array<{ file: String; name: String }>,
-  blocktype: Object,
-  editor: Object | null,
+  blocktype: [Object, String],
+  editor: [Object, String],
   lang: Object | String | null,
   selectedVariant: String,
   deleteToken: String

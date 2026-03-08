@@ -1,0 +1,33 @@
+.concrete-area {
+  @apply transition-all duration-200 relative outline-3 outline-offset-[3px] outline-solid outline-transparent mb-[50px];
+
+  &.concrete-area-hover {
+    @apply outline-gray-300;
+  }
+
+  &.concrete-area-empty {
+    @apply flex items-center justify-center h-[60px] border-gray-300 border-2 outline-0 cursor-pointer;
+
+    .concrete-area-empty-pill {
+      @apply block;
+    }
+
+    &.concrete-area-hover {
+      @apply bg-yellow-50;
+      .concrete-area-empty-pill {
+        @apply bg-gray-500 text-white;
+      }
+    }
+
+  }
+}
+
+.concrete-area-inner {
+  @apply relative;
+}
+
+
+.concrete-area-empty-pill {
+  @apply transition-all duration-200 hidden bg-gray-300 mx-auto px-[1.5rem] py-[0.25rem] rounded-full text-[0.75rem]
+  font-semibold uppercase text-gray-400;
+}

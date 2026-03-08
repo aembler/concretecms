@@ -38,10 +38,10 @@ import {
   normalizeJsonResponse,
   useAjax,
 } from '@concretecms/backendui'
-import MenuContainer from '../../../build/assets/cms/components/Ui/MenuContainer.vue'
-import { useMenuPositioner } from '../../../build/assets/cms/utilities/menu'
-import { useConcreteUiStore } from '../../../build/assets/cms/stores/concrete-ui'
-import type { BlockRef, UpdateBlockOperation } from '../../../build/assets/cms/stores/types/page-operations'
+import MenuContainer from '../../../build/assets/cms/js/components/Ui/MenuContainer.vue'
+import { useMenuPositioner } from '../../../build/assets/cms/js/utilities/menu'
+import { useConcreteUiStore } from '../../../build/assets/cms/js/stores/concrete-ui'
+import type { BlockRef, UpdateBlockOperation } from '../../../build/assets/cms/js/stores/types/page-operations'
 
 const props = defineProps<{
   editor: {

@@ -119,8 +119,16 @@ mix
     })
     .js('assets/installer/js/installer.js', 'js/installer.js').vue()
 
-// BackendUI (CMS and Dashboard)
-mix.postCss('assets/backendui.css', 'css/backendui.css', [
+
+// CMS - in page components
+mix.postCss('assets/cms/css/page.css', 'css/cms/page.css', [
+    tailwindcss(),
+    require('autoprefixer'),
+])
+    .version()
+
+// CMS - app (included by cms.js for Tailwind in our custom elements, app, toolbar, dialog, etc..)
+mix.postCss('assets/cms/css/app.css', 'css/cms/app.css', [
     tailwindcss(),
     require('autoprefixer'),
 ])
@@ -128,17 +136,8 @@ mix.postCss('assets/backendui.css', 'css/backendui.css', [
 
 // CMS
 mix
-    .sass('assets/cms.scss', 'css/cms.css', {
-        sassOptions: {
-            includePaths: [
-                path.resolve(__dirname, './node_modules/')
-            ]
-        }
-    })
-mix
-    .js('assets/cms.js', 'concrete/js/cms.js')
-    .vue({version: 3, customElement: true})
-
+    .js('assets/cms/js/cms.js', 'concrete/js/cms.js')
+    .vue({version: 3, customElement: /\.ce\.vue$/})
 // Atomik Theme
 mix
     .sass('../concrete/themes/atomik/css/presets/default/main.scss', 'themes/atomik/css/skins/default.css', {

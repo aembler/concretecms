@@ -1,0 +1,11 @@
+.concrete-container {
+  position: relative;
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: transparent;
+  margin-bottom: 50px;
+
+  &.concrete-container-hover {
+    @apply outline-[#800080];
+  }
+}

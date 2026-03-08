@@ -12,16 +12,16 @@ $(function() {
 
 // cms.js
 import { defineCustomElement, createApp } from 'vue'
-import ConcreteApp from './cms/components/App.ce.vue'
-import ConcreteArea from './cms/components/Area.ce.vue'
-import ConcreteBlock from './cms/components/Block.ce.vue'
-import ConcreteContainer from './cms/components/Container.ce.vue'
-import ConcreteAreaBlockTarget from './cms/components/AreaBlockTarget.ce.vue'
+import ConcreteApp from './components/App.ce.vue'
+import ConcreteArea from './components/Area.ce.vue'
+import ConcreteBlock from './components/Block.ce.vue'
+import ConcreteContainer from './components/Container.ce.vue'
+import ConcreteAreaBlockTarget from './components/AreaBlockTarget.ce.vue'
 
-import rawCss from '!raw-loader!./../../concrete/css/backendui.css'
+import rawCss from '!raw-loader!./../../../../concrete/css/cms/app.css'
 import postcss from 'postcss'
-import { createConcretePinia } from './cms/stores/pinia'
-import { ConcreteAssetLoader } from './cms/support/LegacyAssetLoader'
+import { createConcretePinia } from './stores/pinia'
+import { ConcreteAssetLoader } from './support/LegacyAssetLoader'
 
 // Extract only @property rules
 function extractPropertyRules(css) {
@@ -67,27 +67,27 @@ function getMergedElementStyles(component) {
 }
 
 // Master App component. This component hosts all UI components, including block editors. It has full access
-// To tailwind classes.
+// To tailwind classes. It uses shadow DOM so that page theme styles do not affect it, unlike page level components
+// like ConcreteArea and ConcreteContainer, which inherit their styles from the theme and from cms/page.css
 const ConcreteAppElement = defineCustomElement(ConcreteApp, {
     styles: getMergedElementStyles(ConcreteApp),
     plugins: [pinia]
 })
-
-// Inner page components – NO access to Tailwind because we don't want tailwind bleeding into the page. Uses
-// custom classes defined in cms.scss if necessary (but ideally there would be very few UI classes in any of these)
-// Additionally, all of these have NO shadow root because we want theme stylings to be able to bleed into these components
-// in order to facilitate inline editing, etc..., live rendering of blocks, etc...
 const ConcreteAreaElement = defineCustomElement(ConcreteArea, {
     shadowRoot: false,
     plugins: [pinia]
 })
+const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {
+    shadowRoot: false,
+    plugins: [pinia]
+})
+
+
+
+
 
 const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
     styles: getMergedElementStyles(ConcreteBlock),
-    plugins: [pinia]
-})
-const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {
-    styles: getMergedElementStyles(ConcreteContainer),
     plugins: [pinia]
 })
 const ConcreteAreaBlockTargetElement = defineCustomElement(ConcreteAreaBlockTarget, {
@@ -97,8 +97,8 @@ const ConcreteAreaBlockTargetElement = defineCustomElement(ConcreteAreaBlockTarg
 
 customElements.define('concrete-app', ConcreteAppElement)
 customElements.define('concrete-area', ConcreteAreaElement)
-customElements.define('concrete-block', ConcreteBlockElement)
 customElements.define('concrete-container', ConcreteContainerElement)
+customElements.define('concrete-block', ConcreteBlockElement)
 customElements.define('concrete-area-block-target', ConcreteAreaBlockTargetElement)
 
 // Legacy compatibility global for classic blocks that dynamically load CSS/JS.

@@ -34,6 +34,7 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       toastQueue: [] as ToastOperation[],
       activeToastId: null as string | null,
       operationsDebug: getDefaultOperationsDebug(),
+      hoverArea: null as String | null
     },
     toastContainer: null as HTMLElement | string | null,
     clickProxy: {

@@ -1,11 +1,19 @@
 <template>
   <!-- In-page custom elements render without shadow DOM, so Tailwind utility classes are not available here. -->
-  <div class="concrete-area" :class="{ 'ccm-area-interactions-disabled': !isInteractionsEnabled }">
+  <!-- To edit the styles for classes used here, look for _area.scss in the cms.scss file. //-->
+  <div class="concrete-area"
+       @mouseover="handleAreaHover"
+       @mouseout="handleAreaOut"
+       :class="{
+         'concrete-area-empty': totalBlocks === 0,
+         'concrete-area-hover': uiStore.page.hoverArea === areaKey,
+         'concrete-area-interactions-disabled': !isInteractionsEnabled
+       }">
     <div class="concrete-area-inner">
       <slot />
     </div>
-    <div v-if="totalBlocks === 0" class="concrete-area-empty-overlay">
-      <div class="concrete-area-empty-pill">Empty {{name}}</div>
+    <div v-show="totalBlocks === 0">
+      <div class="concrete-area-empty-pill" v-if="totalBlocks === 0">Empty {{name}}</div>
     </div>
   </div>
 </template>
@@ -57,6 +65,16 @@ const activeAddOperation = computed<AddBlockOperation | null>(() => {
   )
   return operation ?? null
 })
+
+function handleAreaHover() {
+  uiStore.page.hoverArea = areaKey.value
+}
+
+function handleAreaOut() {
+  if (uiStore.page.hoverArea === areaKey.value) {
+    uiStore.page.hoverArea = null;
+  }
+}
 
 function requestJson(url: string): Promise<any> {
   return new Promise((resolve) => {

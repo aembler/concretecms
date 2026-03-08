@@ -480,7 +480,7 @@ return [
         'core/cms' => [
             ['javascript', 'js/cms.js', ['minify' => false, 'combine' => false]],
             ['javascript-localized', '/ccm/assets/localization/core/js'],
-            ['css', 'css/cms.css', ['minify' => false, 'combine' => false]],
+            ['css', 'css/cms/page.css', ['minify' => false, 'combine' => false]],
         ],
 
         // Fallback/minimal assets for accessory features
