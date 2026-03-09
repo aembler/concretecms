@@ -1,67 +1,19 @@
 <template>
   <template v-if="!isDeleted">
-
-    <!-- Clickable outline, the hotspot that covers everything //-->
     <div
         ref="rootEl"
-        :class="[
-      'min-h-[16px] select-none z-1 relative outline-3 outline-offset-[-2px] transition-all duration-200',
-      isBlockClicked || isBlockHovered ? 'cursor-pointer' : 'cursor-default',
-      outlineColor,
-    ]">
-
-      <!-- Block Menu //-->
-      <Menu
-          :block-element="rootEl"
-          :show="isBlockClicked"
-          :id="menuId"
-          :variants="parsedVariants"
-          :selected-variant="selectedVariant"
-          @edit="editBlock"
-          @delete="showDeleteModal = true"
-      >
-      </Menu>
-
-      <!-- Floating green block name badge //-->
-      <div
-          :class="[
-        'absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none',
-        isBlockClicked || isBlockHovered ? 'animate-hotSpotBadge' : 'opacity-0',
-        'z-3 shadow-sm text-xs font-semibold uppercase rounded-full py-1 px-2 inline-block bg-concrete-green'
-      ]"
-      >{{ name }}
-      </div>
-
-      <!-- Edit Mode for the block //-->
-      <div v-if="editMode">
-        <component
-          :is="currentEditorComponent"
-          v-if="currentEditorComponent"
-          :block-type-id="parseBlockType?.id"
-          :editor="parseEditor"
-          :block-id="blockId"
-          :area-handle="areaHandle"
-          :page-id="pageId"
-          @updated="handleUpdated"
-          @closed="handleEditorClosed"
+        class="concrete-block"
+        :data-concrete-block-id="blockId"
+    >
+      <slot />
+      <HotSpot
+          :element="rootEl"
+          :is-hovered="isBlockHovered"
+          base-class="border-3 border-(--color-concrete-block) transition-opacity duration-200 opacity-0"
+          hover-class="opacity-100"
       />
-      </div>
-
-      <!-- Actual Block View //-->
-      <div>
-        <slot />
-      </div>
-
-      <!-- Background/hover overlay //-->
-      <div
-          :class="[
-        'absolute inset-0 z-10 transition-all duration-200',
-        isInteractionsEnabled ? 'pointer-events-auto' : 'pointer-events-none',
-        isBlockClicked && 'bg-concrete-green/30'
-      ]"
-      ></div>
-
     </div>
+
   </template>
 
   <DeleteBlockModal
@@ -78,6 +30,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import Menu from "./Block/Menu.vue";
+import HotSpot from "./Ui/HotSpot.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
@@ -96,7 +49,6 @@ const { request } = useAjax()
 const runningDeleteOperationId = ref<string | null>(null)
 
 const props = defineProps({
-  id: String, // Needed as a separate prop for DOM operations, menu observer.
   blockId: Number | String,
   areaHandle: String,
   pageId: Number | String,
@@ -114,7 +66,6 @@ const parsedVariants = useParsedJsonProp(props.variants)
 const parseBlockType = useParsedJsonProp(props.blocktype)
 const parseEditor = useParsedJsonProp(props.editor)
 const parseLang = useParsedJsonProp(props.lang)
-const blockElementId = computed(() => String(props.id || ''))
 const blockAreaPath = computed(() => {
   const rootNode = rootEl.value?.getRootNode()
   const hostElement = rootNode instanceof ShadowRoot ? rootNode.host : rootEl.value
@@ -146,7 +97,7 @@ const blockAreaPath = computed(() => {
 })
 
 watch(
-  [blockElementId, blockAreaPath],
+  [props.blockId, blockAreaPath],
   ([newBlockId, newPaths], [oldBlockId]) => {
     if (oldBlockId) {
       uiStore.clearBlockAreaMap(oldBlockId)
@@ -166,15 +117,15 @@ const isMasterCollectionBool = computed(() => {
   const value = props.isMasterCollection
   return value === true || value === 1 || value === '1' || value === 'true'
 })
-const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.id)
-const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.id)
+const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.blockId)
+const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.blockId)
 const isBlockHovered = computed(() => {
   if (!isInteractionsEnabled.value) {
     return false
   }
 
   if (!uiStore.clickProxy.activeElementId) {
-    return uiStore.clickProxy.hoverElementId === props.id
+    return uiStore.clickProxy.hoverElementId === props.blockId
   }
 })
 
@@ -194,7 +145,7 @@ const outlineColor = computed(() => {
   return 'outline-transparent'
 })
 
-let menuId = computed(() => props.id + '-menu')
+let menuId = computed(() => 'm' + props.blockId + '-menu')
 const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
 
 function editBlock() {
@@ -332,9 +283,7 @@ onBeforeUnmount(() => {
     uiStore.setPageInteractionsEnabled(true)
   }
 
-  if (blockElementId.value) {
-    uiStore.clearBlockAreaMap(blockElementId.value)
-  }
+  uiStore.clearBlockAreaMap(props.blockId)
 })
 
 </script>

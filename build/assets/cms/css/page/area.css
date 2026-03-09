@@ -1,65 +1,11 @@
 .concrete-area {
-  --index-layer-area-badge: 100;
 
-  @apply transition-all duration-200 relative outline-3 outline-offset-[3px] outline-solid outline-transparent mb-[50px];
-
-  &.concrete-area-hover {
-    @apply outline-gray-300;
-  }
-
+  /**
+   Note: all hovering interactions with area happen in the hotspot, which is elevated and exists above the page.
+   But we still need these styles for empty areas on the page. LEt's make sure that empty areas are at least 60px
+   tall. Hotspot will do the rest.
+   */
   &.concrete-area-empty {
-    @apply flex items-center justify-center h-[60px] border-gray-300 border-2 outline-0 cursor-pointer;
-
-    .concrete-area-badge {
-      @apply block;
-    }
-
-    &.concrete-area-hover {
-      @apply bg-yellow-50;
-      .concrete-area-badge {
-        @apply bg-gray-500 text-white;
-      }
-    }
-
-  }
-}
-
-.concrete-area-inner {
-  @apply relative;
-}
-
-.concrete-area-badge {
-  @apply pointer-events-none absolute left-0 right-0 bottom-[3px] mx-auto bg-gray-300 px-[1.5rem] py-[0.25rem] rounded-full text-[0.75rem]
-  font-semibold uppercase text-gray-400 transition-opacity duration-200;
-  z-index: var(--index-layer-area-badge);
-  opacity: 0;
-  width: max-content;
-  transform: translateY(6px);
-}
-
-.concrete-area-empty .concrete-area-badge {
-  @apply static translate-x-0 translate-y-0;
-  transform: none;
-  @apply opacity-100;
-}
-
-.concrete-area-badge-visible {
-  animation: concreteAreaBadgeInFromBottom 0.3s var(--default-transition-timing-function) forwards;
-}
-
-.concrete-area-empty .concrete-area-badge-visible {
-  animation: none;
-  opacity: 1;
-}
-
-@keyframes concreteAreaBadgeInFromBottom {
-  0% {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateY(-4px);
-    opacity: 1;
+    @apply h-[60px];
   }
 }

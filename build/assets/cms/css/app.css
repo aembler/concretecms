@@ -3,6 +3,8 @@
 @import "../../../node_modules/@concretecms/backendui/dist/backendui.css";
 
 :host {
+    --index-layer-hotspot: 300;
+
     --index-layer-toolbar-wrapper: 310;
     --index-layer-panel-backdrop: 300;
     --index-layer-panel: 315;
@@ -10,6 +12,7 @@
 
     --index-layer-dialog-backdrop: 500;
     --index-layer-dialog: 510;
+
 }
 
 @import "./app/toolbar.css";

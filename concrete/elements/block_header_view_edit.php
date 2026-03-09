@@ -39,7 +39,6 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
     ?>
 
 <concrete-block
-    id="b<?=$b->getBlockID()?>"
     block-id="<?=$b->getBlockID()?>"
     page-id="<?=$c->getCollectionID()?>"
     name="<?=t($blockType->getBlockTypeName())?>"

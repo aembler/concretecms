@@ -1,0 +1,135 @@
+import { nextTick, onBeforeUnmount, onMounted, ref, unref, watch, type Ref } from 'vue'
+
+type MaybeRef<T> = T | Ref<T>
+type MaybeGetter<T> = (() => T) | T
+
+export type HotSpotGeometry = {
+  top: number
+  left: number
+  pageTop: number
+  pageLeft: number
+  width: number
+  height: number
+  right: number
+  bottom: number
+}
+type HotSpotGeometryRefs = {
+  top: Ref<number>
+  left: Ref<number>
+  pageTop: Ref<number>
+  pageLeft: Ref<number>
+  width: Ref<number>
+  height: Ref<number>
+  right: Ref<number>
+  bottom: Ref<number>
+  updateGeometry: () => void
+}
+
+export function useHotSpotGeometry(
+  rootElement: MaybeRef<HTMLElement | null | undefined> | MaybeGetter<HTMLElement | null | undefined>
+) {
+  const top = ref(0)
+  const left = ref(0)
+  const pageTop = ref(0)
+  const pageLeft = ref(0)
+  const width = ref(0)
+  const height = ref(0)
+  const right = ref(0)
+  const bottom = ref(0)
+
+  let resizeObserver: ResizeObserver | null = null
+
+  function resolveRootElement() {
+    if (typeof rootElement === 'function') {
+      return rootElement()
+    }
+
+    return unref(rootElement)
+  }
+
+  function resetGeometry() {
+    top.value = 0
+    left.value = 0
+    pageTop.value = 0
+    pageLeft.value = 0
+    width.value = 0
+    height.value = 0
+    right.value = 0
+    bottom.value = 0
+  }
+
+  function updateGeometry() {
+    const root = resolveRootElement()
+    if (!root || !root.getBoundingClientRect) {
+      resetGeometry()
+      return
+    }
+
+    const rect = root.getBoundingClientRect()
+    top.value = rect.top
+    left.value = rect.left
+    right.value = rect.right
+    bottom.value = rect.bottom
+    width.value = rect.width
+    height.value = rect.height
+    pageTop.value = rect.top + window.scrollY
+    pageLeft.value = rect.left + window.scrollX
+  }
+
+  async function scheduleUpdate() {
+    await nextTick()
+    updateGeometry()
+  }
+
+  function handleViewportChange() {
+    updateGeometry()
+  }
+
+  function disconnectResizeObserver() {
+    if (!resizeObserver) {
+      return
+    }
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+
+  function connectResizeObserver(root: HTMLElement | null | undefined) {
+    if (!root || !(root instanceof Element) || !window.ResizeObserver) {
+      return
+    }
+
+    disconnectResizeObserver()
+    resizeObserver = new ResizeObserver(updateGeometry)
+    resizeObserver.observe(root)
+  }
+
+  onMounted(() => {
+    window.addEventListener('scroll', handleViewportChange, { passive: true })
+    window.addEventListener('resize', handleViewportChange, { passive: true })
+    connectResizeObserver(resolveRootElement())
+    void scheduleUpdate()
+  })
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('scroll', handleViewportChange)
+    window.removeEventListener('resize', handleViewportChange)
+    disconnectResizeObserver()
+  })
+
+  watch(resolveRootElement, (root) => {
+    connectResizeObserver(root)
+    void scheduleUpdate()
+  }, { flush: 'post' })
+
+  return {
+    top,
+    left,
+    pageTop,
+    pageLeft,
+    width,
+    height,
+    right,
+    bottom,
+    updateGeometry,
+  } satisfies HotSpotGeometryRefs
+}

@@ -1,25 +1,25 @@
 <template>
-  <!-- In-page custom elements render without shadow DOM, so Tailwind utility classes are not available here. -->
-  <!-- To edit the styles for classes used here, look for _area.scss in the cms.scss file. //-->
   <div
-    ref="rootEl"
-    @pointerenter="isPointerOver = true"
-    @pointerleave="isPointerOver = false"
-    class="concrete-area"
-       :class="{
+      ref="rootEl"
+      @pointerenter="isPointerOver = true"
+      @pointerleave="isPointerOver = false"
+      class="concrete-area"
+      :class="{
          'concrete-area-empty': totalBlocks === 0,
-         'concrete-area-hover': isHovered,
-         'concrete-area-interactions-disabled': !isInteractionsEnabled
        }">
-    <div class="concrete-area-inner">
-      <slot />
-    </div>
-    <div class="concrete-area-badge" :class="{ 'concrete-area-badge-visible': totalBlocks === 0 || isHovered }">{{name}} Area</div>
+    <slot />
+    <HotSpot
+        :element="rootEl"
+        :is-hovered="isHovered"
+        base-class="border-3 border-(--color-concrete-area) transition-opacity duration-200 opacity-0"
+        hover-class="opacity-100"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import HotSpot from './Ui/HotSpot.vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../stores/types/page-operations'
 import { BlockRenderer } from '../support/dom/BlockRenderer'
@@ -70,9 +70,11 @@ const hasHoveredBlockArea = computed(() => {
 
   return rootEl.value.contains(hoveredElement)
 })
+
 const isHovered = computed(() =>
-  isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockArea.value || isPointerOver.value)
+    isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockArea.value || isPointerOver.value)
 )
+
 const toast = useToast()
 const { request } = useAjax()
 
@@ -114,10 +116,6 @@ function requestJson(url: string): Promise<any> {
   })
 }
 
-function showSuccessToast(title: string, message: string) {
-  toast.success(title, message)
-}
-
 async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise<void> {
   try {
     runningUpdateOperationId.value = operation.id
@@ -130,7 +128,7 @@ async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise
       evaluateScripts: true,
     })
 
-    showSuccessToast(
+    toast.success(
       operation.response?.title || 'Update Block',
       operation.response?.message || 'The block has been saved successfully.'
     )
@@ -173,7 +171,7 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       evaluateScripts: true,
     })
 
-    showSuccessToast(
+    toast.success(
       submitResponse?.title || 'Add Block',
       submitResponse?.message || 'The block has been added successfully.'
     )

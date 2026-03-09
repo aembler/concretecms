@@ -1,6 +1,5 @@
 @import "tailwindcss/theme";
 @import "tailwindcss/utilities" source("page/");
 
-@import "./page/area.css";
-@import "./page/containers.css";
 @import "./page/toolbar.css";
+@import "./page/area.css";

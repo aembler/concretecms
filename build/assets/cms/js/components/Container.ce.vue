@@ -5,21 +5,22 @@
     ref="rootEl"
     @pointerenter="isPointerOver = true"
     @pointerleave="isPointerOver = false"
-    :class="[
-      'concrete-container',
-      isHovered ? 'concrete-container-hover' : ''
-    ]"
+    class="concrete-container"
   >
-    <div class="concrete-container-badge" :class="{ 'concrete-container-badge-visible': isHovered }">
-      {{ containerName }}
-    </div>
     <slot />
+    <HotSpot
+        :element="rootEl"
+        :is-hovered="isHovered"
+        base-class="border-3 border-(--color-concrete-container) transition-opacity duration-200 opacity-0"
+        hover-class="opacity-100"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
+import HotSpot from "./Ui/HotSpot.vue";
 
 const props = withDefaults(defineProps<{
   containerBlockId?: number | string,
@@ -63,4 +64,8 @@ const hasHoveredBlockContainer = computed(() => {
 const isHovered = computed(() =>
   isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockContainer.value || isPointerOver.value)
 )
+
+function handleContainerBadgeClick() {
+  alert(`Container badge clicked: ${props.containerName}`)
+}
 </script>

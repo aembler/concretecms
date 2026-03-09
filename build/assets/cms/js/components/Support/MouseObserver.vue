@@ -6,19 +6,21 @@ import { useConcreteUiStore } from '../../stores/concrete-ui'
 const uiStore = useUiStore()
 const concreteUiStore = useConcreteUiStore()
 
-function getFirstElementWithIdFromPath(eventPath: EventTarget[]): HTMLElement | null {
+function getFirstElementWithConcreteBlockIdFromPath(eventPath: EventTarget[]): HTMLElement | null {
   const firstElementWithId = eventPath.find(
-    (el): el is HTMLElement => el instanceof HTMLElement && Boolean(el.id)
+    (el): el is HTMLElement => el instanceof HTMLElement
+      && Boolean(el.getAttribute('data-concrete-block-id'))
   )
 
   return firstElementWithId || null
 }
 
 function handleMouseMove(event: MouseEvent) {
-  const firstElementWithId = getFirstElementWithIdFromPath(event.composedPath())
+  const firstElementWithId = getFirstElementWithConcreteBlockIdFromPath(event.composedPath())
+  const hoveredBlockId = firstElementWithId?.getAttribute('data-concrete-block-id') || ''
 
-  if (firstElementWithId?.id) {
-    concreteUiStore.clickProxy.hoverElementId = firstElementWithId.id
+  if (hoveredBlockId) {
+    concreteUiStore.clickProxy.hoverElementId = hoveredBlockId
   } else {
     concreteUiStore.clickProxy.hoverElementId = ''
   }
@@ -69,8 +71,8 @@ function handleGlobalClick(event: MouseEvent) {
     const clickedInsideActive = isClickInsideActiveMenu(eventPath, eventTarget, activeMenuId)
 
     if (!clickedInsideActive) {
-      const firstElementWithId = getFirstElementWithIdFromPath(eventPath)
-      concreteUiStore.clickProxy.hoverElementId = firstElementWithId?.id || ''
+      const firstElementWithId = getFirstElementWithConcreteBlockIdFromPath(eventPath)
+      concreteUiStore.clickProxy.hoverElementId = firstElementWithId?.getAttribute('data-concrete-block-id') || ''
       concreteUiStore.clickProxy.activeElementId = ''
       concreteUiStore.clickProxy.activeElementMenuId = ''
       concreteUiStore.clearDoubleClickedElementId()
@@ -87,7 +89,7 @@ function handleGlobalDoubleClick(event: MouseEvent) {
 
   if (activeId) {
     const clickedInsideActive = path.some((el) =>
-        (el as HTMLElement).id === activeId
+        el instanceof HTMLElement && el.getAttribute('data-concrete-block-id') === activeId
     )
     if (clickedInsideActive) {
       concreteUiStore.setDoubleClickedElementId(activeId)
