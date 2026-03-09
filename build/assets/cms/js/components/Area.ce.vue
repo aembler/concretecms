@@ -11,15 +11,32 @@
     <HotSpot
         :element="rootEl"
         :is-hovered="isHovered"
-        base-class="border-3 border-(--color-concrete-area) transition-opacity duration-200 opacity-0"
-        hover-class="opacity-100"
-    />
+        border-color="var(--color-concrete-area)"
+        badge-placement="offset-bottom-center"
+    >
+      <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
+        <HotSpotBadge
+          :label="name || ''"
+          :is-hovered="isBadgeHovered"
+          :badge-placement="badgePlacement"
+          :badge-color="{
+            backgroundColor: 'var(--color-concrete-area)',
+            textColor: '#1f2937',
+            hoverBackgroundColor: '#d8d8d8',
+            hoverTextColor: '#111827',
+            activeBackgroundColor: '#c9c9c9',
+            activeTextColor: '#111827',
+          }"
+        />
+      </template>
+    </HotSpot>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import HotSpot from './Ui/HotSpot.vue'
+import HotSpotBadge from './Ui/HotSpotBadge.vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../stores/types/page-operations'
 import { BlockRenderer } from '../support/dom/BlockRenderer'
@@ -44,6 +61,13 @@ const blockRenderer = new BlockRenderer()
 const runningUpdateOperationId = ref<string | null>(null)
 const runningAddOperationId = ref<string | null>(null)
 const rootEl = ref<HTMLElement | null>(null)
+
+function getHoveredElement(blockId: string): HTMLElement | null {
+  const blocks = Array.from(document.querySelectorAll<HTMLElement>('[data-concrete-block-id]'))
+  const result = blocks.find((block) => block.getAttribute('data-concrete-block-id') === blockId) || null
+  return result
+}
+
 const isPointerOver = ref(false)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
@@ -55,20 +79,20 @@ const hasHoveredBlockArea = computed(() => {
   }
 
   const paths = uiStore.blockAreaMap[effectiveHoveredBlockId.value] || []
-  if (paths.length > 0) {
-    return paths.includes(areaKey.value)
-  }
+  const hasPathMatch = paths.includes(areaKey.value)
 
   if (!isInteractionsEnabled.value || !rootEl.value) {
     return false
   }
 
-  const hoveredElement = document.getElementById(effectiveHoveredBlockId.value)
+  const hoveredElement = getHoveredElement(effectiveHoveredBlockId.value)
   if (!hoveredElement) {
     return false
   }
 
-  return rootEl.value.contains(hoveredElement)
+  const containsHovered = rootEl.value.contains(hoveredElement)
+
+  return hasPathMatch || containsHovered
 })
 
 const isHovered = computed(() =>

@@ -4,6 +4,7 @@
 
 :host {
     --index-layer-hotspot: 300;
+    --index-layer-hotspot-badge: 305;
 
     --index-layer-toolbar-wrapper: 310;
     --index-layer-panel-backdrop: 300;

@@ -11,9 +11,21 @@
     <HotSpot
         :element="rootEl"
         :is-hovered="isHovered"
-        base-class="border-3 border-(--color-concrete-container) transition-opacity duration-200 opacity-0"
-        hover-class="opacity-100"
-    />
+        border-color="var(--color-concrete-container)"
+        badge-placement="top-center">
+      <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
+        <HotSpotBadge
+            :label="containerName"
+            :is-hovered="isBadgeHovered"
+            :badge-placement="badgePlacement"
+            :badge-color="{
+            backgroundColor: 'var(--color-concrete-container)',
+            textColor: 'white',
+          }"
+        />
+      </template>
+
+    </HotSpot>
   </div>
 </template>
 
@@ -21,6 +33,7 @@
 import { computed, ref } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import HotSpot from "./Ui/HotSpot.vue";
+import HotSpotBadge from "./Ui/HotSpotBadge.vue";
 
 const props = withDefaults(defineProps<{
   containerBlockId?: number | string,
@@ -39,6 +52,13 @@ const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.inte
 const containerKey = computed(() =>
   props.containerBlockId ? `container:${props.containerBlockId}` : ''
 )
+
+function getHoveredElement(containerHoverId: string): HTMLElement | null {
+  const blocks = Array.from(document.querySelectorAll<HTMLElement>('[data-concrete-block-id]'))
+  const result = blocks.find((block) => block.getAttribute('data-concrete-block-id') === containerHoverId) || null
+  return result
+}
+
 const hasHoveredBlockContainer = computed(() => {
   const activeHover = effectiveHoveredBlockId.value
   if (!activeHover) {
@@ -46,20 +66,20 @@ const hasHoveredBlockContainer = computed(() => {
   }
 
   const paths = uiStore.blockAreaMap[activeHover] || []
-  if (paths.length > 0 && containerKey.value) {
-    return paths.includes(containerKey.value)
-  }
+  const hasPathMatch = paths.includes(containerKey.value)
 
   if (!isInteractionsEnabled.value || !rootEl.value) {
     return false
   }
 
-  const hoveredElement = document.getElementById(activeHover)
+  const hoveredElement = getHoveredElement(activeHover)
   if (!hoveredElement) {
     return false
   }
 
-  return rootEl.value.contains(hoveredElement)
+  const containsHovered = rootEl.value.contains(hoveredElement)
+
+  return hasPathMatch || containsHovered
 })
 const isHovered = computed(() =>
   isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockContainer.value || isPointerOver.value)

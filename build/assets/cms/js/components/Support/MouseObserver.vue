@@ -72,7 +72,8 @@ function handleGlobalClick(event: MouseEvent) {
 
     if (!clickedInsideActive) {
       const firstElementWithId = getFirstElementWithConcreteBlockIdFromPath(eventPath)
-      concreteUiStore.clickProxy.hoverElementId = firstElementWithId?.getAttribute('data-concrete-block-id') || ''
+      const clickedBlockId = firstElementWithId?.getAttribute('data-concrete-block-id') || ''
+      concreteUiStore.clickProxy.hoverElementId = clickedBlockId
       concreteUiStore.clickProxy.activeElementId = ''
       concreteUiStore.clickProxy.activeElementMenuId = ''
       concreteUiStore.clearDoubleClickedElementId()

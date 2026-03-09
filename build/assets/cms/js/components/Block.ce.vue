@@ -9,9 +9,21 @@
       <HotSpot
           :element="rootEl"
           :is-hovered="isBlockHovered"
-          base-class="border-3 border-(--color-concrete-block) transition-opacity duration-200 opacity-0"
-          hover-class="opacity-100"
-      />
+          border-color="var(--color-concrete-block)"
+          badge-placement="offset-top-center"
+      >
+        <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
+          <HotSpotBadge
+              :label="name || ''"
+              :is-hovered="isBadgeHovered"
+              :badge-placement="badgePlacement"
+              :badge-color="{
+            backgroundColor: 'var(--color-concrete-block)',
+            textColor: 'var(--color-gray-800)',
+          }"
+          />
+        </template>
+      </HotSpot>
     </div>
 
   </template>
@@ -37,6 +49,7 @@ import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
 import { useBlockEditorRegistry } from '../stores/block-editor-registry'
 import { useToast } from '../utilities/toast'
+import HotSpotBadge from "./Ui/HotSpotBadge.vue";
 
 const rootEl = ref<HTMLElement | null>()
 const editMode = ref(false)
@@ -97,7 +110,7 @@ const blockAreaPath = computed(() => {
 })
 
 watch(
-  [props.blockId, blockAreaPath],
+  [() => props.blockId, blockAreaPath],
   ([newBlockId, newPaths], [oldBlockId]) => {
     if (oldBlockId) {
       uiStore.clearBlockAreaMap(oldBlockId)
@@ -125,8 +138,11 @@ const isBlockHovered = computed(() => {
   }
 
   if (!uiStore.clickProxy.activeElementId) {
-    return uiStore.clickProxy.hoverElementId === props.blockId
+    const hovered = uiStore.clickProxy.hoverElementId === props.blockId
+    return hovered
   }
+
+  return false
 })
 
 watch(isBlockDoubleClicked, (value) => {

@@ -1,4 +1,4 @@
-import { nextTick, onBeforeUnmount, onMounted, ref, unref, watch, type Ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, unref, watch, type InjectionKey, type Ref } from 'vue'
 
 type MaybeRef<T> = T | Ref<T>
 type MaybeGetter<T> = (() => T) | T
@@ -24,6 +24,15 @@ type HotSpotGeometryRefs = {
   bottom: Ref<number>
   updateGeometry: () => void
 }
+
+export type HotSpotBadgeGeometry = {
+  top: Ref<number>
+  left: Ref<number>
+  bottom: Ref<number>
+  width: Ref<number>
+}
+
+export const HOT_SPOT_BADGE_GEOMETRY_KEY = Symbol('hot-spot-badge-geometry') as InjectionKey<HotSpotBadgeGeometry>
 
 export function useHotSpotGeometry(
   rootElement: MaybeRef<HTMLElement | null | undefined> | MaybeGetter<HTMLElement | null | undefined>
@@ -74,6 +83,7 @@ export function useHotSpotGeometry(
     height.value = rect.height
     pageTop.value = rect.top + window.scrollY
     pageLeft.value = rect.left + window.scrollX
+
   }
 
   async function scheduleUpdate() {
