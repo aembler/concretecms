@@ -1,6 +1,6 @@
 <template>
   <div
-      v-if="hasGeometry && isScrollSettled && (isHovered || isActive)"
+      v-if="hasGeometry && isScrollVisible && (isHovered || isActive)"
       class="rounded-lg fixed z-(--index-layer-hotspot) pointer-events-auto transition-opacity duration-200"
       :style="overlayStyles"
   ></div>
@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<{
   activeOpacity: number,
   cursor?: string,
   outset?: number | null,
+  hideOnScroll?: boolean,
 }>(), {
   element: null,
   isHovered: false,
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<{
   hoverOpacity: 0,
   activeOpacity: 0,
   cursor: 'pointer',
+  hideOnScroll: true,
   outset: 0,
 })
 
@@ -46,6 +48,7 @@ const canApplyLeftOutset = computed(() => left.value - outsetPx.value >= 0)
 const shouldApplyOutset = computed(() => canApplyTopOutset.value && canApplyLeftOutset.value)
 
 const hasGeometry = computed(() => width.value > 0 && height.value > 0)
+const isScrollVisible = computed(() => (props.hideOnScroll ? isScrollSettled.value : true))
 const overlayStyles = computed(() => ({
   top: `${top.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,
   left: `${left.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,

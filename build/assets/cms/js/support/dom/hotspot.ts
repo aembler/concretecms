@@ -107,7 +107,7 @@ export function useHotSpotGeometry(
 
     scrollSettledTimer = setTimeout(() => {
       isScrollSettled.value = true
-    }, 400)
+    }, 150)
 
     updateGeometry()
   }

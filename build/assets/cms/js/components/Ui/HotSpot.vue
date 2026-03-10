@@ -1,10 +1,10 @@
 <template>
   <Teleport :to="uiStore.menuContainer">
-    <div v-if="hasGeometry && isScrollSettled" class="fixed inset-0 pointer-events-none">
+  <div v-if="hasGeometry && isScrollVisible" class="fixed inset-0 pointer-events-none">
       <div
         class="z-(--index-layer-hotspot) absolute border-3 rounded-lg transition-opacity duration-200 pointer-events-none"
         :style="overlayStyles"
-        :class="['opacity-0', isTargeted ? 'opacity-100' : '']"
+        :class="['opacity-0', isBorderVisible ? 'opacity-100' : '']"
       ></div>
 
       <slot
@@ -27,17 +27,26 @@ const props = withDefaults(defineProps<{
   element: HTMLElement | null,
   borderColor: string | null,
   isTargeted: boolean | false,
-  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | null,
+  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | null,
+  borderBehavior?: 'hover' | 'display' | null,
+  hideOnScroll?: boolean,
   outset?: number | null,
 }>(), {
   element: null,
   borderColor: null,
   isTargeted: false,
   badgePlacement: null,
+  borderBehavior: null,
+  hideOnScroll: true,
   outset: 0,
 })
 
 const { isScrollSettled, top, left, bottom, width, height } = useHotSpotGeometry(() => props.element)
+
+const effectiveBorderBehavior = computed(() => props.borderBehavior || 'hover')
+const isBorderVisible = computed(() =>
+  effectiveBorderBehavior.value === 'display' || props.isTargeted
+)
 
 provide(HOT_SPOT_BADGE_GEOMETRY_KEY, {
   top,
@@ -58,6 +67,7 @@ const canApplyTopOutset = ref(true)
 const canApplyLeftOutset = computed(() => left.value - outsetPx.value >= 0)
 const shouldApplyOutset = computed(() => canApplyTopOutset.value && canApplyLeftOutset.value)
 const hasGeometry = computed(() => width.value > 0 && height.value > 0)
+const isScrollVisible = computed(() => (props.hideOnScroll ? isScrollSettled.value : true))
 const overlayStyles = computed(() => ({
   position: 'absolute',
   top: `${top.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,
@@ -65,6 +75,7 @@ const overlayStyles = computed(() => ({
   width: `${Math.max(0, width.value + (shouldApplyOutset.value ? (outsetPx.value * 2) : 0))}px`,
   height: `${Math.max(0, height.value + (shouldApplyOutset.value ? (outsetPx.value * 2) : 0))}px`,
   borderColor: `${props.borderColor}`,
+  opacity: isBorderVisible.value ? 1 : 0,
 }))
 const slots = useSlots()
 const hasBadgeSlot = computed(() => Boolean(props.badgePlacement && slots.badge))

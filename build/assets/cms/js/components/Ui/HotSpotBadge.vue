@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   isHovered?: boolean,
   isActive?: boolean,
   badgeColor: HotSpotBadgeColorProps,
-  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | null,
+  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | null,
 }>(), {
   isHovered: false,
   isActive: false,
@@ -44,9 +44,11 @@ const top = computed(() => hotspotGeometry?.top.value ?? fallbackGeometry.top)
 const left = computed(() => hotspotGeometry?.left.value ?? fallbackGeometry.left)
 const bottom = computed(() => hotspotGeometry?.bottom.value ?? fallbackGeometry.bottom)
 const width = computed(() => hotspotGeometry?.width.value ?? fallbackGeometry.width)
+const height = computed(() => Math.max(0, bottom.value - top.value))
 
 const badgeOffsetPx = 10; // the offset from the bottom or top when using the offset placements
 const badgeCenterOffsetPx = 8; // the offset used to position badge _just_ above the border.
+const isAlwaysVisible = computed(() => props.badgePlacement === 'block-bottom-center')
 
 function resolveColorState() {
   const backgroundHover = props.badgeColor.hoverBackgroundColor || props.badgeColor.backgroundColor
@@ -79,6 +81,10 @@ function badgeLeft() {
     return '0px'
   }
 
+  if (props.badgePlacement === 'block-bottom-center') {
+    return `${left.value}px`
+  }
+
   return `${left.value + (width.value / 2)}px`
 }
 
@@ -93,6 +99,10 @@ function badgeTop() {
 
   if (props.badgePlacement === 'offset-bottom-center') {
     return `${bottom.value - badgeOffsetPx}px`
+  }
+
+  if (props.badgePlacement === 'block-bottom-center') {
+    return `${top.value + height.value - (badgeOffsetPx * 3) }px`
   }
 
   return `${top.value - badgeCenterOffsetPx}px`
@@ -113,6 +123,10 @@ function badgeTransform(): CSSProperties['transform'] {
     return `${centerX} 0, 0)`
   }
 
+  if (props.badgePlacement === 'block-bottom-center') {
+    return 'none'
+  }
+
   return `${centerX} -100%, 0)`
 }
 
@@ -122,6 +136,7 @@ const badgeStyles = computed<CSSProperties>(() => ({
   zIndex: 'var(--index-layer-hotspot-badge)',
   left: badgeLeft(),
   top: badgeTop(),
+  width: props.badgePlacement === 'block-bottom-center' ? `${width.value}px` : 'auto',
   transform: badgeTransform(),
   pointerEvents: 'none',
 }))
@@ -129,6 +144,6 @@ const badgeStyles = computed<CSSProperties>(() => ({
 const badgeClass = computed(() => [
   'pointer-events-auto shadow-sm text-xs font-semibold uppercase rounded-full py-1 px-2 inline-block',
   'transition-opacity duration-200',
-  props.isHovered ? 'opacity-100' : 'opacity-0'
+  isAlwaysVisible.value || props.isHovered ? 'opacity-100' : 'opacity-0'
 ])
 </script>

@@ -1,4 +1,8 @@
 .concrete-area {
+  /**
+   * We add some padding to accommodate the persistent area badge at the bottom.
+   */
+  @apply pb-[3rem] mb-[2rem];
 
   /**
    Note: all hovering interactions with area happen in the hotspot, which is elevated and exists above the page.
