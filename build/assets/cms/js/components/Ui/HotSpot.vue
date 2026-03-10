@@ -1,10 +1,10 @@
 <template>
   <Teleport :to="uiStore.menuContainer">
-  <div v-if="hasGeometry && isScrollSettled" class="fixed inset-0 pointer-events-none">
+    <div v-if="hasGeometry && isScrollSettled" class="fixed inset-0 pointer-events-none">
       <div
-        class="z-(--index-layer-hotspot) absolute pointer-events-none"
-        :class="['border-3 rounded-lg transition-opacity duration-200 opacity-0', isTargeted ?  'opacity-100' : '']"
+        class="z-(--index-layer-hotspot) absolute border-3 rounded-lg transition-opacity duration-200 pointer-events-none"
         :style="overlayStyles"
+        :class="['opacity-0', isTargeted ? 'opacity-100' : '']"
       ></div>
 
       <slot
@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<{
   element: HTMLElement | null,
   borderColor: string | null,
   isTargeted: boolean | false,
-  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'top-center' | null,
+  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | null,
   outset?: number | null,
 }>(), {
   element: null,

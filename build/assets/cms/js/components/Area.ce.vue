@@ -6,6 +6,7 @@
       class="concrete-area"
       :class="{
          'concrete-area-empty': totalBlocks === 0,
+         'concrete-area-hovered': isHovered,
        }">
     <slot />
     <HotSpot

@@ -33,7 +33,6 @@ const props = withDefaults(defineProps<{
 })
 
 const { isScrollSettled, top, left, width, height } = useHotSpotGeometry(() => props.element)
-
 const outsetPx = computed(() => {
   if (props.outset === null || props.outset === undefined) {
     return 0

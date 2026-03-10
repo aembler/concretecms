@@ -8,4 +8,5 @@
   &.concrete-area-empty {
     @apply h-[60px];
   }
+
 }

@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   isHovered?: boolean,
   isActive?: boolean,
   badgeColor: HotSpotBadgeColorProps,
-  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'top-center' | null,
+  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | null,
 }>(), {
   isHovered: false,
   isActive: false,
@@ -45,7 +45,7 @@ const left = computed(() => hotspotGeometry?.left.value ?? fallbackGeometry.left
 const bottom = computed(() => hotspotGeometry?.bottom.value ?? fallbackGeometry.bottom)
 const width = computed(() => hotspotGeometry?.width.value ?? fallbackGeometry.width)
 
-const badgeOffsetPx = 20; // the offset from the bottom or top when using the offset placements
+const badgeOffsetPx = 10; // the offset from the bottom or top when using the offset placements
 const badgeCenterOffsetPx = 8; // the offset used to position badge _just_ above the border.
 
 function resolveColorState() {
@@ -105,7 +105,7 @@ function badgeTransform(): CSSProperties['transform'] {
     return `${centerX} 0, 0)`
   }
 
-  if (props.badgePlacement === 'top-center') {
+  if (props.badgePlacement === 'notch-top-center') {
     return `${centerX} 0, 0)`
   }
 

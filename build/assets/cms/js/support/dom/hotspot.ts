@@ -112,6 +112,10 @@ export function useHotSpotGeometry(
     updateGeometry()
   }
 
+  function handleScrollStart() {
+    isScrollSettled.value = false
+  }
+
   function disconnectResizeObserver() {
     if (!resizeObserver) {
       return
@@ -131,13 +135,19 @@ export function useHotSpotGeometry(
   }
 
   onMounted(() => {
+    window.addEventListener('wheel', handleScrollStart, { passive: true })
     window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('touchstart', handleScrollStart, { passive: true })
+    window.addEventListener('touchmove', handleScrollStart, { passive: true })
     window.addEventListener('resize', handleViewportChange, { passive: true })
     connectResizeObserver(resolveRootElement())
     void scheduleUpdate()
   })
 
   onBeforeUnmount(() => {
+    window.removeEventListener('wheel', handleScrollStart)
+    window.removeEventListener('touchstart', handleScrollStart)
+    window.removeEventListener('touchmove', handleScrollStart)
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('resize', handleViewportChange)
     disconnectResizeObserver()

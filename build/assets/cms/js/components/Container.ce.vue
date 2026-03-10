@@ -12,7 +12,7 @@
         :element="rootEl"
         :is-targeted="isHovered"
         border-color="var(--color-concrete-container)"
-        badge-placement="top-center">
+        badge-placement="notch-top-center">
       <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
         <HotSpotBadge
             :label="containerName"
