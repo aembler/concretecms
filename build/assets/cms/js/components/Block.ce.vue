@@ -40,7 +40,6 @@
         </template>
       </HotSpot>
 
-      <!--
       <Menu
           :block-element="rootEl"
           :show="isBlockClicked"
@@ -50,7 +49,7 @@
           @edit="editBlock"
           @delete="showDeleteModal = true"
       >
-      </Menu>//-->
+      </Menu>
 
     </div>
 
@@ -161,6 +160,7 @@ const isMasterCollectionBool = computed(() => {
 })
 const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.blockId)
 const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.blockId)
+
 const isBlockHovered = computed(() => {
   if (!isInteractionsEnabled.value) {
     return false
