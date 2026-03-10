@@ -5,12 +5,27 @@
         class="concrete-block"
         :data-concrete-block-id="blockId"
     >
-      <slot />
+      <div class="relative">
+        <slot />
+        <HotSpotOverlay
+            :element="rootEl"
+            :is-hovered="isBlockHovered"
+            :is-active="isBlockClicked"
+            hover-color="var(--color-concrete-green)"
+            active-color="var(--color-concrete-green)"
+            :hover-opacity="0.2"
+            :active-opacity="0.4"
+            :outset="8"
+
+        />
+      </div>
       <HotSpot
           :element="rootEl"
-          :is-hovered="isBlockHovered"
+          :is-targeted="isBlockHovered || isBlockClicked"
           border-color="var(--color-concrete-block)"
           badge-placement="offset-top-center"
+          :outset="8"
+
       >
         <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
           <HotSpotBadge
@@ -43,6 +58,7 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import Menu from "./Block/Menu.vue";
 import HotSpot from "./Ui/HotSpot.vue";
+import HotSpotOverlay from "./Ui/HotSpotOverlay.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'

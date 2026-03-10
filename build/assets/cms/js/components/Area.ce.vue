@@ -10,9 +10,10 @@
     <slot />
     <HotSpot
         :element="rootEl"
-        :is-hovered="isHovered"
+        :is-targeted="isHovered"
         border-color="var(--color-concrete-area)"
         badge-placement="offset-bottom-center"
+        :outset="12"
     >
       <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
         <HotSpotBadge

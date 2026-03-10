@@ -1,16 +1,16 @@
 <template>
   <Teleport :to="uiStore.menuContainer">
-    <div v-if="hasGeometry" class="fixed inset-0 pointer-events-none">
+  <div v-if="hasGeometry && isScrollSettled" class="fixed inset-0 pointer-events-none">
       <div
         class="z-(--index-layer-hotspot) absolute pointer-events-none"
-        :class="['border-3 transition-opacity duration-200 opacity-0', isHovered ?  'opacity-100' : '']"
+        :class="['border-3 rounded-lg transition-opacity duration-200 opacity-0', isTargeted ?  'opacity-100' : '']"
         :style="overlayStyles"
       ></div>
 
       <slot
         v-if="hasBadgeSlot"
         name="badge"
-        :is-hovered="isHovered"
+        :is-hovered="isTargeted"
         :badge-placement="badgePlacement"
       />
     </div>
@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide, useSlots } from 'vue'
+import {computed, provide, ref, useSlots} from 'vue'
 import { HOT_SPOT_BADGE_GEOMETRY_KEY, useHotSpotGeometry } from '../../support/dom/hotspot'
 import { useUiStore } from '@concretecms/backendui'
 
@@ -26,18 +26,18 @@ const uiStore = useUiStore()
 const props = withDefaults(defineProps<{
   element: HTMLElement | null,
   borderColor: string | null,
-  isHovered: boolean | false,
+  isTargeted: boolean | false,
   badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'top-center' | null,
-  inset?: number | null,
+  outset?: number | null,
 }>(), {
   element: null,
   borderColor: null,
-  isHovered: false,
+  isTargeted: false,
   badgePlacement: null,
-  inset: 0,
+  outset: 0,
 })
 
-const { top, left, bottom, width, height } = useHotSpotGeometry(() => props.element)
+const { isScrollSettled, top, left, bottom, width, height } = useHotSpotGeometry(() => props.element)
 
 provide(HOT_SPOT_BADGE_GEOMETRY_KEY, {
   top,
@@ -46,23 +46,26 @@ provide(HOT_SPOT_BADGE_GEOMETRY_KEY, {
   width,
 })
 
-const insetPx = computed(() => {
-  if (props.inset === null || props.inset === undefined) {
+const outsetPx = computed(() => {
+  if (props.outset === null || props.outset === undefined) {
     return 0
   }
 
-  return Number.isFinite(props.inset) ? props.inset : 0
+  return Number.isFinite(props.outset) ? props.outset : 0
 })
+//const canApplyTopOutset = computed(() => top.value - outsetPx.value >= 0)
+const canApplyTopOutset = ref(true)
+const canApplyLeftOutset = computed(() => left.value - outsetPx.value >= 0)
+const shouldApplyOutset = computed(() => canApplyTopOutset.value && canApplyLeftOutset.value)
 const hasGeometry = computed(() => width.value > 0 && height.value > 0)
 const overlayStyles = computed(() => ({
   position: 'absolute',
-  top: `${top.value + insetPx.value}px`,
-  left: `${left.value + insetPx.value}px`,
-  width: `${Math.max(0, width.value - (insetPx.value * 2))}px`,
-  height: `${Math.max(0, height.value - (insetPx.value * 2))}px`,
+  top: `${top.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,
+  left: `${left.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,
+  width: `${Math.max(0, width.value + (shouldApplyOutset.value ? (outsetPx.value * 2) : 0))}px`,
+  height: `${Math.max(0, height.value + (shouldApplyOutset.value ? (outsetPx.value * 2) : 0))}px`,
   borderColor: `${props.borderColor}`,
 }))
-
 const slots = useSlots()
 const hasBadgeSlot = computed(() => Boolean(props.badgePlacement && slots.badge))
 </script>

@@ -19,7 +19,7 @@ View::element('block_header_view', ['a' => $a, 'b' => $b, 'c' => $c, 'pt' => $pt
 if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
 
 <concrete-container
-    :container-block-id="<?=$b->getBlockID()?>"
+    container-block-id="<?=$b->getBlockID()?>"
     container-name="<?=t('%s Container', $b->getController()?->getContainerInstanceObject()?->getContainer()?->getContainerName())?>"
     >
 

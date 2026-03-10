@@ -22,6 +22,7 @@ type HotSpotGeometryRefs = {
   height: Ref<number>
   right: Ref<number>
   bottom: Ref<number>
+  isScrollSettled: Ref<boolean>
   updateGeometry: () => void
 }
 
@@ -45,6 +46,8 @@ export function useHotSpotGeometry(
   const height = ref(0)
   const right = ref(0)
   const bottom = ref(0)
+  const isScrollSettled = ref(true)
+  let scrollSettledTimer: ReturnType<typeof setTimeout> | null = null
 
   let resizeObserver: ResizeObserver | null = null
 
@@ -95,6 +98,20 @@ export function useHotSpotGeometry(
     updateGeometry()
   }
 
+  function handleScroll() {
+    isScrollSettled.value = false
+
+    if (scrollSettledTimer) {
+      clearTimeout(scrollSettledTimer)
+    }
+
+    scrollSettledTimer = setTimeout(() => {
+      isScrollSettled.value = true
+    }, 400)
+
+    updateGeometry()
+  }
+
   function disconnectResizeObserver() {
     if (!resizeObserver) {
       return
@@ -114,16 +131,20 @@ export function useHotSpotGeometry(
   }
 
   onMounted(() => {
-    window.addEventListener('scroll', handleViewportChange, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleViewportChange, { passive: true })
     connectResizeObserver(resolveRootElement())
     void scheduleUpdate()
   })
 
   onBeforeUnmount(() => {
-    window.removeEventListener('scroll', handleViewportChange)
+    window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('resize', handleViewportChange)
     disconnectResizeObserver()
+    if (scrollSettledTimer) {
+      clearTimeout(scrollSettledTimer)
+      scrollSettledTimer = null
+    }
   })
 
   watch(resolveRootElement, (root) => {
@@ -140,6 +161,7 @@ export function useHotSpotGeometry(
     height,
     right,
     bottom,
+    isScrollSettled,
     updateGeometry,
   } satisfies HotSpotGeometryRefs
 }
