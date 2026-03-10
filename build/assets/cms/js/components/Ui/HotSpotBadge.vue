@@ -49,7 +49,7 @@ const width = computed(() => hotspotGeometry?.width.value ?? fallbackGeometry.wi
 const height = computed(() => Math.max(0, bottom.value - top.value))
 
 const badgeOffsetPx = 10; // the offset from the bottom or top when using the offset placements
-const badgeCenterOffsetPx = 8; // the offset used to position badge _just_ above the border.
+const badgeCenterOffsetPx = 10; // the offset used to position badge _just_ above the border.
 const isTargeted = computed(() => Boolean(props.isHovered || props.isActive))
 const isBadgeVisible = computed(() => props.appearBehavior === 'display' || isTargeted.value)
 const isNotchTopCenter = computed(() => props.badgePlacement === 'notch-top-center')
@@ -86,7 +86,7 @@ function badgeLeft() {
   }
 
   if (props.badgePlacement === 'block-bottom-center') {
-    return `${left.value}px`
+    return `${left.value + badgeOffsetPx}px`
   }
 
   if (props.badgePlacement === 'middle-center') {
@@ -114,7 +114,7 @@ function badgeTop() {
   }
 
   if (props.badgePlacement === 'block-bottom-center') {
-    return `${top.value + height.value - (badgeOffsetPx * 3) }px`
+    return `${top.value + height.value - (badgeOffsetPx * 3.75) }px`
   }
 
   if (props.badgePlacement === 'middle-center') {
@@ -156,7 +156,7 @@ const badgeStyles = computed<CSSProperties>(() => ({
   zIndex: 'var(--index-layer-hotspot-badge)',
   left: badgeLeft(),
   top: badgeTop(),
-  width: props.badgePlacement === 'block-bottom-center' ? `${width.value}px` : 'auto',
+  width: props.badgePlacement === 'block-bottom-center' ? `${width.value - (badgeOffsetPx * 2)}px` : 'auto',
   transform: `${badgeTransform()} ${isNotchTopCenter.value ? `scale(${isBadgeVisible.value ? '1' : '0.95'})` : ''}`.trim(),
   pointerEvents: 'none',
 }))

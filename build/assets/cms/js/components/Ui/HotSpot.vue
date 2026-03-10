@@ -48,13 +48,6 @@ const isBorderVisible = computed(() =>
   effectiveBorderBehavior.value === 'display' || props.isTargeted
 )
 
-provide(HOT_SPOT_BADGE_GEOMETRY_KEY, {
-  top,
-  left,
-  bottom,
-  width,
-})
-
 const outsetPx = computed(() => {
   if (props.outset === null || props.outset === undefined) {
     return 0
@@ -66,14 +59,28 @@ const outsetPx = computed(() => {
 const canApplyTopOutset = ref(true)
 const canApplyLeftOutset = computed(() => left.value - outsetPx.value >= 0)
 const shouldApplyOutset = computed(() => canApplyTopOutset.value && canApplyLeftOutset.value)
+const effectiveOutset = computed(() => (shouldApplyOutset.value ? outsetPx.value : 0))
+const effectiveTop = computed(() => top.value - effectiveOutset.value)
+const effectiveLeft = computed(() => left.value - effectiveOutset.value)
+const effectiveWidth = computed(() => Math.max(0, width.value + (effectiveOutset.value * 2)))
+const effectiveHeight = computed(() => Math.max(0, height.value + (effectiveOutset.value * 2)))
+const effectiveBottom = computed(() => effectiveTop.value + effectiveHeight.value)
+
+provide(HOT_SPOT_BADGE_GEOMETRY_KEY, {
+  top: effectiveTop,
+  left: effectiveLeft,
+  bottom: effectiveBottom,
+  width: effectiveWidth,
+})
+
 const hasGeometry = computed(() => width.value > 0 && height.value > 0)
 const isScrollVisible = computed(() => (props.hideOnScroll ? isScrollSettled.value : true))
 const overlayStyles = computed(() => ({
   position: 'absolute',
-  top: `${top.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,
-  left: `${left.value - (shouldApplyOutset.value ? outsetPx.value : 0)}px`,
-  width: `${Math.max(0, width.value + (shouldApplyOutset.value ? (outsetPx.value * 2) : 0))}px`,
-  height: `${Math.max(0, height.value + (shouldApplyOutset.value ? (outsetPx.value * 2) : 0))}px`,
+  top: `${effectiveTop.value}px`,
+  left: `${effectiveLeft.value}px`,
+  width: `${effectiveWidth.value}px`,
+  height: `${effectiveHeight.value}px`,
   borderColor: `${props.borderColor}`,
   opacity: isBorderVisible.value ? 1 : 0,
 }))

@@ -1,4 +1,4 @@
 .concrete-container {
-  padding: calc(var(--concrete-element-spacing-y) / 2) 0;
-  margin-bottom: calc(var(--concrete-element-spacing-y) / 2);
+  padding: calc(var(--concrete-element-spacing-y)) 0;
+  margin-bottom: calc(var(--concrete-element-spacing-y));
 }
