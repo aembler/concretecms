@@ -9,6 +9,7 @@
         <slot />
         <HotSpotOverlay
             :element="rootEl"
+            :data-concrete-block-id="blockId"
             :is-hovered="isBlockHovered"
             :is-active="isBlockClicked"
             hover-color="var(--color-concrete-green)"
@@ -16,7 +17,6 @@
             :hover-opacity="0.2"
             :active-opacity="0.4"
             :outset="8"
-
         />
       </div>
       <HotSpot
@@ -39,6 +39,19 @@
           />
         </template>
       </HotSpot>
+
+      <!--
+      <Menu
+          :block-element="rootEl"
+          :show="isBlockClicked"
+          :id="menuId"
+          :variants="parsedVariants"
+          :selected-variant="selectedVariant"
+          @edit="editBlock"
+          @delete="showDeleteModal = true"
+      >
+      </Menu>//-->
+
     </div>
 
   </template>

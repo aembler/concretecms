@@ -1,14 +1,23 @@
 <template>
-  <div
+  <Teleport :to="uiStore.menuContainer">
+    <div
       v-if="hasGeometry && isScrollVisible && (isHovered || isActive)"
       class="rounded-lg fixed z-(--index-layer-hotspot) pointer-events-auto transition-opacity duration-200"
+      v-bind="overlayDomAttrs"
       :style="overlayStyles"
-  ></div>
+    ></div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import { useHotSpotGeometry } from '../../support/dom/hotspot'
+import { useUiStore } from '@concretecms/backendui'
+
+// Forward unknown attributes to the overlay DOM node so callers can pass
+// marker attributes (like data-concrete-block-id) without coupling this
+// generic hotspot component to caller-specific props, especially with Teleport.
+const overlayDomAttrs = useAttrs()
 
 const props = withDefaults(defineProps<{
   element: HTMLElement | null,
@@ -34,6 +43,7 @@ const props = withDefaults(defineProps<{
   outset: 0,
 })
 
+const uiStore = useUiStore()
 const { isScrollSettled, top, left, width, height } = useHotSpotGeometry(() => props.element)
 const outsetPx = computed(() => {
   if (props.outset === null || props.outset === undefined) {

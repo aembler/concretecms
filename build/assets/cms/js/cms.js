@@ -73,6 +73,9 @@ const ConcreteAppElement = defineCustomElement(ConcreteApp, {
     styles: getMergedElementStyles(ConcreteApp),
     plugins: [pinia]
 })
+
+// Inner page components. These inherit their styles from the page and do not use the shadow root. We need this
+// So theme styling can flow through to things like inline editor components, etc...
 const ConcreteAreaElement = defineCustomElement(ConcreteArea, {
     shadowRoot: false,
     plugins: [pinia]
@@ -81,15 +84,15 @@ const ConcreteContainerElement = defineCustomElement(ConcreteContainer, {
     shadowRoot: false,
     plugins: [pinia]
 })
-
-
-
-
-
 const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
-    styles: getMergedElementStyles(ConcreteBlock),
+    shadowRoot: false,
     plugins: [pinia]
 })
+
+
+
+
+
 const ConcreteAreaBlockTargetElement = defineCustomElement(ConcreteAreaBlockTarget, {
     styles: getMergedElementStyles(ConcreteAreaBlockTarget),
     plugins: [pinia]
