@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<{
   element: HTMLElement | null,
   borderColor: string | null,
   isTargeted: boolean | false,
-  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | null,
+  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | 'middle-center' | null,
   borderBehavior?: 'hover' | 'display' | null,
   hideOnScroll?: boolean,
   outset?: number | null,

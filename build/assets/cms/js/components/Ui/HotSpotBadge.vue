@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   isHovered?: boolean,
   isActive?: boolean,
   badgeColor: HotSpotBadgeColorProps,
-  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | null,
+  badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | 'middle-center' | null,
 }>(), {
   isHovered: false,
   isActive: false,
@@ -49,6 +49,8 @@ const height = computed(() => Math.max(0, bottom.value - top.value))
 const badgeOffsetPx = 10; // the offset from the bottom or top when using the offset placements
 const badgeCenterOffsetPx = 8; // the offset used to position badge _just_ above the border.
 const isAlwaysVisible = computed(() => props.badgePlacement === 'block-bottom-center')
+const isBadgeVisible = computed(() => isAlwaysVisible.value || props.isHovered || props.isActive)
+const isNotchTopCenter = computed(() => props.badgePlacement === 'notch-top-center')
 
 function resolveColorState() {
   const backgroundHover = props.badgeColor.hoverBackgroundColor || props.badgeColor.backgroundColor
@@ -85,6 +87,10 @@ function badgeLeft() {
     return `${left.value}px`
   }
 
+  if (props.badgePlacement === 'middle-center') {
+    return `${left.value + (width.value / 2)}px`
+  }
+
   return `${left.value + (width.value / 2)}px`
 }
 
@@ -97,12 +103,20 @@ function badgeTop() {
     return `${top.value + badgeOffsetPx}px`
   }
 
+  if (props.badgePlacement === 'notch-top-center') {
+    return `${top.value - badgeCenterOffsetPx}px`
+  }
+
   if (props.badgePlacement === 'offset-bottom-center') {
     return `${bottom.value - badgeOffsetPx}px`
   }
 
   if (props.badgePlacement === 'block-bottom-center') {
     return `${top.value + height.value - (badgeOffsetPx * 3) }px`
+  }
+
+  if (props.badgePlacement === 'middle-center') {
+    return `${top.value + (height.value / 2)}px`
   }
 
   return `${top.value - badgeCenterOffsetPx}px`
@@ -115,16 +129,20 @@ function badgeTransform(): CSSProperties['transform'] {
     return `${centerX} 0, 0)`
   }
 
-  if (props.badgePlacement === 'notch-top-center') {
+  if (props.badgePlacement === 'offset-top-center') {
     return `${centerX} 0, 0)`
   }
 
-  if (props.badgePlacement === 'offset-top-center') {
+  if (props.badgePlacement === 'notch-top-center') {
     return `${centerX} 0, 0)`
   }
 
   if (props.badgePlacement === 'block-bottom-center') {
     return 'none'
+  }
+
+  if (props.badgePlacement === 'middle-center') {
+    return 'translate3d(-50%, -50%, 0)'
   }
 
   return `${centerX} -100%, 0)`
@@ -137,13 +155,13 @@ const badgeStyles = computed<CSSProperties>(() => ({
   left: badgeLeft(),
   top: badgeTop(),
   width: props.badgePlacement === 'block-bottom-center' ? `${width.value}px` : 'auto',
-  transform: badgeTransform(),
+  transform: `${badgeTransform()} ${isNotchTopCenter.value ? `scale(${isBadgeVisible.value ? '1' : '0.95'})` : ''}`.trim(),
   pointerEvents: 'none',
 }))
 
 const badgeClass = computed(() => [
   'pointer-events-auto shadow-sm text-xs font-semibold uppercase rounded-full py-1 px-2 inline-block',
-  'transition-opacity duration-200',
-  isAlwaysVisible.value || props.isHovered ? 'opacity-100' : 'opacity-0'
+  isNotchTopCenter.value ? 'origin-center transition-all duration-200' : 'transition-opacity duration-200',
+  isBadgeVisible.value ? 'opacity-100' : 'opacity-0'
 ])
 </script>

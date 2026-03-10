@@ -23,7 +23,7 @@
           :element="rootEl"
           :is-targeted="isBlockHovered || isBlockClicked"
           border-color="var(--color-concrete-block)"
-          badge-placement="offset-top-center"
+          badge-placement="middle-center"
           :outset="8"
 
       >
