@@ -10,6 +10,10 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({
+  inheritAttrs: false
+})
+
 import { computed, ref, useAttrs } from 'vue'
 import { useHotSpotGeometry } from '../../support/dom/hotspot'
 import { useUiStore } from '@concretecms/backendui'
