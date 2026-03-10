@@ -26,10 +26,12 @@ const props = withDefaults(defineProps<{
   isActive?: boolean,
   badgeColor: HotSpotBadgeColorProps,
   badgePlacement?: 'offset-top-center' | 'offset-bottom-center' | 'notch-top-center' | 'block-bottom-center' | 'middle-center' | null,
+  appearBehavior?: 'targeted' | 'display',
 }>(), {
   isHovered: false,
   isActive: false,
   badgePlacement: null,
+  appearBehavior: 'targeted',
 })
 
 const hotspotGeometry = inject(HOT_SPOT_BADGE_GEOMETRY_KEY, null) as HotSpotBadgeGeometry | null
@@ -48,8 +50,8 @@ const height = computed(() => Math.max(0, bottom.value - top.value))
 
 const badgeOffsetPx = 10; // the offset from the bottom or top when using the offset placements
 const badgeCenterOffsetPx = 8; // the offset used to position badge _just_ above the border.
-const isAlwaysVisible = computed(() => props.badgePlacement === 'block-bottom-center')
-const isBadgeVisible = computed(() => isAlwaysVisible.value || props.isHovered || props.isActive)
+const isTargeted = computed(() => Boolean(props.isHovered || props.isActive))
+const isBadgeVisible = computed(() => props.appearBehavior === 'display' || isTargeted.value)
 const isNotchTopCenter = computed(() => props.badgePlacement === 'notch-top-center')
 
 function resolveColorState() {

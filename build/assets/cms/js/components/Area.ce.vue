@@ -5,7 +5,7 @@
       @pointerleave="isPointerOver = false"
       class="concrete-area"
       :class="{
-         'concrete-area-empty': totalBlocks === 0,
+         'concrete-area-empty': isAreaEmpty,
          'concrete-area-hovered': isHovered,
        }">
     <slot />
@@ -14,15 +14,16 @@
       :is-targeted="isHovered"
       border-color="var(--color-concrete-area)"
       border-behavior="display"
-      badge-placement="block-bottom-center"
+      :badge-placement="badgePlacement"
       :hide-on-scroll="false"
       :outset="12"
     >
-      <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
+      <template #badge>
         <HotSpotBadge
           :label="name || ''"
-          :is-hovered="isBadgeHovered"
+          :is-hovered="isHovered"
           :badge-placement="badgePlacement"
+          appear-behavior="display"
           :badge-color="{
             backgroundColor: 'var(--color-concrete-area)',
             textColor: '#1f2937',
@@ -59,6 +60,9 @@ const props = withDefaults(defineProps<{
   name: '',
   totalBlocks: 0,
 })
+
+const isAreaEmpty = computed(() => Number(props.totalBlocks) === 0)
+const badgePlacement = computed(() => isAreaEmpty.value ? 'middle-center' : 'block-bottom-center')
 
 const uiStore = useConcreteUiStore()
 const blockRenderer = new BlockRenderer()

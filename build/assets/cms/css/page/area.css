@@ -2,7 +2,7 @@
   /**
    * We add some padding to accommodate the persistent area badge at the bottom.
    */
-  @apply pb-[3rem] mb-[2rem];
+  @apply pb-[3rem] mb-[0.5rem];
 
   /**
    Note: all hovering interactions with area happen in the hotspot, which is elevated and exists above the page.
@@ -11,6 +11,13 @@
    */
   &.concrete-area-empty {
     @apply h-[60px];
+  }
+
+  .concrete-area {
+    /* If an area comes inside another area, we might have some kind of nested container situation on our hands
+     * in which case we'll want to add more margin so things don't collapse and look crazy 
+     */
+    @apply mb-[2rem];
   }
 
 }
