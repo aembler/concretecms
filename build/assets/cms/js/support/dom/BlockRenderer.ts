@@ -65,6 +65,7 @@ export class BlockRenderer {
   async insertBlock(options: InsertBlockOptions): Promise<HTMLElement> {
     const { newBlockElement, scripts } = this.parseReplacementHtml(options.replacementHtml)
     this.insertBlockElementAtTarget(newBlockElement, options.target)
+    this.insertFollowingAreaBlockTarget(newBlockElement, options.target)
 
     if (options.evaluateScripts !== false) {
       await this.executeScripts(scripts)
@@ -108,6 +109,22 @@ export class BlockRenderer {
     const areaHandle = this.escapeAttributeSelectorValue(String(target.areaHandle || ''))
     const pageId = String(target.pageId || '')
     const afterBlockId = String(target.afterBlockId || 0)
+    const afterBlockNumericId = Number(afterBlockId || 0)
+    const areaSelector = `concrete-area[page-id="${pageId}"][area-handle="${areaHandle}"]`
+    const legacyAreaSelector = `concrete-area[page-id="${pageId}"][data-area-handle="${areaHandle}"]`
+    const areaElement =
+      document.querySelector(areaSelector)
+      || document.querySelector(legacyAreaSelector)
+
+    if (afterBlockNumericId === 0) {
+      if (areaElement) {
+        const firstTarget = areaElement.querySelector('concrete-area-block-target')
+        if (firstTarget) {
+          firstTarget.insertAdjacentElement('afterend', blockElement)
+          return
+        }
+      }
+    }
 
     const targetSelector = `concrete-area-block-target[data-page-id="${pageId}"][data-area-handle="${areaHandle}"][data-after-block-id="${afterBlockId}"]`
     const areaTarget = document.querySelector(targetSelector)
@@ -117,17 +134,22 @@ export class BlockRenderer {
     }
 
     // Fallback to direct block-anchor insertion when target markers are missing/stale.
-    const afterBlockNumericId = Number(afterBlockId || 0)
     if (afterBlockNumericId > 0) {
       const afterBlockElement = this.findExistingBlockElement(afterBlockNumericId)
       if (afterBlockElement) {
-        afterBlockElement.insertAdjacentElement('afterend', blockElement)
+        const trailingTarget = afterBlockElement.nextElementSibling
+        if (
+          trailingTarget instanceof HTMLElement
+          && trailingTarget.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
+        ) {
+          trailingTarget.insertAdjacentElement('afterend', blockElement)
+        } else {
+          afterBlockElement.insertAdjacentElement('afterend', blockElement)
+        }
         return
       }
     }
 
-    const areaSelector = `concrete-area[page-id="${pageId}"][data-area-handle="${areaHandle}"]`
-    const areaElement = document.querySelector(areaSelector)
     if (areaElement) {
       const firstTarget = areaElement.querySelector('concrete-area-block-target')
       if (firstTarget) {
@@ -139,6 +161,62 @@ export class BlockRenderer {
     }
 
     throw new Error(`Could not find insert target for area "${String(target.areaHandle || '')}"`)
+  }
+
+  private insertFollowingAreaBlockTarget(blockElement: HTMLElement, target: AddBlockTargetRef): void {
+    const insertedBlockId = this.resolveInsertedBlockId(blockElement)
+    if (!insertedBlockId) {
+      return
+    }
+
+    const existingNextTarget = blockElement.nextElementSibling
+    if (
+      existingNextTarget instanceof HTMLElement
+      && existingNextTarget.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
+      && this.readAreaTargetAfterBlockId(existingNextTarget) === insertedBlockId
+    ) {
+      return
+    }
+
+    const targetEl = document.createElement('concrete-area-block-target')
+    targetEl.setAttribute('area-id', String(target.areaId || ''))
+    targetEl.setAttribute('page-id', String(target.pageId || ''))
+    targetEl.setAttribute('area-handle', String(target.areaHandle || ''))
+    targetEl.setAttribute('after-block-id', insertedBlockId)
+
+    const baseTargetIndex = Number(target.targetIndex || 0)
+    const resolvedTargetIndex = Number.isFinite(baseTargetIndex) ? (baseTargetIndex + 1) : 0
+    targetEl.setAttribute('target-index', String(resolvedTargetIndex))
+
+    blockElement.insertAdjacentElement('afterend', targetEl)
+  }
+
+  private resolveInsertedBlockId(blockElement: HTMLElement): string {
+    const blockIdAttr = blockElement.getAttribute('block-id')
+    if (blockIdAttr && blockIdAttr.trim() !== '') {
+      return blockIdAttr.trim().replace(/^b/i, '')
+    }
+
+    const domId = blockElement.id || ''
+    if (domId.trim() !== '') {
+      return domId.trim().replace(/^b/i, '')
+    }
+
+    return ''
+  }
+
+  private readAreaTargetAfterBlockId(targetElement: HTMLElement): string {
+    const fromData = targetElement.getAttribute('data-after-block-id')
+    if (fromData && fromData.trim() !== '') {
+      return fromData.trim().replace(/^b/i, '')
+    }
+
+    const fromAttr = targetElement.getAttribute('after-block-id')
+    if (fromAttr && fromAttr.trim() !== '') {
+      return fromAttr.trim().replace(/^b/i, '')
+    }
+
+    return ''
   }
 
   private escapeAttributeSelectorValue(value: string): string {

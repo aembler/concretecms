@@ -34,6 +34,11 @@ export type HotSpotBadgeGeometry = {
 }
 
 export const HOT_SPOT_BADGE_GEOMETRY_KEY = Symbol('hot-spot-badge-geometry') as InjectionKey<HotSpotBadgeGeometry>
+const hotSpotGeometryRefreshers = new Set<() => void>()
+
+export function refreshHotSpotGeometries() {
+  hotSpotGeometryRefreshers.forEach((refreshGeometry) => refreshGeometry())
+}
 
 export function useHotSpotGeometry(
   rootElement: MaybeRef<HTMLElement | null | undefined> | MaybeGetter<HTMLElement | null | undefined>
@@ -88,6 +93,7 @@ export function useHotSpotGeometry(
     pageLeft.value = rect.left + window.scrollX
 
   }
+  const refreshGeometry = () => updateGeometry()
 
   async function scheduleUpdate() {
     await nextTick()
@@ -141,6 +147,7 @@ export function useHotSpotGeometry(
     window.addEventListener('touchmove', handleScrollStart, { passive: true })
     window.addEventListener('resize', handleViewportChange, { passive: true })
     connectResizeObserver(resolveRootElement())
+    hotSpotGeometryRefreshers.add(refreshGeometry)
     void scheduleUpdate()
   })
 
@@ -150,6 +157,7 @@ export function useHotSpotGeometry(
     window.removeEventListener('touchmove', handleScrollStart)
     window.removeEventListener('scroll', handleScroll)
     window.removeEventListener('resize', handleViewportChange)
+    hotSpotGeometryRefreshers.delete(refreshGeometry)
     disconnectResizeObserver()
     if (scrollSettledTimer) {
       clearTimeout(scrollSettledTimer)

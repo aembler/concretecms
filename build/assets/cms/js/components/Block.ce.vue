@@ -289,6 +289,7 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
       if (nextIsTarget && nextSibling) {
         nextSibling.remove()
       }
+      uiStore.refreshPageAreas()
       
       uiStore.completePageOperation(operation.id)
     },

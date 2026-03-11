@@ -3,6 +3,7 @@ import type { Pinia } from 'pinia'
 import { getConcretePinia } from './pinia'
 import type { PageOperation } from './types/page-operations'
 import type { ToastOperation } from './types/page-operations'
+import { refreshHotSpotGeometries } from '../support/dom/hotspot'
 
 type DragPointer = { x: number; y: number } | null
 type OperationsDebugWindow = Window & { __CONCRETE_PAGE_OPS_DEBUG__?: boolean }
@@ -39,10 +40,10 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     toastContainer: null as HTMLElement | string | null,
     blockAreaMap: {} as Record<string, string[]>,
     clickProxy: {
-      activeElementId: '',
-      hoverElementId: '',
-      doubleClickedElementId: '',
-      activeElementMenuId: '',
+      activeElementId: null as string | null,
+      hoverElementId: null as string | null,
+      doubleClickedElementId: null as string | null,
+      activeElementMenuId: null as string | null,
     },
     scroll: {
       y: 0,
@@ -68,12 +69,17 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       this.clickProxy.doubleClickedElementId = id
       queueMicrotask(() => {
         if (this.clickProxy.doubleClickedElementId === id) {
-          this.clickProxy.doubleClickedElementId = ''
+          this.clickProxy.doubleClickedElementId = null
         }
       })
     },
     clearDoubleClickedElementId() {
-      this.clickProxy.doubleClickedElementId = ''
+      this.clickProxy.doubleClickedElementId = null
+    },
+    refreshPageAreas() {
+      this.clickProxy.activeElementId = null
+      this.clickProxy.hoverElementId = null
+      refreshHotSpotGeometries()
     },
     updateScroll(y: number) {
       const direction = y < this.scroll.y ? 'up' : 'down'

@@ -202,6 +202,7 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       replacementHtml,
       evaluateScripts: true,
     })
+    uiStore.refreshPageAreas()
 
     toast.success(
       submitResponse?.title || 'Add Block',
