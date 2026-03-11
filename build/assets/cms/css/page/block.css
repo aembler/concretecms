@@ -1,0 +1,4 @@
+.concrete-block {
+  padding: 1px 0; /* This helps certain block types like horizontal rule */
+  position: relative;
+}

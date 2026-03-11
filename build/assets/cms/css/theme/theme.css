@@ -1,0 +1,8 @@
+@theme {
+    --color-concrete-green: #59EC59;
+    --color-concrete-green-heavy: #108910;
+    --color-concrete-area: #e6e6e6;
+    --color-concrete-container: #800080;
+    --color-concrete-block: var(--color-concrete-green);
+    --color-concrete-backdrop-bg: rgba(0, 0, 0, 0.4)
+}

@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="targetRef"
-    class="ccm-area-block-target"
+    class="concrete-area-block-target"
     :class="[
       isDragActive ? 'is-drag-active' : '',
       isActiveTarget ? 'is-active-target' : '',
@@ -186,51 +186,9 @@ onBeforeUnmount(() => {
     :data-target-index="ownTargetIndex"
   >
     <div
-      class="ccm-area-block-target-pill px-6 shadow-sm text-xs font-semibold uppercase rounded-full py-1 inline-block bg-concrete-green"
+      class="concrete-area-block-target-pill"
     >
       + Add
     </div>
   </div>
 </template>
-
-<style>
-.ccm-area-block-target {
-  height: 0;
-  overflow: hidden;
-  position: relative;
-  transition: height 180ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, border-radius 180ms ease, border-color 180ms ease;
-  will-change: height, background-color, border-radius, border-color;
-}
-
-.ccm-area-block-target.is-drag-active {
-  height: 10px;
-  border-radius: 4px;
-  border: 2px solid var(--color-concrete-green);
-  margin: 4px 0;
-
-  .ccm-area-block-target-pill {
-    opacity: 0;
-  }
-}
-
-.ccm-area-block-target.is-drag-active:hover,
-.ccm-area-block-target.is-active-target {
-  height: 30px;
-  background: var(--color-concrete-green-heavy);
-  border-radius: 0;
-  border-color: transparent;
-
-  .ccm-area-block-target-pill {
-    opacity: 1;
-  }
-}
-
-.ccm-area-block-target-pill {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  will-change: opacity;
-  transition: height 180ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-</style>

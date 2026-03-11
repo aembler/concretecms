@@ -69,6 +69,8 @@ function getMergedElementStyles(component) {
 // Master App component. This component hosts all UI components, including block editors. It has full access
 // To tailwind classes. It uses shadow DOM so that page theme styles do not affect it, unlike page level components
 // like ConcreteArea and ConcreteContainer, which inherit their styles from the theme and from cms/page.css
+// Any components found within other components like Block.ce.vue have their UI elements
+// teleported into a container hosted in this app.
 const ConcreteAppElement = defineCustomElement(ConcreteApp, {
     styles: getMergedElementStyles(ConcreteApp),
     plugins: [pinia]
@@ -89,12 +91,8 @@ const ConcreteBlockElement = defineCustomElement(ConcreteBlock, {
     plugins: [pinia]
 })
 
-
-
-
-
 const ConcreteAreaBlockTargetElement = defineCustomElement(ConcreteAreaBlockTarget, {
-    styles: getMergedElementStyles(ConcreteAreaBlockTarget),
+    shadowRoot: false,
     plugins: [pinia]
 })
 

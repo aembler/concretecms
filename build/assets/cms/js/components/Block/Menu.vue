@@ -3,7 +3,7 @@
     <div
         :id="id"
         v-show="show"
-        class="flex absolute z-50 pointer-events-auto -translate-x-1/2"
+        class="z-(--index-layer-page-menu) flex absolute pointer-events-auto -translate-x-1/2"
         ref="menuEl"
         :style="{ top: menuTop, left: menuLeft }"
     >

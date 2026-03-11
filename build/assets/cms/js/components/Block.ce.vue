@@ -5,7 +5,7 @@
         class="concrete-block"
         :data-concrete-block-id="blockId"
     >
-      <div class="relative">
+      <div class="concrete-block">
         <slot />
         <HotSpotOverlay
             :element="rootEl"
@@ -54,6 +54,21 @@
     </div>
 
   </template>
+
+  <!-- Edit Mode for the block //-->
+  <div v-if="editMode">
+    <component
+        :is="currentEditorComponent"
+        v-if="currentEditorComponent"
+        :block-type-id="parseBlockType?.id"
+        :editor="parseEditor"
+        :block-id="blockId"
+        :area-handle="areaHandle"
+        :page-id="pageId"
+        @updated="handleUpdated"
+        @closed="handleEditorClosed"
+    />
+  </div>
 
   <DeleteBlockModal
       :open="showDeleteModal"
@@ -160,9 +175,10 @@ const isMasterCollectionBool = computed(() => {
 })
 const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.blockId)
 const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.blockId)
+const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
 
 const isBlockHovered = computed(() => {
-  if (!isInteractionsEnabled.value) {
+  if (!isInteractionsEnabled.value || isAddContentDragActive.value) {
     return false
   }
 
@@ -182,16 +198,7 @@ watch(isBlockDoubleClicked, (value) => {
   editBlock()
 })
 
-const clickedOutlineColor = 'outline-concrete-green';
-const hoveredOutlineColor = 'outline-concrete-green';
-const outlineColor = computed(() => {
-  if (isBlockClicked.value) return clickedOutlineColor
-  if (isBlockHovered.value) return hoveredOutlineColor
-  return 'outline-transparent'
-})
-
 let menuId = computed(() => 'm' + props.blockId + '-menu')
-const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
 
 function editBlock() {
   if (!currentEditorComponent.value) {
@@ -202,14 +209,6 @@ function editBlock() {
   editMode.value = true
 }
 
-function clearMenuState() {
-  if (uiStore.clickProxy.activeElementId === props.id) {
-    uiStore.clickProxy.hoverElementId = ''
-    uiStore.clickProxy.activeElementId = ''
-    uiStore.clickProxy.doubleClickedElementId = ''
-    uiStore.clickProxy.activeElementMenuId = ''
-  }
-}
 
 function handleUpdated() {
   uiStore.setPageInteractionsEnabled(true)
@@ -276,9 +275,7 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
 
       // Remove the custom element host itself on delete. Keeping the host in place
       // leaves stale siblings/targets around because only the inner slot content is hidden.
-      const hostId = String(props.id || '')
-      const hostElement = hostId ? document.getElementById(hostId) : null
-      const previousSibling = hostElement?.previousElementSibling || null
+      const hostElement = document.querySelector(`concrete-block[block-id="${props.blockId}"]`)
       const nextSibling = hostElement?.nextElementSibling || null
       if (hostElement) {
         hostElement.remove()
@@ -288,14 +285,11 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
 
       // PHP renders a target before and after blocks. Once the host is removed those
       // two targets can become adjacent duplicates, so collapse one of them.
-      const prevIsTarget = previousSibling?.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
       const nextIsTarget = nextSibling?.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
-      if (prevIsTarget && nextIsTarget && nextSibling) {
+      if (nextIsTarget && nextSibling) {
         nextSibling.remove()
       }
-
-      clearMenuState()
-
+      
       uiStore.completePageOperation(operation.id)
     },
     onError: () => {
