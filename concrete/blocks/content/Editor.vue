@@ -6,25 +6,28 @@
         class="absolute z-50 -translate-x-1/2 pointer-events-auto"
         :style="{ left: menuLeft, top: menuTop }"
       >
-        <InlineToolbar class="flex-nowrap">
-          <InlineToolbarGroup>
-            <InlineToolbarButton :disabled="isSubmitting" @click="handleCancel">
-              Cancel
-            </InlineToolbarButton>
-            <InlineToolbarButton :disabled="isSubmitting" @click="handleSave">
-              Save
-            </InlineToolbarButton>
-          </InlineToolbarGroup>
-        </InlineToolbar>
+        <BaselineToolbar toolbar-mode="inline">
+          <template #actions>
+            <InlineToolbarSeparator />
+            <InlineToolbarGroup>
+              <InlineToolbarButton :disabled="isSubmitting" @click="handleCancel">
+                Cancel
+              </InlineToolbarButton>
+              <InlineToolbarButton :disabled="isSubmitting" @click="handleSave">
+                Save
+              </InlineToolbarButton>
+            </InlineToolbarGroup>
+          </template>
+        </BaselineToolbar>
       </div>
     </MenuContainer>
 
     <div
       ref="editableEl"
       class="min-h-[48px] rounded border border-concrete-green/30 bg-base-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-concrete-green/30"
-      contenteditable="true"
-      @input="handleInput"
-    ></div>
+    >
+      <BaselineEditor v-model="contentHtml" />
+    </div>
 
   </div>
 </template>
@@ -39,11 +42,13 @@ export const blockEditorMeta: BlockEditorMeta = {
 </script>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
-  InlineToolbar,
+  BaselineEditor,
+  BaselineToolbar,
   InlineToolbarButton,
   InlineToolbarGroup,
+  InlineToolbarSeparator,
   normalizeJsonResponse,
   useAjax,
 } from '@concretecms/backendui'
@@ -91,14 +96,6 @@ const dialogUrl = computed(() => {
 
   return `/ccm/system/dialogs/block/edit/submit?${params.toString()}`
 })
-
-
-function handleInput() {
-  contentHtml.value = editableEl.value?.innerHTML ?? ''
-  void nextTick(() => {
-    menuPos.update()
-  })
-}
 
 function handleSave() {
   if (isSubmitting.value) {
@@ -153,11 +150,14 @@ function handleCancel() {
   emit('closed')
 }
 
+watch(contentHtml, () => {
+  void nextTick(() => {
+    menuPos.update()
+  })
+})
+
 onMounted(() => {
   contentHtml.value = props.contentHtml ?? props.editor?.componentProps?.content ?? ''
-  if (editableEl.value) {
-    editableEl.value.innerHTML = contentHtml.value
-  }
 
   void nextTick(() => {
     menuPos.update()

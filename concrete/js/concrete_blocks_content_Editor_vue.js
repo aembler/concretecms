@@ -145,13 +145,6 @@ var blockEditorMeta = {
       });
       return "/ccm/system/dialogs/block/edit/submit?".concat(params.toString());
     });
-    function handleInput() {
-      var _editableEl$value$inn, _editableEl$value;
-      contentHtml.value = (_editableEl$value$inn = (_editableEl$value = editableEl.value) === null || _editableEl$value === void 0 ? void 0 : _editableEl$value.innerHTML) !== null && _editableEl$value$inn !== void 0 ? _editableEl$value$inn : '';
-      void (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)(function () {
-        menuPos.update();
-      });
-    }
     function handleSave() {
       if (isSubmitting.value) {
         return;
@@ -199,12 +192,14 @@ var blockEditorMeta = {
     function handleCancel() {
       emit('closed');
     }
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(contentHtml, function () {
+      void (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)(function () {
+        menuPos.update();
+      });
+    });
     (0,vue__WEBPACK_IMPORTED_MODULE_0__.onMounted)(function () {
       var _ref2, _props$contentHtml, _props$editor;
       contentHtml.value = (_ref2 = (_props$contentHtml = props.contentHtml) !== null && _props$contentHtml !== void 0 ? _props$contentHtml : (_props$editor = props.editor) === null || _props$editor === void 0 || (_props$editor = _props$editor.componentProps) === null || _props$editor === void 0 ? void 0 : _props$editor.content) !== null && _ref2 !== void 0 ? _ref2 : '';
-      if (editableEl.value) {
-        editableEl.value.innerHTML = contentHtml.value;
-      }
       void (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)(function () {
         menuPos.update();
       });
@@ -224,17 +219,22 @@ var blockEditorMeta = {
       menuLeft: menuLeft,
       menuTop: menuTop,
       dialogUrl: dialogUrl,
-      handleInput: handleInput,
       handleSave: handleSave,
       handleCancel: handleCancel,
-      get InlineToolbar() {
-        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.InlineToolbar;
+      get BaselineEditor() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.BaselineEditor;
+      },
+      get BaselineToolbar() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.BaselineToolbar;
       },
       get InlineToolbarButton() {
         return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.InlineToolbarButton;
       },
       get InlineToolbarGroup() {
         return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.InlineToolbarGroup;
+      },
+      get InlineToolbarSeparator() {
+        return _concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.InlineToolbarSeparator;
       },
       MenuContainer: _build_assets_cms_js_components_Ui_MenuContainer_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
     };
@@ -270,6 +270,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 var _hoisted_1 = {
   "class": "relative"
 };
+var _hoisted_2 = {
+  ref: "editableEl",
+  "class": "min-h-[48px] rounded border border-concrete-green/30 bg-base-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-concrete-green/30"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["MenuContainer"], null, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
@@ -280,18 +284,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           left: $setup.menuLeft,
           top: $setup.menuTop
         })
-      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["InlineToolbar"], {
-        "class": "flex-nowrap"
+      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["BaselineToolbar"], {
+        "toolbar-mode": "inline"
       }, {
-        "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["InlineToolbarGroup"], null, {
+        actions: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
+          return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["InlineToolbarSeparator"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["InlineToolbarGroup"], null, {
             "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
               return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["InlineToolbarButton"], {
                 disabled: $setup.isSubmitting,
                 onClick: $setup.handleCancel
               }, {
                 "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-                  return _toConsumableArray(_cache[0] || (_cache[0] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Cancel ", -1 /* CACHED */)]));
+                  return _toConsumableArray(_cache[1] || (_cache[1] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Cancel ", -1 /* CACHED */)]));
                 }),
                 _: 1 /* STABLE */
               }, 8 /* PROPS */, ["disabled"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["InlineToolbarButton"], {
@@ -299,7 +303,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 onClick: $setup.handleSave
               }, {
                 "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-                  return _toConsumableArray(_cache[1] || (_cache[1] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Save ", -1 /* CACHED */)]));
+                  return _toConsumableArray(_cache[2] || (_cache[2] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Save ", -1 /* CACHED */)]));
                 }),
                 _: 1 /* STABLE */
               }, 8 /* PROPS */, ["disabled"])];
@@ -311,12 +315,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       })], 4 /* STYLE */)];
     }),
     _: 1 /* STABLE */
-  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    ref: "editableEl",
-    "class": "min-h-[48px] rounded border border-concrete-green/30 bg-base-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-concrete-green/30",
-    contenteditable: "true",
-    onInput: $setup.handleInput
-  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */)]);
+  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["BaselineEditor"], {
+    modelValue: $setup.contentHtml,
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $setup.contentHtml = $event;
+    })
+  }, null, 8 /* PROPS */, ["modelValue"])], 512 /* NEED_PATCH */)]);
 }
 
 /***/ })
