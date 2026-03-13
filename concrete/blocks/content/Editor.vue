@@ -29,6 +29,15 @@
   </div>
 </template>
 
+<script lang="ts">
+import type { BlockEditorMeta } from '../../../build/assets/cms/js/stores/block-editor-registry'
+
+export const blockEditorMeta: BlockEditorMeta = {
+  pageContentMode: 'hide',
+  editorContentSource: 'html',
+}
+</script>
+
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import {
@@ -53,6 +62,8 @@ const props = defineProps<{
   blockId: string | number
   areaHandle: string
   pageId: string | number
+  contentHtml?: string | null
+  contentEl?: HTMLElement | null
 }>()
 
 const emit = defineEmits<{
@@ -78,7 +89,7 @@ const dialogUrl = computed(() => {
     bID: String(props.blockId),
   })
 
-  return `/ccm/system/dialogs/block/edit?${params.toString()}`
+  return `/ccm/system/dialogs/block/edit/submit?${params.toString()}`
 })
 
 
@@ -98,7 +109,6 @@ function handleSave() {
 
   const body = new FormData()
   body.set('content', contentHtml.value)
-  body.set('ccm_token', String((window as any).CCM_SECURITY_TOKEN || ''))
 
   request({
     url: dialogUrl.value,
@@ -144,7 +154,7 @@ function handleCancel() {
 }
 
 onMounted(() => {
-  contentHtml.value = props.editor?.componentProps?.content || ''
+  contentHtml.value = props.contentHtml ?? props.editor?.componentProps?.content ?? ''
   if (editableEl.value) {
     editableEl.value.innerHTML = contentHtml.value
   }

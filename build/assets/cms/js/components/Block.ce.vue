@@ -6,8 +6,15 @@
         :data-concrete-block-id="blockId"
     >
       <div class="concrete-block">
-        <slot />
+        <div
+            ref="contentEl"
+            class="concrete-block__content"
+            v-show="shouldShowPageContent"
+        >
+          <slot />
+        </div>
         <HotSpotOverlay
+            v-if="shouldRenderHotSpots"
             :element="rootEl"
             :data-concrete-block-id="blockId"
             :is-hovered="isBlockHovered"
@@ -20,6 +27,7 @@
         />
       </div>
       <HotSpot
+          v-if="shouldRenderHotSpots"
           :element="rootEl"
           :is-targeted="isBlockHovered || isBlockClicked"
           border-color="var(--color-concrete-block)"
@@ -65,6 +73,8 @@
         :block-id="blockId"
         :area-handle="areaHandle"
         :page-id="pageId"
+        :content-html="contentHtml"
+        :content-el="contentEl"
         @updated="handleUpdated"
         @closed="handleEditorClosed"
     />
@@ -87,7 +97,7 @@ import Menu from "./Block/Menu.vue";
 import HotSpot from "./Ui/HotSpot.vue";
 import HotSpotOverlay from "./Ui/HotSpotOverlay.vue";
 import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
-import { normalizeJsonResponse, useAjax, useParsedJsonProp } from '@concretecms/backendui'
+import { normalizeJsonResponse, useAjax, useParsedJsonPropRef } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
 import { useBlockEditorRegistry } from '../stores/block-editor-registry'
@@ -95,6 +105,7 @@ import { useToast } from '../utilities/toast'
 import HotSpotBadge from "./Ui/HotSpotBadge.vue";
 
 const rootEl = ref<HTMLElement | null>()
+const contentEl = ref<HTMLElement | null>()
 const editMode = ref(false)
 const isDeleted = ref(false)
 const showDeleteModal = ref(false)
@@ -117,10 +128,39 @@ const props = defineProps({
   selectedVariant: String,
 })
 
-const parsedVariants = useParsedJsonProp(props.variants)
-const parseBlockType = useParsedJsonProp(props.blocktype)
-const parseEditor = useParsedJsonProp(props.editor)
-const parseLang = useParsedJsonProp(props.lang)
+const parsedVariants = useParsedJsonPropRef(() => props.variants)
+const parseBlockType = useParsedJsonPropRef(() => props.blocktype)
+const parseEditor = useParsedJsonPropRef(() => props.editor)
+const parseLang = useParsedJsonPropRef(() => props.lang)
+// Metadata exported by the active editor component. This lets the editor decide
+// whether page content stays visible during edit mode and whether it needs access
+// to the current block content from the page.
+const editorMeta = ref({
+  pageContentMode: 'preserve' as const,
+  editorContentSource: 'none' as const,
+})
+// Snapshot of the rendered block content. Editors like the content block editor
+// can use this instead of relying on backend-provided initial content props.
+const contentHtml = computed(() => contentEl.value?.innerHTML ?? '')
+
+watch(
+  () => parseEditor.value?.component,
+  async (componentName) => {
+    editorMeta.value = await blockEditorRegistry.resolveEditorMeta(componentName)
+  },
+  { immediate: true }
+)
+
+const shouldShowPageContent = computed(() => {
+  if (!editMode.value) {
+    return true
+  }
+
+  // Editors can temporarily hide the page-rendered content while they take over
+  // the editing UI. The default remains "preserve" for backward compatibility.
+  return editorMeta.value.pageContentMode !== 'hide'
+})
+
 const blockAreaPath = computed(() => {
   const rootNode = rootEl.value?.getRootNode()
   const hostElement = rootNode instanceof ShadowRoot ? rootNode.host : rootEl.value
@@ -168,6 +208,7 @@ watch(
 )
 
 const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const shouldRenderHotSpots = computed(() => !editMode.value && isInteractionsEnabled.value)
 const isMasterCollectionBool = computed(() => {
   const value = props.isMasterCollection
   return value === true || value === 1 || value === '1' || value === 'true'
@@ -220,7 +261,7 @@ function handleEditorClosed() {
 }
 
 const currentEditorComponent = computed(() => {
-  const editorComponentName = parseEditor?.component
+  const editorComponentName = parseEditor.value?.component
   return blockEditorRegistry.resolveEditorComponent(editorComponentName)
 })
 

@@ -44,6 +44,15 @@
   </LazyDialog>
 </template>
 
+<script lang="ts">
+import type { BlockEditorMeta } from '../../../stores/block-editor-registry'
+
+export const blockEditorMeta: BlockEditorMeta = {
+  pageContentMode: 'preserve',
+  editorContentSource: 'none',
+}
+</script>
+
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
@@ -71,6 +80,8 @@ const props = defineProps<{
   blockId: string | number
   areaHandle: string
   pageId: string | number
+  contentHtml?: string | null
+  contentEl?: HTMLElement | null
   addTarget?: AddBlockTargetRef
 }>()
 

@@ -9,6 +9,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* reexport safe */ _Editor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_1__.blockEditorMeta),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _Editor_vue_vue_type_template_id_ae4868e0_ts_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Editor.vue?vue&type=template&id=ae4868e0&ts=true */ "../concrete/blocks/content/Editor.vue?vue&type=template&id=ae4868e0&ts=true");
@@ -36,6 +37,7 @@ if (false) {}
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* reexport safe */ _build_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_build_node_modules_ts_loader_index_js_clonedRuleSet_26_build_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Editor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__.blockEditorMeta),
 /* harmony export */   "default": () => (/* reexport safe */ _build_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_build_node_modules_ts_loader_index_js_clonedRuleSet_26_build_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Editor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _build_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_build_node_modules_ts_loader_index_js_clonedRuleSet_26_build_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Editor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../build/node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../build/node_modules/ts-loader/index.js??clonedRuleSet-26!../../../build/node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./Editor.vue?vue&type=script&setup=true&lang=ts */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/ts-loader/index.js??clonedRuleSet-26!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!../concrete/blocks/content/Editor.vue?vue&type=script&setup=true&lang=ts");
@@ -66,6 +68,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* binding */ blockEditorMeta),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "vue");
@@ -80,6 +83,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var blockEditorMeta = {
+  pageContentMode: 'hide',
+  editorContentSource: 'html'
+};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*@__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   __name: 'Editor',
   props: {
@@ -98,6 +105,14 @@ __webpack_require__.r(__webpack_exports__);
     pageId: {
       type: [String, Number],
       required: true
+    },
+    contentHtml: {
+      type: [String, null],
+      required: false
+    },
+    contentEl: {
+      type: null,
+      required: false
     }
   },
   emits: ["updated", "closed"],
@@ -128,7 +143,7 @@ __webpack_require__.r(__webpack_exports__);
         arHandle: String(props.areaHandle),
         bID: String(props.blockId)
       });
-      return "/ccm/system/dialogs/block/edit?".concat(params.toString());
+      return "/ccm/system/dialogs/block/edit/submit?".concat(params.toString());
     });
     function handleInput() {
       var _editableEl$value$inn, _editableEl$value;
@@ -144,7 +159,6 @@ __webpack_require__.r(__webpack_exports__);
       isSubmitting.value = true;
       var body = new FormData();
       body.set('content', contentHtml.value);
-      body.set('ccm_token', String(window.CCM_SECURITY_TOKEN || ''));
       request({
         url: dialogUrl.value,
         method: 'POST',
@@ -186,8 +200,8 @@ __webpack_require__.r(__webpack_exports__);
       emit('closed');
     }
     (0,vue__WEBPACK_IMPORTED_MODULE_0__.onMounted)(function () {
-      var _props$editor;
-      contentHtml.value = ((_props$editor = props.editor) === null || _props$editor === void 0 || (_props$editor = _props$editor.componentProps) === null || _props$editor === void 0 ? void 0 : _props$editor.content) || '';
+      var _ref2, _props$contentHtml, _props$editor;
+      contentHtml.value = (_ref2 = (_props$contentHtml = props.contentHtml) !== null && _props$contentHtml !== void 0 ? _props$contentHtml : (_props$editor = props.editor) === null || _props$editor === void 0 || (_props$editor = _props$editor.componentProps) === null || _props$editor === void 0 ? void 0 : _props$editor.content) !== null && _ref2 !== void 0 ? _ref2 : '';
       if (editableEl.value) {
         editableEl.value.innerHTML = contentHtml.value;
       }
@@ -196,6 +210,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     });
     var __returned__ = {
+      blockEditorMeta: blockEditorMeta,
       props: props,
       emit: emit,
       request: request,

@@ -9,6 +9,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* reexport safe */ _DialogEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_1__.blockEditorMeta),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _DialogEditor_vue_vue_type_template_id_32cccb9e_ts_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DialogEditor.vue?vue&type=template&id=32cccb9e&ts=true */ "./assets/cms/js/components/Block/Editor/DialogEditor.vue?vue&type=template&id=32cccb9e&ts=true");
@@ -36,6 +37,7 @@ if (false) {}
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_ts_loader_index_js_clonedRuleSet_26_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DialogEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__.blockEditorMeta),
 /* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_ts_loader_index_js_clonedRuleSet_26_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DialogEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_ts_loader_index_js_clonedRuleSet_26_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DialogEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/ts-loader/index.js??clonedRuleSet-26!../../../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./DialogEditor.vue?vue&type=script&setup=true&lang=ts */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/ts-loader/index.js??clonedRuleSet-26!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./assets/cms/js/components/Block/Editor/DialogEditor.vue?vue&type=script&setup=true&lang=ts");
@@ -66,6 +68,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* binding */ blockEditorMeta),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "vue");
@@ -76,7 +79,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var DIALOG_CLOSE_TRANSITION_MS = 240;
+var blockEditorMeta = {
+  pageContentMode: 'preserve',
+  editorContentSource: 'none'
+};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*@__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   __name: 'DialogEditor',
   props: {
@@ -104,6 +110,14 @@ var DIALOG_CLOSE_TRANSITION_MS = 240;
       type: [String, Number],
       required: true
     },
+    contentHtml: {
+      type: [String, null],
+      required: false
+    },
+    contentEl: {
+      type: null,
+      required: false
+    },
     addTarget: {
       type: Object,
       required: false
@@ -121,6 +135,7 @@ var DIALOG_CLOSE_TRANSITION_MS = 240;
     var isSubmitting = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(false);
     var closeEmitTimer = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
     var pendingUpdatedResponse = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
+    var DIALOG_CLOSE_TRANSITION_MS = 240;
     var _useAjax = (0,_concretecms_backendui__WEBPACK_IMPORTED_MODULE_1__.useAjax)(),
       request = _useAjax.request;
     var lazyDialogRef = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
@@ -310,6 +325,7 @@ var DIALOG_CLOSE_TRANSITION_MS = 240;
       document.removeEventListener('click', handleDocumentClick);
     });
     var __returned__ = {
+      blockEditorMeta: blockEditorMeta,
       props: props,
       open: open,
       helpTooltipText: helpTooltipText,

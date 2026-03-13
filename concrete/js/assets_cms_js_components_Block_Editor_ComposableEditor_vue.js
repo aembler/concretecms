@@ -9,6 +9,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* reexport safe */ _ComposableEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_1__.blockEditorMeta),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _ComposableEditor_vue_vue_type_template_id_3f0ed4a3_ts_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ComposableEditor.vue?vue&type=template&id=3f0ed4a3&ts=true */ "./assets/cms/js/components/Block/Editor/ComposableEditor.vue?vue&type=template&id=3f0ed4a3&ts=true");
@@ -36,6 +37,7 @@ if (false) {}
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_ts_loader_index_js_clonedRuleSet_26_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_ComposableEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__.blockEditorMeta),
 /* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_ts_loader_index_js_clonedRuleSet_26_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_ComposableEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_ts_loader_index_js_clonedRuleSet_26_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_ComposableEditor_vue_vue_type_script_setup_true_lang_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/ts-loader/index.js??clonedRuleSet-26!../../../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./ComposableEditor.vue?vue&type=script&setup=true&lang=ts */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/ts-loader/index.js??clonedRuleSet-26!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./assets/cms/js/components/Block/Editor/ComposableEditor.vue?vue&type=script&setup=true&lang=ts");
@@ -66,6 +68,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   blockEditorMeta: () => (/* binding */ blockEditorMeta),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "vue");
@@ -78,12 +81,36 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
 
 
+var blockEditorMeta = {
+  pageContentMode: 'preserve',
+  editorContentSource: 'none'
+};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*@__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   __name: 'ComposableEditor',
   props: {
     blockTypeId: {
       type: Number,
       required: true
+    },
+    blockId: {
+      type: [String, Number],
+      required: false
+    },
+    areaHandle: {
+      type: String,
+      required: false
+    },
+    pageId: {
+      type: [String, Number],
+      required: false
+    },
+    contentHtml: {
+      type: [String, null],
+      required: false
+    },
+    contentEl: {
+      type: null,
+      required: false
     }
   },
   setup: function setup(__props, _ref) {
@@ -110,6 +137,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       }, _callee);
     })));
     var __returned__ = {
+      blockEditorMeta: blockEditorMeta,
       props: props,
       request: request
     };

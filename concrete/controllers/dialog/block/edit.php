@@ -46,7 +46,7 @@ class Edit extends BackendInterfaceBlockController
 
     public function submit()
     {
-        if ($this->validateAction() && $this->canAccess()) {
+        if ($this->canAccess()) {
             $app = Application::getFacadeApplication();
 
             // validate the request
