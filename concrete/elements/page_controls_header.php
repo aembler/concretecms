@@ -18,6 +18,7 @@ if (isset($cp)) {
         <script type="text/javascript">
             <?php
             $valt = Loader::helper('validation/token');
+            // Backward compatibility: legacy dashboard requests still read CCM_SECURITY_TOKEN / ccm_token.
             echo "var CCM_SECURITY_TOKEN = '" . $valt->generate() . "';\n";
 
             $mercureService = app(MercureService::class);

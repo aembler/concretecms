@@ -5,6 +5,7 @@ use Concrete\Core\User\User;
 use Concrete\Core\Localization\Localization;
 use Concrete\Core\Multilingual\Page\Section\Section;
 use Concrete\Core\Support\Facade\Application;
+use Concrete\Core\Validation\CSRF\SimpleToken;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Concrete\Core\Sharing\OpenGraph\OpenGraph;
 
@@ -110,6 +111,14 @@ if ($c !== null && $c->getAttribute('exclude_search_index')) {
 }
 if ($appConfig->get('concrete.misc.generator_tag_display_in_header')) {
     $metaTags['generator'] = sprintf('<meta name="generator" content="%s">', 'Concrete CMS');
+}
+$csrfToken = $app->make(SimpleToken::class)->getSessionToken();
+if ($csrfToken !== null) {
+    $metaTags[SimpleToken::DEFAULT_TOKEN_NAME] = sprintf(
+        '<meta name="%s" content="%s">',
+        SimpleToken::DEFAULT_TOKEN_NAME,
+        h($csrfToken)
+    );
 }
 if (($modernIconFID = (int) $config->get('misc.modern_tile_thumbnail_fid')) && ($modernIconFile = File::getByID($modernIconFID))) {
     $metaTags['msapplication-TileImage'] = sprintf('<meta name="msapplication-TileImage" content="%s">', $modernIconFile->getURL());

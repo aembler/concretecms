@@ -115,7 +115,6 @@ const props = defineProps({
   editor: [Object, String],
   lang: Object | String | null,
   selectedVariant: String,
-  deleteToken: String
 })
 
 const parsedVariants = useParsedJsonProp(props.variants)
@@ -256,7 +255,6 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
     cID: props.pageId,
     bID: props.blockId,
     arHandle: props.areaHandle,
-    ccm_token: props.deleteToken,
   })
 
   const url = window.CCM_DISPATCHER_FILENAME + endpoint + '?' + params.toString();
@@ -293,8 +291,22 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
       
       uiStore.completePageOperation(operation.id)
     },
-    onError: () => {
+    onError: (error: any) => {
       uiStore.failPageOperation(operation.id)
+
+      const message = error?.responseText || error?.message || 'An unknown error occurred.'
+      const globalWindow = window as any
+      if (globalWindow?.ConcreteAlert?.dialog) {
+        globalWindow.ConcreteAlert.dialog('Error', message)
+        return
+      }
+
+      if (globalWindow?.ConcreteAlert?.error) {
+        globalWindow.ConcreteAlert.error(message)
+        return
+      }
+
+      window.alert(String(message).replace(/<[^>]*>/g, ''))
     },
     onComplete: () => {
       runningDeleteOperationId.value = null

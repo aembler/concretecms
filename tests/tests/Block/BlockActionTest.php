@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Concrete\Core\Http\Request;
+use Concrete\Core\Http\Middleware\ValidateSimpleCsrfTokenMiddleware;
 use Symfony\Component\Routing\RouteCollection;
 
 class BlockActionTest extends TestCase
@@ -196,5 +197,22 @@ class BlockActionTest extends TestCase
         $route = $router->getRouteByPath($path, $context);
         $action = $router->resolveAction($route);
         $this->assertEquals($class, $action->getControllerCallback());
+    }
+
+    public function testSystemRoutesIncludeCsrfMiddleware()
+    {
+        $router = new Router(new RouteCollection(), new RouteActionFactory());
+        $list = new SystemRouteList();
+        $list->loadRoutes($router);
+
+        $context = new RequestContext();
+        $context->fromRequest(Request::getInstance());
+        $route = $router->getRouteByPath('/ccm/system/block/action/add/123/Main/4/add_form/', $context);
+
+        $middlewareClasses = array_map(function ($middleware) {
+            return $middleware->getMiddleware();
+        }, $route->getMiddlewares());
+
+        $this->assertContains(ValidateSimpleCsrfTokenMiddleware::class, $middlewareClasses);
     }
 }

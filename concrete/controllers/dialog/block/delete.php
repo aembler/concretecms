@@ -38,7 +38,7 @@ class Delete extends BackendInterfaceBlockController
 
     public function submit()
     {
-        if ($this->validateAction()) {
+        if ($this->canAccess()) {
             if ($this->permissions->canDeleteBlock()) {
                 $b = $this->getBlockToEdit();
                 $pr = $this->getEditResponse($b);

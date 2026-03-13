@@ -1,5 +1,6 @@
 <?php
 use Concrete\Core\Localization\Localization;
+use Concrete\Core\Validation\CSRF\SimpleToken;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
@@ -14,6 +15,12 @@ if (is_object($c)) {
 ?>
 
 <title><?=t('Preview')?></title>
+<?php
+$csrfToken = app(SimpleToken::class)->getSessionToken();
+if ($csrfToken !== null) {
+    echo sprintf('<meta name="%s" content="%s">', SimpleToken::DEFAULT_TOKEN_NAME, h($csrfToken)) . PHP_EOL;
+}
+?>
 <script type="text/javascript">
     var CCM_DISPATCHER_FILENAME = "<?= DIR_REL . '/' . DISPATCHER_FILENAME; ?>";
     var CCM_CID = <?= $cID ?? 0; ?>;
