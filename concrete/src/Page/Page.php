@@ -1837,6 +1837,9 @@ class Page extends Collection implements CategoryMemberInterface,
                     case 'dashboard':
                         $this->themeObject = new \Concrete\Theme\Dashboard\PageTheme();
                         break;
+                    case 'nova_dashboard':
+                        $this->themeObject = new \Concrete\Theme\NovaDashboard\PageTheme();
+                        break;
                     default:
                         $this->themeObject = PageTheme::getByHandle($tmpTheme[0]);
                         break;

@@ -213,6 +213,10 @@ class View extends AbstractView
                     $this->themeObject = new \Concrete\Theme\Dashboard\PageTheme();
                     $this->themePkgHandle = false;
                     break;
+                case 'nova_dashboard':
+                    $this->themeObject = new \Concrete\Theme\NovaDashboard\PageTheme();
+                    $this->themePkgHandle = false;
+                    break;
                 default:
                     if (!isset($this->themeObject)) {
                         $this->themeObject = PageTheme::getByHandle($this->themeHandle);

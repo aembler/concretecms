@@ -314,8 +314,8 @@ return [
      * Route themes
      */
     'theme_paths' => [
-        '/dashboard' => 'dashboard',
-        '/dashboard/*' => 'dashboard',
+        '/dashboard' => 'nova_dashboard',
+        '/dashboard/*' => 'nova_dashboard',
         '/frontend/install' => VIEW_CORE_THEME,
         '/login' => VIEW_CORE_THEME,
         '/oauth/authorize' => VIEW_CORE_THEME,
