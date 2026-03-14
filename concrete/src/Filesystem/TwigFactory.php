@@ -4,6 +4,7 @@ namespace Concrete\Core\Filesystem;
 
 use Concrete\Core\Application\ApplicationAwareInterface;
 use Concrete\Core\Application\ApplicationAwareTrait;
+use Concrete\Core\Filesystem\FileLocator\ThemeLocation;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Page\View\PageView;
 use Twig\Cache\CacheInterface;
@@ -44,7 +45,8 @@ class TwigFactory implements ApplicationAwareInterface
         if ($c) {
             $theme = $c->getCollectionThemeObject();
             if ($theme) {
-                $loader->addPath((string) $theme->getThemeDirectory(), 'theme');
+                $themeLocation = new ThemeLocation($theme);
+                $loader->addPath((string) $themeLocation->getPath(), 'theme');
             }
         }
     }

@@ -8,6 +8,11 @@ use Concrete\Core\Page\Theme\BedrockThemeTrait;
 class PageTheme extends \Concrete\Core\Page\Theme\Theme
 {
 
+    public function getThemeHandle()
+    {
+        return 'nova_dashboard';
+    }
+
     use BedrockThemeTrait {
         registerAssets as bedrockRegisterAssets;
     }
