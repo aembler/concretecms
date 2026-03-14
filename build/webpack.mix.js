@@ -109,15 +109,12 @@ mix
     .js('assets/themes/concrete/js/main.js', 'themes/concrete').vue()
 
 // Installer
-mix
-    .sass('assets/installer/scss/installer.scss', 'css/installer.css', {
-        sassOptions: {
-            includePaths: [
-                path.resolve(__dirname, './node_modules/')
-            ]
-        }
-    })
-    .js('assets/installer/js/installer.js', 'js/installer.js').vue()
+mix.postCss('assets/installer/css/installer.css', 'css/installer.css', [
+    tailwindcss(),
+    require('autoprefixer'),
+]).version()
+
+mix.js('assets/installer/js/installer.js', 'js/installer.js').vue()
 
 
 // CMS - in page components

@@ -21,9 +21,6 @@ return [
     ],
 
     'assets' => [
-        'core/backendui' => [
-            ['css', 'css/backendui.css', ['minify' => false, 'combine' => false]],
-        ],
         'core/installer' => [
             ['javascript', 'js/installer.js', ['minify' => false, 'combine' => false]],
             ['css', 'css/installer.css', ['minify' => false, 'combine' => false]],
@@ -35,7 +32,6 @@ return [
             [
                 ['javascript', 'vue'],
                 ['javascript', 'core/installer'],
-                ['css', 'core/backendui'],
                 ['css', 'core/installer'],
             ],
         ],
