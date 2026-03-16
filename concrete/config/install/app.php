@@ -22,8 +22,8 @@ return [
 
     'assets' => [
         'core/installer' => [
-            ['javascript', 'js/installer.js', ['minify' => false, 'combine' => false]],
-            ['css', 'css/installer.css', ['minify' => false, 'combine' => false]],
+            ['vite-javascript', '@assets/installer/js/installer.js'],
+            ['vite-css', '@assets/installer/css/installer.css'],
         ],
     ],
 

@@ -27,32 +27,42 @@
 <script>
 import NProgress from 'nprogress'
 import {ArrowRightIcon} from '@heroicons/vue/24/solid'
+import { useAjax } from '@concretecms/backendui'
 
 
 export default {
     components: {
       ArrowRightIcon
     },
+    setup() {
+        const { request } = useAjax()
+
+        return {
+            request,
+        }
+    },
     methods: {
-        setLanguage() {
-            var my = this
+        async setLanguage() {
             NProgress.start()
-            $.ajax({
-                cache: false,
-                dataType: 'json',
-                method: 'GET',
-                url: my.loadStringsUrl + '/' + my.selectedLocale,
-                success(r) {
-                    my.$emit('set-locale', my.selectedLocale)
-                    my.$emit('set-language-strings', r.i18n)
-                    my.$emit('set-preconditions', r.preconditions)
-                    my.$emit('set-starting-points', r.starting_points)
-                    my.$emit('next')
-                },
-                complete() {
-                    NProgress.done()
-                }
-            })
+            try {
+                await this.request({
+                    url: `${this.loadStringsUrl}/${this.selectedLocale}`,
+                    method: 'GET',
+                    skipResponseValidation: true,
+                    onSuccess: (response) => {
+                        this.$emit('set-locale', this.selectedLocale)
+                        this.$emit('set-language-strings', response.i18n)
+                        this.$emit('set-preconditions', response.preconditions)
+                        this.$emit('set-starting-points', response.starting_points)
+                        this.$emit('next')
+                    },
+                    onError: (error) => {
+                        throw error
+                    },
+                })
+            } finally {
+                NProgress.done()
+            }
         }
     },
     computed: {

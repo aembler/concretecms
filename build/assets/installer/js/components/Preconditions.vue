@@ -56,7 +56,7 @@
 </form>
 </template>
 <script>
-import PreconditionsList from "./PreconditionsList";
+import PreconditionsList from "./PreconditionsList.vue";
 import Actions from "./Actions.vue";
 export default {
     components: {

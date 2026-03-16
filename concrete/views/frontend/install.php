@@ -5,33 +5,43 @@ defined('C5_EXECUTE') or die('Access Denied.');
 /**
  * @var string $concreteVersion
  */
+
+$installerProps = [
+    'logo' => ASSETS_URL_IMAGES . '/logo_hand_only.svg',
+    'loadStringsUrl' => (string) URL::to('/install/i18n'),
+    'reloadPreconditionsUrl' => (string) URL::to('/install'),
+    'validateEnvironmentUrl' => (string) URL::to('/install/validate_environment'),
+    'beginInstallationUrl' => (string) URL::to('/install/begin_installation'),
+    'lang' => $lang,
+    'locales' => $locales,
+    'languages' => $languages,
+    'onlineLocales' => $onlineLocales,
+    'concreteVersion' => $concreteVersion,
+    'siteLocaleLanguage' => $siteLocaleLanguage,
+    'countries' => $countries,
+    'siteLocaleCountry' => $siteLocaleCountry,
+    'timezone' => $timezone,
+    'timezones' => $timezones,
+    'defaultStartingPoint' => 'atomik',
+    'startingPointRoutineUrl' => (string) URL::to('/install/run_routine'),
+    'installationCompleteUrl' => (string) URL::to('/'),
+];
+
+if (isset($locale)) {
+    $installerProps['locale'] = $locale;
+}
+
+if (isset($preconditions)) {
+    $installerProps['preconditions'] = $preconditions;
+}
+
+if (isset($startingPoints)) {
+    $installerProps['startingPoints'] = $startingPoints;
+}
 ?>
 <div class="min-h-screen flex">
-    <div v-cloak id="ccm-page-install" class="pt-8 pb-24 w-full mx-auto max-w-screen-lg my-auto">
-        <concrete-installer
-                logo="<?= ASSETS_URL_IMAGES ?>/logo_hand_only.svg"
-                load-strings-url='<?= URL::to('/install/i18n') ?>'
-                reload-preconditions-url='<?= URL::to('/install') ?>'
-                validate-environment-url='<?= URL::to('/install/validate_environment') ?>'
-                begin-installation-url='<?= URL::to('/install/begin_installation') ?>'
-                :lang='<?= h(json_encode($lang)) ?>'
-                <?php if (isset($locale)) { ?>locale="<?= $locale ?>"<?php } ?>
-                <?php if (isset($preconditions)) { ?>:preconditions='<?= h(json_encode($preconditions)) ?>'<?php } ?>
-                <?php if (isset($startingPoints)) { ?>:starting-points='<?= h(json_encode($startingPoints)) ?>'<?php } ?>
-                :locales='<?= h(json_encode($locales)) ?>'
-                :languages='<?= h(json_encode($languages)) ?>'
-                :online-locales='<?= h(json_encode($onlineLocales)) ?>'
-                concrete-version="<?= $concreteVersion ?>"
-                site-locale-language="<?= $siteLocaleLanguage ?>"
-                :countries='<?= h(json_encode($countries)) ?>'
-                site-locale-country="<?= $siteLocaleCountry ?>"
-                timezone="<?= $timezone ?>"
-                :timezones='<?= h(json_encode($timezones)) ?>'
-                default-starting-point="atomik"
-                starting-point-routine-url='<?= URL::to('/install/run_routine') ?>'
-                installation-complete-url='<?= URL::to('/') ?>'
-        ></concrete-installer>
-    </div>
+    <div v-cloak id="ccm-page-install" class="pt-8 pb-24 w-full mx-auto max-w-screen-lg my-auto"></div>
+    <script type="application/json" id="ccm-page-install-props"><?= json_encode($installerProps, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?></script>
 </div>
 
 <noscript>

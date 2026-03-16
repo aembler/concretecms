@@ -24,6 +24,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useAjax } from '@concretecms/backendui'
 import {
   ArrowPathIcon,
   CheckIcon,
@@ -41,6 +42,7 @@ const props = defineProps({
 const emit = defineEmits(['precondition-failed'])
 const requestUrlsSuccess = ref(null)
 const ajaxFailed = ref(false)
+const { request } = useAjax()
 
 const failureMessage = computed(() => {
   if (ajaxFailed.value) {
@@ -56,23 +58,26 @@ watch(requestUrlsSuccess, (value) => {
   }
 })
 
-onMounted(() => {
-  $.ajax({
-    cache: false,
-    dataType: 'json',
-    method: 'GET',
-    url: props.precondition.precondition.ajax_url
-  })
-      .done((data) => {
+onMounted(async () => {
+  try {
+    await request({
+      url: props.precondition.precondition.ajax_url,
+      method: 'GET',
+      skipResponseValidation: true,
+      onSuccess: (data) => {
         if (data.response === 400) {
           requestUrlsSuccess.value = true
         } else {
           requestUrlsSuccess.value = false
         }
-      })
-      .fail(() => {
-        requestUrlsSuccess.value = false
-        ajaxFailed.value = true
-      })
+      },
+      onError: (error) => {
+        throw error
+      },
+    })
+  } catch (error) {
+    requestUrlsSuccess.value = false
+    ajaxFailed.value = true
+  }
 })
 </script>

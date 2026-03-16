@@ -8,13 +8,17 @@
             'pageMetaKeywords': pageMetaKeywords ? pageMetaKeywords,
         }) | raw }}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {{ vite('@assets/themes/nova_dashboard/js/main.js') }}
+        {{ vite('@assets/themes/nova_dashboard/css/main.css') }}
     </head>
-    <body>
+    <body class="min-h-screen bg-base-200 text-base-content">
         {% block header %}
             {% include '@theme/templates/header.html.twig' %}
         {% endblock %}
 
-        {% block content %}{% endblock %}
+        <main class="mx-auto flex min-h-[calc(100vh-9rem)] w-full max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+            {% block content %}{% endblock %}
+        </main>
 
         {% block footer %}
             {% include '@theme/templates/footer.html.twig' %}

@@ -1,7 +1,10 @@
-@config "./app/tailwind.config.js";
 @import "../../../node_modules/@concretecms/backendui/src/css/backend.css";
 @import "../../../node_modules/@concretecms/backendui/dist/backendui.css";
 @import "./theme/theme.css";
+@import "./app/toolbar.css";
+@import "./app/animations.css";
+@import "./app/interactions.css";
+@config "./app/tailwind.config.js";
 
 :host {
     --index-layer-hotspot: 300;
@@ -17,6 +20,3 @@
     --index-layer-dialog-backdrop: 500;
     --index-layer-dialog: 510;
 }
-
-@import "./app/toolbar.css";
-@import "./app/animations.css";

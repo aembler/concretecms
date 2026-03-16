@@ -1,4 +1,12 @@
 /**
+ * Historical migration reference.
+ *
+ * This file preserves the broader pre-Vite Laravel Mix build so we can compare
+ * old outputs and finish porting any remaining legacy assets into the modern
+ * Vite-based toolchain. It is no longer part of the active build, and the
+ * repository no longer depends on Laravel Mix to run day-to-day workflows.
+ */
+/**
  * Import and configure laravel mix.
  */
 let mix = require('laravel-mix');

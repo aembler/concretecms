@@ -58,10 +58,14 @@ error_log
 # ignore JavaScript source maps
 /concrete/js/*.js.map
 /concrete/js/bootstrap/*.js.map
+/concrete/themes/*/*.js.map
 mix-manifest.json
 
 # ignore node modules used for building
 /build/node_modules
+/build/dist
+/build/hot
+/build/.vite-temp
 /build/release
 /build/Gruntfile.parameters.js
 /build/npm-debug.log

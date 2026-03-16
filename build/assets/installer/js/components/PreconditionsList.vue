@@ -9,9 +9,9 @@
     </tbody></table>
 </template>
 <script>
-import Precondition from "./Preconditions/Precondition";
-import RequestUrlsPrecondition from "./Preconditions/RequestUrlsPrecondition";
-import CookiesPrecondition from "./Preconditions/CookiesPrecondition";
+import Precondition from "./Preconditions/Precondition.vue";
+import RequestUrlsPrecondition from "./Preconditions/RequestUrlsPrecondition.vue";
+import CookiesPrecondition from "./Preconditions/CookiesPrecondition.vue";
 export default {
     components: {
         Precondition,

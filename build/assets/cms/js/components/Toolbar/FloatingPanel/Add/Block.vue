@@ -410,13 +410,3 @@ onBeforeUnmount(() => {
     @closed="handleAddDialogClosed"
   />
 </template>
-
-<style>
-.ccm-add-block-drag-preview {
-  background-color: rgba(240, 249, 255, 0.98);
-  transition: none !important;
-  animation: none !important;
-  will-change: transform;
-  backface-visibility: hidden;
-}
-</style>

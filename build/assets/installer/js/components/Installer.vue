@@ -55,6 +55,7 @@
 
         <transition name="install-step" mode="out-in">
             <choose-language
+                :key="step"
                 v-if="step === 'language'"
                 :logo="logo"
                 :load-strings-url="loadStringsUrl"
@@ -69,6 +70,7 @@
                 @next="next"
             />
             <preconditions
+                :key="step"
                 v-else-if="step === 'requirements'"
                 :locale="selectedLocale"
                 :logo="logo"
@@ -79,6 +81,7 @@
                 @next="next"
             />
             <choose-content
+                :key="step"
                 v-else-if="step === 'content'"
                 :locale="selectedLocale"
                 :lang="lang"
@@ -90,6 +93,7 @@
             />
 
             <environment
+                :key="step"
                 v-else-if="step === 'environment'"
                 :lang="lang"
                 :logo="logo"
@@ -103,6 +107,7 @@
             />
 
             <confirm-installation
+                :key="step"
                 v-else-if="step === 'confirm'"
                 :lang="lang"
                 :logo="logo"
@@ -113,6 +118,7 @@
             />
 
             <perform-installation
+                :key="step"
                 v-else-if="step === 'perform_installation'"
                 :begin-installation-url="beginInstallationUrl"
                 :lang="lang"
@@ -122,6 +128,7 @@
                 @installation-complete="step='installation_complete'"
             />
             <installation-complete
+                :key="step"
                 :logo="logo"
                 :installation-complete-url="installationCompleteUrl"
                 v-else-if="step === 'installation_complete'"
@@ -133,16 +140,24 @@
 </template>
 <script>
 import NProgress from "nprogress"
-import ChooseLanguage from "./ChooseLanguage"
-import Preconditions from "./Preconditions"
-import Environment from "./Environment"
-import ChooseContent from "./ChooseContent"
-import PerformInstallation from "./PerformInstallation"
-import ConfirmInstallation from "./ConfirmInstallation"
-import InstallationComplete from "./InstallationComplete"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@concretecms/backendui'
+import ChooseLanguage from "./ChooseLanguage.vue"
+import Preconditions from "./Preconditions.vue"
+import Environment from "./Environment.vue"
+import ChooseContent from "./ChooseContent.vue"
+import PerformInstallation from "./PerformInstallation.vue"
+import ConfirmInstallation from "./ConfirmInstallation.vue"
+import InstallationComplete from "./InstallationComplete.vue"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, useAjax } from '@concretecms/backendui'
+import { toFormData } from '../formData'
 
 export default {
+    setup() {
+        const { request } = useAjax()
+
+        return {
+            request,
+        }
+    },
     components: {
         ChooseLanguage,
         Preconditions,
@@ -212,35 +227,35 @@ export default {
             this.installOptions.startingPoint = this.startingPoint
             this.installOptions.startingPointPreset = this.startingPointPreset
         },
-        validateInstallOptions(proceedToNextStep) {
-            var my = this
+        async validateInstallOptions(proceedToNextStep) {
             NProgress.start()
-
-            $.ajax({
-                cache: false,
-                dataType: 'json',
-                method: 'post',
-                data: this.installOptions,
-                url: my.validateEnvironmentUrl,
-                success(r) {
-                    NProgress.done()
-                    if (r.error && r.error.error) {
-                        my.environmentErrors = r.error.errors
-                    } else {
-                        my.environmentErrors = []
-                    }
-                    my.optionsPreconditions = r.preconditions
-                    my.translateOptionPreconditionsToErrorsAndWarnings()
-                    if (proceedToNextStep) {
-                        if (!my.environmentErrors.length && (!my.environmentWarnings.length || my.ignoreWarnings)) {
-                            my.next()
+            try {
+                await this.request({
+                    url: this.validateEnvironmentUrl,
+                    method: 'POST',
+                    data: toFormData(this.installOptions),
+                    skipResponseValidation: true,
+                    onSuccess: (response) => {
+                        if (response.error && response.error.error) {
+                            this.environmentErrors = response.error.errors
+                        } else {
+                            this.environmentErrors = []
                         }
-                    }
-                },
-                complete() {
-                  NProgress.done()
-                }
-            })
+                        this.optionsPreconditions = response.preconditions
+                        this.translateOptionPreconditionsToErrorsAndWarnings()
+                        if (proceedToNextStep) {
+                            if (!this.environmentErrors.length && (!this.environmentWarnings.length || this.ignoreWarnings)) {
+                                this.next()
+                            }
+                        }
+                    },
+                    onError: (error) => {
+                        throw error
+                    },
+                })
+            } finally {
+                NProgress.done()
+            }
         },
         setLocale(locale) {
             this.selectedLocale = locale

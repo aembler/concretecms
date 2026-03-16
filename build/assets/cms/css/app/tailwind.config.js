@@ -6,6 +6,7 @@ module.exports = {
     '../../../../../concrete/blocks/**/*.php',
     '../../../../../concrete/views/frontend/**/*.php',
     '../../../cms/**/*.{js,vue,ts}',
+    '../../../installer/**/*.{js,vue,ts}',
   ],
   theme: {
     extend: {},

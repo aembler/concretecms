@@ -70,7 +70,7 @@ class AssetList
         // overwrite all the defaults with the arguments
         $args = array_merge($defaults, $args);
 
-        $class = '\\Concrete\\Core\\Asset\\' . ConcreteObject::camelcase($assetType) . 'Asset';
+        $class = $this->resolveAssetClass($assetType);
         $o = new $class($assetHandle);
         $o->register($filename, $args, $pkg);
         $this->registerAsset($o);
@@ -168,5 +168,14 @@ class AssetList
     public function getAssetGroup($assetGroupHandle)
     {
         return $this->assetGroups[$assetGroupHandle] ?? null;
+    }
+
+    protected function resolveAssetClass(string $assetType): string
+    {
+        if (str_starts_with($assetType, 'vite-')) {
+            return '\\Concrete\\Core\\Asset\\Vite\\' . ConcreteObject::camelcase(substr($assetType, 5)) . 'Asset';
+        }
+
+        return '\\Concrete\\Core\\Asset\\' . ConcreteObject::camelcase($assetType) . 'Asset';
     }
 }

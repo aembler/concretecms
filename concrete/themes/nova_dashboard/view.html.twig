@@ -1,14 +1,18 @@
 {% extends '@theme/templates/skeleton.html.twig' %}
 {% block content %}
     {% if success %}
-        <div class="container">
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="alert alert-success">{{ success }}</div>
-                </div>
-            </div>
+        <div class="alert alert-success mb-6 shadow-sm">
+            {{ success }}
         </div>
     {% endif %}
 
-    {{ innerContent|raw }}
+    <div class="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+        <div class="border-b border-base-300 px-6 py-4">
+            <h1 class="text-xl font-semibold tracking-tight">Dashboard</h1>
+            <p class="text-sm text-base-content/60">A simple admin shell for the Nova Dashboard theme.</p>
+        </div>
+        <div class="p-6">
+            {{ innerContent|raw }}
+        </div>
+    </div>
 {% endblock %}

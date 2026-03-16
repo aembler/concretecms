@@ -1,5 +1,5 @@
 //import * as FrontendBase from '@concretecms/bedrock/assets/bedrock/js/frontend';
-import LoginTabs from './login-tabs';
+//import LoginTabs from './login-tabs';
 //import BackgroundImage from './background-image';
 
 // Handle profile picture
@@ -8,8 +8,8 @@ import LoginTabs from './login-tabs';
 // Handle desktop
 //import '@concretecms/bedrock/assets/desktop/js/frontend';
 
-import NProgress from 'nprogress';
-window.NProgress = NProgress;
+//import NProgress from 'nprogress';
+//window.NProgress = NProgress;
 /*
 const tooltipTriggerList = [].slice.call(document.querySelectorAll('.launch-tooltip'))
 const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

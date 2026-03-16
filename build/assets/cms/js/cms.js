@@ -18,7 +18,7 @@ import ConcreteBlock from './components/Block.ce.vue'
 import ConcreteContainer from './components/Container.ce.vue'
 import ConcreteAreaBlockTarget from './components/AreaBlockTarget.ce.vue'
 
-import rawCss from '!raw-loader!./../../../../concrete/css/cms/app.css'
+import rawCss from '../css/app.css?inline'
 import postcss from 'postcss'
 import { createConcretePinia } from './stores/pinia'
 import { ConcreteAssetLoader } from './support/LegacyAssetLoader'

@@ -1,7 +1,7 @@
-@config "../../cms/css/app/tailwind.config.js";
 @import "../../../node_modules/@concretecms/backendui/src/css/backend.css";
 @import "../../../node_modules/@concretecms/backendui/dist/backendui.css";
 @import "../../cms/css/theme/theme.css";
+@config "../../cms/css/app/tailwind.config.js";
 
 div#ccm-page-install {
   div.ccm-install-title {
@@ -25,26 +25,27 @@ div#ccm-page-install {
     right: 10px;
     z-index: 1200;
   }
+}
 
-  // Transition between states
-  .install-step-enter-active, .install-step-leave-active {
-    transition: all 0.2s;
-    .install-actions {
-      opacity: 0;
-    }
-  }
-
-  .install-step-enter, .install-step-leave-to {
+.install-step-enter-active, .install-step-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  .install-actions {
     opacity: 0;
-    transform: translateY(30px);
   }
+}
 
-  .install-step-leave-to {
-    .install-actions {
-      display: none;
-    }
+.install-step-enter-from, .install-step-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.install-step-enter-to, .install-step-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.install-step-leave-to {
+  .install-actions {
+    display: none;
   }
-
-
-
 }

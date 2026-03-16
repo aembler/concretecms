@@ -57,6 +57,9 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
+import { useAjax } from '@concretecms/backendui'
+import NProgress from 'nprogress'
+import { toFormData } from '../formData'
 
 const props = defineProps({
   logo: { type: String, required: true },
@@ -72,12 +75,13 @@ const currentProgress = ref(null)
 const installError = ref(null)
 
 const emit = defineEmits(['installation-complete'])
+const { request } = useAjax()
 
 function initProgressBar() {
   NProgress.configure({ showSpinner: false })
 }
 
-watch(currentRoutine, (routineIndex) => {
+watch(currentRoutine, async (routineIndex) => {
   if (!routines.value || routineIndex === null) return
 
   if (routines.value.length > routineIndex) {
@@ -85,23 +89,26 @@ watch(currentRoutine, (routineIndex) => {
     const url = `${props.startingPointRoutineUrl}/${props.installOptions.startingPoint}`
     currentProgress.value = routine.text
 
-    $.ajax({
-      cache: false,
-      dataType: 'json',
-      method: 'post',
-      data: {
-        routine,
-        options: props.installOptions
-      },
+    await request({
       url,
-      success(r) {
-        if (r.error) {
-          installError.value = r.message
+      method: 'POST',
+      data: toFormData({
+        routine,
+        options: props.installOptions,
+      }),
+      skipResponseValidation: true,
+      onSuccess: (response) => {
+        if (response.error) {
+          installError.value = response.message
         } else {
           currentRoutine.value++
+          console.log(currentRoutine.value, routines.value.length)
           NProgress.set(currentRoutine.value / routines.value.length)
         }
-      }
+      },
+      onError: (error) => {
+        throw error
+      },
     })
   } else {
     NProgress.done()
@@ -110,20 +117,22 @@ watch(currentRoutine, (routineIndex) => {
   }
 })
 
-onMounted(() => {
+onMounted(async () => {
   initProgressBar()
   currentProgress.value = props.lang.loadingInstallationRoutines
 
-  $.ajax({
-    cache: false,
-    dataType: 'json',
-    method: 'post',
-    data: props.installOptions,
+  await request({
     url: props.beginInstallationUrl,
-    success(r) {
-      routines.value = r
+    method: 'POST',
+    data: toFormData(props.installOptions),
+    skipResponseValidation: true,
+    onSuccess: (response) => {
+      routines.value = response
       currentRoutine.value = 0
-    }
+    },
+    onError: (error) => {
+      throw error
+    },
   })
 })
 </script>

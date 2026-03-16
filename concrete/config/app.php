@@ -478,9 +478,9 @@ return [
 
         // Foundational Assets
         'core/cms' => [
-            ['javascript', 'js/cms.js', ['minify' => false, 'combine' => false]],
+            ['vite-javascript', '@assets/cms/js/cms.js'],
             ['javascript-localized', '/ccm/assets/localization/core/js'],
-            ['css', 'css/cms/page.css', ['minify' => false, 'combine' => false]],
+            ['vite-css', '@assets/cms/css/page.css'],
         ],
 
         // Fallback/minimal assets for accessory features
@@ -909,6 +909,17 @@ return [
 
     ],
 
+    'vite' => [
+        'build_directory' => DIR_BASE . '/build',
+        'manifest' => DIR_BASE . '/build/dist/.vite/manifest.json',
+        'hot_file' => DIR_BASE . '/build/hot',
+        'dev_server_url' => null,
+        'public_path' => '/build/dist/',
+        'aliases' => [
+            '@assets' => 'assets',
+        ],
+    ],
+
     'twig' => [
         // bool|'auto' Set to `'auto'` to enable based on production mode
         'debug' => 'auto',
@@ -917,6 +928,7 @@ return [
         'extensions' => [
             'debug' => \Twig\Extension\DebugExtension::class,
             'core' => \Concrete\Core\Filesystem\Twig\CoreExtension::class,
+            'vite' => \Concrete\Core\Asset\Vite\ViteTwigExtension::class,
         ]
     ]
 
