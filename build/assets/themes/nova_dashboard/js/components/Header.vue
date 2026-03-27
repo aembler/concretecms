@@ -1,6 +1,6 @@
 <template>
   <header class="sticky top-0 z-50 border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
-    <div class="navbar mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <div class="navbar mx-auto max-w-screen-2xl px-4 lg:px-6">
       <div class="flex-none mr-6">
         <a href="/" class="flex items-center gap-2.5">
           <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-sm">
@@ -49,8 +49,7 @@
           </li>
         </ul>
       </div>
-
-      <div class="flex-none flex items-center gap-1">
+      <div class="flex items-center gap-1">
         <div class="hidden lg:block mr-2">
           <Search />
         </div>
@@ -72,31 +71,7 @@
 
         <div class="h-5 w-px bg-base-300"></div>
 
-        <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-sm gap-2 px-2 font-normal">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-xs font-semibold text-white shadow-sm">
-              A
-            </div>
-            <svg class="h-3 w-3 text-base-content/30" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-            </svg>
-          </label>
-          <ul tabindex="0" class="menu dropdown-content menu-sm z-[1] mt-3 w-60 rounded-xl border border-base-300 bg-base-100 p-1.5 shadow-2xl">
-            <li class="px-3 py-2 pointer-events-none">
-              <div class="-mx-1 flex flex-col">
-                <span class="text-sm font-semibold text-base-content leading-tight">Admin User</span>
-                <span class="text-xs text-base-content/40 font-normal">admin@example.com</span>
-              </div>
-            </li>
-            <div class="divider my-0.5 h-0"></div>
-            <li><a class="rounded-lg text-sm text-base-content/70">Account settings</a></li>
-            <li><a class="rounded-lg text-sm text-base-content/70">Team &amp; members</a></li>
-            <li><a class="rounded-lg text-sm text-base-content/70">Billing</a></li>
-            <li><a class="rounded-lg text-sm text-base-content/70">API keys</a></li>
-            <div class="divider my-0.5 h-0"></div>
-            <li><a class="rounded-lg text-sm text-error/80 hover:text-error hover:bg-error/5">Sign out</a></li>
-          </ul>
-        </div>
+        <UserMenuButton />
       </div>
     </div>
   </header>
@@ -105,6 +80,7 @@
 <script setup>
 import HelpButton from '../../../../cms/js/components/Toolbar/Button/HelpButton.vue'
 import Search from '../../../../cms/js/components/Toolbar/Search/Search.vue'
+import UserMenuButton from '../../../../cms/js/components/Toolbar/Button/UserMenuButton.vue'
 
 defineProps({
   helpUrl: {

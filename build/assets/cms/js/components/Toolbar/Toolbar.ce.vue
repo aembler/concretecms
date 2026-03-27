@@ -84,7 +84,7 @@
         </div>
       </div>
 
-      <div class="px-2 lg:px-4 flex items-center gap-1">
+      <div class="px-4 lg:px-6 flex items-center gap-1">
         <Search @search="handleSearch" />
         <HelpButton :help-url="helpUrl" />
 
@@ -114,41 +114,7 @@
 
         <div class="h-5 w-px bg-base-300"></div>
 
-        <!-- User Menu -->
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <div class="c-toolbar-button">
-              <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-xs font-semibold text-white shadow-sm">
-                A
-              </div>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent class="mx-6 mt-3 rounded-xl shadow-2xl z-[var(--index-layer-toolbar-dropdown)] w-52">
-            <DropdownMenuItem as-child class="py-3 -mx-2 -mt-2 mb-1 flex flex-col border-b border-base-300 ">
-              <div>
-                <span class="text-sm font-semibold text-base-content leading-tight">Admin User</span>
-                <span class="text-xs text-base-content/40 font-normal">admin@example.com</span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem as-child>
-              <a href="/waiting-for-me">Waiting For Me</a>
-            </DropdownMenuItem>
-            <DropdownMenuItem as-child>
-              <a href="/private-messages">Private Messages</a>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem as-child>
-              <a href="/profile/edit">Edit Profile</a>
-            </DropdownMenuItem>
-            <DropdownMenuItem as-child>
-              <a href="/profile/picture">Profile Picture</a>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem as-child>
-              <a href="/logout">Sign Out</a>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <UserMenuButton />
       </div>
     </div>
     <FloatingPanelGroup
@@ -188,6 +154,7 @@ import {
 import { computed, ref, onMounted, useTemplateRef, watch } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
+import UserMenuButton from "./Button/UserMenuButton.vue";
 import ToastContainer from '../Ui/ToastContainer.vue'
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
 import AddFloatingPanel from './FloatingPanel/AddFloatingPanel.vue'
@@ -196,11 +163,6 @@ import {
   FloatingPanelGroup,
   useUiStore,
   useFloatingPanelsStore,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 const ui = useUiStore()
