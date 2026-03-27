@@ -1,3 +1,6 @@
-@import "tailwindcss";
+@import "../../../../node_modules/@concretecms/backendui/src/css/backend.css";
+@import "../../../../node_modules/@concretecms/backendui/dist/backendui.css";
+@import "../../../cms/css/theme/theme.css";
+
 @source "./";
 @source "../../../../../concrete/themes/nova_dashboard";

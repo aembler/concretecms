@@ -1,6 +1,6 @@
 html.ccm-toolbar-visible {
   .ccm-page {
     /* Toolbar height */
-    @apply mt-[72px];
+    @apply mt-[65px];
   }
 }

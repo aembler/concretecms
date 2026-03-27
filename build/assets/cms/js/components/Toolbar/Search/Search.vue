@@ -11,7 +11,7 @@
         v-model="query"
         type="text"
         placeholder="Search..."
-        class="input border-transparent pl-8 shadow-[1px_1px_10px_rgba(183,183,183,0.3)] focus:shadow-[1px_1px_10px_rgba(183,183,183,0.3)]"
+        class="input border-transparent pl-8 c-shadow focus:shadow-[1px_1px_10px_rgba(183,183,183,0.3)]"
         @keydown.enter="emitSearch"
     />
   </div>

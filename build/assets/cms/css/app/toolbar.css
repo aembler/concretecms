@@ -1,6 +1,7 @@
 .c-toolbar-button {
-    @apply btn text-base font-normal px-3 bg-transparent border-transparent shadow-none text-gray-500;
+    @apply inline-flex rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content;
 }
+
 
 .c-toolbar-button:hover {
     @apply cursor-pointer bg-base-200 dark:bg-gray-700;
@@ -9,4 +10,8 @@
 .dropdown:focus .c-toolbar-button,
 .c-toolbar-button-active {
     @apply shadow-[1px_1px_10px_rgba(183,183,183,0.3)] font-semibold text-primary bg-white dark:bg-black shadow-[1px_1px_10px_rgba(183,183,183,0.3)] rounded-lg;
+}
+
+.c-shadow {
+    @apply shadow-[1px_1px_10px_rgba(183,183,183,0.3)]
 }

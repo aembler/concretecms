@@ -197,7 +197,7 @@ class UserInterface
             $src = Config::get('concrete.white_label.logo');
         }
         if (!$src) {
-            $filename = 'logo';
+            $filename = 'logo_circle';
             if (file_exists(DIR_APPLICATION . '/' . DIRNAME_IMAGES . '/' . $filename . '.svg')) {
                 $src = REL_DIR_APPLICATION . '/' . DIRNAME_IMAGES . '/' . $filename . '.svg';
             } elseif (file_exists(DIR_APPLICATION . '/' . DIRNAME_IMAGES . '/' . $filename . '.png')) {
