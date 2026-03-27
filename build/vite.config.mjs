@@ -126,6 +126,7 @@ export default defineConfig(({ mode }) => ({
                 'assets/installer/css/installer.css': path.resolve(__dirname, 'assets/installer/css/installer.css'),
                 'assets/themes/concrete/js/main.js': path.resolve(__dirname, 'assets/themes/concrete/js/main.js'),
                 'assets/themes/concrete/scss/main.scss': path.resolve(__dirname, 'assets/themes/concrete/scss/main.scss'),
+                'assets/themes/nova_dashboard/js/main.js': path.resolve(__dirname, 'assets/themes/nova_dashboard/js/main.js'),
                 'assets/themes/nova_dashboard/css/main.css': path.resolve(__dirname, 'assets/themes/nova_dashboard/css/main.css'),
                 'assets/themes/atomik/js/main.js': path.resolve(__dirname, 'assets/themes/atomik/js/main.js'),
                 'concrete/themes/atomik/css/presets/default/main.scss': path.resolve(__dirname, '../concrete/themes/atomik/css/presets/default/main.scss'),

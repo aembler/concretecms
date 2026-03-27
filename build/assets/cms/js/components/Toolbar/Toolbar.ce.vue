@@ -84,9 +84,11 @@
         </div>
       </div>
 
-      <div class="flex items-center space-x-2">
-        <Search @search="handleSearch" />
-        <HelpButton :help-url="helpUrl" />
+      <div class="flex items-center">
+        <div class="flex items-center space-x-2">
+          <Search @search="handleSearch" />
+          <HelpButton :help-url="helpUrl" />
+        </div>
 
 
         <!-- Dashboard -->
