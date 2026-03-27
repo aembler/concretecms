@@ -15,37 +15,56 @@
       <div class="hidden flex-1 lg:flex">
         <ul class="menu menu-horizontal gap-0.5 p-0 text-sm font-medium">
           <li>
-            <a class="rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content">
+            <a class="c-toolbar-button">
               Overview
             </a>
           </li>
           <li>
-            <a class="rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content">
+            <a class="c-toolbar-button">
               Payments
             </a>
           </li>
           <li>
-            <a class="rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content">
+            <a class="c-toolbar-button">
               Customers
             </a>
           </li>
           <li>
-            <a class="rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content">
+            <a class="c-toolbar-button">
               Reports
             </a>
           </li>
           <li>
-            <a class="rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content">
+            <a class="c-toolbar-button">
               Developers
             </a>
           </li>
           <li>
-            <a class="flex items-center gap-1 rounded-lg px-3 py-2 text-base-content/70 hover:bg-base-200 hover:text-base-content">
-              More
-              <svg class="h-3 w-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </a>
+            <DropdownMenu>
+              <DropdownMenuTrigger class="c-toolbar-button outline-none">
+                More
+                <svg class="h-3 w-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent class="mt-3 w-48 rounded-xl shadow-2xl">
+                <DropdownMenuItem as-child>
+                  <a href="#">Integrations</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem as-child>
+                  <a href="#">Invoices</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem as-child>
+                  <a href="#">Exports</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem as-child>
+                  <a href="#">Activity Log</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem as-child>
+                  <a href="#">System Status</a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         </ul>
       </div>
@@ -81,6 +100,12 @@
 import HelpButton from '../../../../cms/js/components/Toolbar/Button/HelpButton.vue'
 import Search from '../../../../cms/js/components/Toolbar/Search/Search.vue'
 import UserMenuButton from '../../../../cms/js/components/Toolbar/Button/UserMenuButton.vue'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@concretecms/backendui'
 
 defineProps({
   helpUrl: {

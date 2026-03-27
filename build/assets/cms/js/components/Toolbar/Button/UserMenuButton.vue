@@ -1,10 +1,8 @@
 <template>
   <DropdownMenu>
-    <DropdownMenuTrigger>
-      <div class="c-toolbar-button">
-        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-xs font-semibold text-white shadow-sm">
-          A
-        </div>
+    <DropdownMenuTrigger class="c-toolbar-button outline-none">
+      <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-xs font-semibold text-white shadow-sm">
+        A
       </div>
     </DropdownMenuTrigger>
     <DropdownMenuContent class="mx-6 mt-3 w-52 rounded-xl shadow-2xl z-[var(--index-layer-toolbar-dropdown,415)]">
