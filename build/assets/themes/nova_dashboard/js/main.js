@@ -1,16 +1,24 @@
 import { createApp } from 'vue'
 
-import Search from '../../../cms/js/components/Toolbar/Search/Search.vue'
+import { createConcretePinia } from '../../../cms/js/stores/pinia'
+import Header from './components/Header.vue'
 
 const mountPoints = [
     {
-        selector: '[data-nova-dashboard-search]',
-        component: Search,
+        selector: '[data-nova-dashboard-header]',
+        component: Header,
+        getProps: (element) => ({
+            helpUrl: element.dataset.helpUrl ?? '',
+        }),
     },
 ]
 
-mountPoints.forEach(({ selector, component }) => {
+const pinia = createConcretePinia()
+
+mountPoints.forEach(({ selector, component, getProps = () => ({}) }) => {
     document.querySelectorAll(selector).forEach((element) => {
-        createApp(component).mount(element)
+        createApp(component, getProps(element))
+            .use(pinia)
+            .mount(element)
     })
 })

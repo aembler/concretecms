@@ -1,6 +1,8 @@
 @import "../../../node_modules/@concretecms/backendui/src/css/backend.css";
 @import "../../../node_modules/@concretecms/backendui/dist/backendui.css";
 @import "./theme/theme.css";
+
+
 @import "./app/toolbar.css";
 @import "./app/animations.css";
 @import "./app/interactions.css";
@@ -14,6 +16,7 @@
     --index-layer-toolbar-wrapper: 400;
     --index-layer-panel-backdrop: 400;
     --index-layer-panel: 415;
+    --index-layer-toolbar-dropdown: 415;
     --index-layer-toolbar: 420;
 
 

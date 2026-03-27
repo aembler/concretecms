@@ -1,8 +1,3 @@
-@import "../../../../node_modules/@concretecms/backendui/src/css/backend.css";
-@import "../../../../node_modules/@concretecms/backendui/dist/backendui.css";
-@import "../../../cms/css/theme/theme.css";
-
-@import "../../../cms/css/app/toolbar.css";
-
+@import "../../../cms/css/app.css";
 @source "./";
 @source "../../../../../concrete/themes/nova_dashboard";

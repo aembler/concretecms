@@ -6,8 +6,8 @@
   >
     <div ref="teleportTarget"></div>
     <div ref="toastTeleportTarget"></div>
-    <div id="ccm-toolbar" class="relative z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
-      <div class="navbar mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <div id="ccm-toolbar" class="z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
+      <div class="navbar mx-auto max-w-screen-2xl px-4 lg:px-6 gap-1">
         <!-- Logo -->
         <span class="text-lg font-bold mr-2">
           <img :src="logoSrc" alt="Logo" class="h-8 w-auto" />
@@ -84,12 +84,9 @@
         </div>
       </div>
 
-      <div class="flex items-center">
-        <div class="flex items-center space-x-2">
-          <Search @search="handleSearch" />
-          <HelpButton :help-url="helpUrl" />
-        </div>
-
+      <div class="px-2 lg:px-4 flex items-center gap-1">
+        <Search @search="handleSearch" />
+        <HelpButton :help-url="helpUrl" />
 
         <!-- Dashboard -->
         <div
@@ -115,21 +112,24 @@
           </a>
         </div>
 
+        <div class="h-5 w-px bg-base-300"></div>
+
         <!-- User Menu -->
         <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <button type="button" class="c-toolbar-button">
-              <div class="avatar">
-                <div class="w-6 h-6 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1">
-                  <img src="https://robohash.org/user123.png?size=48x48" alt="User Avatar" />
-                </div>
+          <DropdownMenuTrigger>
+            <div class="c-toolbar-button">
+              <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-xs font-semibold text-white shadow-sm">
+                A
               </div>
-              <svg class="w-4 h-4 text-base-content" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+            </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent class="w-52">
+          <DropdownMenuContent class="mx-6 mt-3 rounded-xl shadow-2xl z-[var(--index-layer-toolbar-dropdown)] w-52">
+            <DropdownMenuItem as-child class="py-3 -mx-2 -mt-2 mb-1 flex flex-col border-b border-base-300 ">
+              <div>
+                <span class="text-sm font-semibold text-base-content leading-tight">Admin User</span>
+                <span class="text-xs text-base-content/40 font-normal">admin@example.com</span>
+              </div>
+            </DropdownMenuItem>
             <DropdownMenuItem as-child>
               <a href="/waiting-for-me">Waiting For Me</a>
             </DropdownMenuItem>
