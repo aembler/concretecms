@@ -102,7 +102,6 @@ watch(currentRoutine, async (routineIndex) => {
           installError.value = response.message
         } else {
           currentRoutine.value++
-          console.log(currentRoutine.value, routines.value.length)
           NProgress.set(currentRoutine.value / routines.value.length)
         }
       },

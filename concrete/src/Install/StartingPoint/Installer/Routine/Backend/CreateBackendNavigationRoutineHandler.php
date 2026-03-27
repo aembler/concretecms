@@ -12,6 +12,10 @@ use Concrete\Core\Tree\Node\Node;
 use Concrete\Core\Tree\Node\Type\DashboardPackagePages;
 use Concrete\Core\Tree\Node\Type\Page as PageNode;
 
+/**
+ * Currently unused but we might still need the code from this
+ * @TODO - remove if not necessary
+ */
 class CreateBackendNavigationRoutineHandler
 {
 

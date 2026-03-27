@@ -5,7 +5,6 @@ use Concrete\Core\Feature\Features;
 use Concrete\Core\Install\InstallerOptions;
 use Concrete\Core\Install\StartingPoint\Controller\ControllerInterface;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Backend\CreateBackendNavigationRoutine;
-use Concrete\Core\Install\StartingPoint\Installer\Routine\Backend\ReorderBackendRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Backend\SetupBackendPermissionsRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Base\AddExpressObjectsSupportRoutine;
 use Concrete\Core\Install\StartingPoint\Installer\Routine\Base\AddHomePageRoutine;
@@ -108,7 +107,7 @@ class Installer implements InstallerInterface
             $routines[] = $routine;
         }
         $routines[] = new SetupBackendPermissionsRoutine();
-        $routines[] = new CreateBackendNavigationRoutine();
+        //$routines[] = new CreateBackendNavigationRoutine();
         return $routines;
     }
 
