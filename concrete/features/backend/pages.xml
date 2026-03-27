@@ -166,5 +166,9 @@
 
     </singlepages>
 
+    <hubs>
+        <hub package="" handle="pages" />
+    </hubs>
+
 
 </concrete5-cif>

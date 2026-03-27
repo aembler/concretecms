@@ -3,68 +3,19 @@
     <div class="navbar mx-auto max-w-screen-2xl px-4 lg:px-6">
       <div class="flex-none mr-6">
         <a href="/" class="flex items-center gap-2.5">
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-sm">
-            <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
-            </svg>
-          </div>
-          <span class="text-sm font-semibold tracking-tight text-base-content">Nova Dashboard</span>
+          <span class="text-lg font-bold mr-2">
+            <img :src="logoSrc" alt="Logo" class="h-8 w-auto" />
+          </span>
+          <span class="text-lg font-semibold tracking-tight text-base-content">Dashboard</span>
         </a>
       </div>
 
       <div class="hidden flex-1 lg:flex">
         <ul class="menu menu-horizontal gap-0.5 p-0 text-sm font-medium">
-          <li>
-            <a class="c-toolbar-button">
-              Overview
+          <li v-for="hub in hubs" :key="hub.id">
+            <a :href="hub.menu?.url || '#'" class="c-toolbar-button">
+              {{ hub.menu?.title || hub.identifier }}
             </a>
-          </li>
-          <li>
-            <a class="c-toolbar-button">
-              Payments
-            </a>
-          </li>
-          <li>
-            <a class="c-toolbar-button">
-              Customers
-            </a>
-          </li>
-          <li>
-            <a class="c-toolbar-button">
-              Reports
-            </a>
-          </li>
-          <li>
-            <a class="c-toolbar-button">
-              Developers
-            </a>
-          </li>
-          <li>
-            <DropdownMenu>
-              <DropdownMenuTrigger class="c-toolbar-button outline-none">
-                More
-                <svg class="h-3 w-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent class="mt-3 w-48 rounded-xl shadow-2xl">
-                <DropdownMenuItem as-child>
-                  <a href="#">Integrations</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem as-child>
-                  <a href="#">Invoices</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem as-child>
-                  <a href="#">Exports</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem as-child>
-                  <a href="#">Activity Log</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem as-child>
-                  <a href="#">System Status</a>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </li>
         </ul>
       </div>
@@ -100,16 +51,18 @@
 import HelpButton from '../../../../cms/js/components/Toolbar/Button/HelpButton.vue'
 import Search from '../../../../cms/js/components/Toolbar/Search/Search.vue'
 import UserMenuButton from '../../../../cms/js/components/Toolbar/Button/UserMenuButton.vue'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@concretecms/backendui'
 
 defineProps({
   helpUrl: {
     type: String,
+    required: true,
+  },
+  logoSrc: {
+    type: String,
+    required: true,
+  },
+  hubs: {
+    type: Array,
     required: true,
   },
 })

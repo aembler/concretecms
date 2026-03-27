@@ -2,8 +2,10 @@
 
 namespace Concrete\Core\Entity\Hub;
 
-use Concrete\Core\Application\UserInterface\Hub\Controller\Controller;
 use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
+use Concrete\Core\Application\UserInterface\Hub\Controller\Manager;
+use Concrete\Core\Application\UserInterface\Hub\Controller\PageController;
+use Concrete\Core\Application\UserInterface\Hub\HubInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -25,6 +27,14 @@ class Hub extends AbstractHub
     }
 
     /**
+     * @return string
+     */
+    public function getHandle()
+    {
+        return $this->getIdentifier();
+    }
+
+    /**
      * @param string $identifier
      */
     public function setIdentifier($identifier): void
@@ -32,8 +42,25 @@ class Hub extends AbstractHub
         $this->identifier = (string) $identifier;
     }
 
+    /**
+     * @param string $handle
+     */
+    public function setHandle($handle): void
+    {
+        $this->setIdentifier($handle);
+    }
+
+    public static function fromXml(\SimpleXMLElement $node): HubInterface
+    {
+        $hub = new static();
+        $hub->setHandle((string) $node['handle']);
+        $hub->setPackage(static::getPackageObject($node['package']));
+
+        return $hub;
+    }
+
     public function getController(): ControllerInterface
     {
-        return new Controller();
+        return app(Manager::class)->driver($this->getHandle());
     }
 }

@@ -3,6 +3,8 @@
 namespace Concrete\Core\Entity\Hub;
 
 use Concrete\Core\Application\UserInterface\Hub\HubInterface;
+use Concrete\Core\Entity\PackageTrait;
+use Concrete\Core\Package\PackageService;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -17,6 +19,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 abstract class AbstractHub implements HubInterface
 {
+    use PackageTrait;
+
     /**
      * @ORM\Id @ORM\Column(type="integer", options={"unsigned":true})
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -50,6 +54,37 @@ abstract class AbstractHub implements HubInterface
     public function setSortOrder($sortOrder): void
     {
         $this->sortOrder = (int) $sortOrder;
+    }
+
+    /**
+     * @param string|\SimpleXMLElement $pkgHandle
+     *
+     * @return \Concrete\Core\Entity\Package|null
+     */
+    protected static function getPackageObject($pkgHandle)
+    {
+        $pkg = null;
+        if ($pkgHandle) {
+            $pkgHandle = (string) $pkgHandle;
+            if ($pkgHandle !== '') {
+                $pkg = app(PackageService::class)->getByHandle($pkgHandle);
+            }
+        }
+
+        return $pkg;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'identifier' => $this->getIdentifier(),
+            'sortOrder' => $this->getSortOrder(),
+            'menu' => [
+                'title' => $this->getController()->getMenuTitle(),
+                'url' => (string) $this->getController()->getHomePageUrl(),
+            ],
+        ];
     }
 
     /**

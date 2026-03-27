@@ -5,6 +5,7 @@ namespace Concrete\Core\Page\Controller;
 use Concrete\Core\Application\Service\DashboardMenu;
 use Concrete\Core\Application\UserInterface\Dashboard\Navigation\FavoritesNavigationFactory;
 use Concrete\Core\Cookie\CookieJar;
+use Concrete\Core\Entity\Hub\AbstractHub;
 use Concrete\Core\Filesystem\ElementManager;
 use Concrete\Core\Navigation\Breadcrumb\BreadcrumbInterface;
 use Concrete\Core\Navigation\Breadcrumb\Dashboard\DashboardBreadcrumbFactory;
@@ -97,6 +98,7 @@ class DashboardPageController extends PageController
         } else {
             $this->set('_bookmarked', false);
         }
+        $this->set('_hubs', $this->entityManager->getRepository(AbstractHub::class)->findBy([], ['sortOrder' => 'asc']));
     }
 
     /**

@@ -9,6 +9,8 @@ const mountPoints = [
         component: Header,
         getProps: (element) => ({
             helpUrl: element.dataset.helpUrl ?? '',
+            hubs: JSON.parse(element.dataset.hubs ?? '[]'),
+            logoSrc: element.dataset.logoSrc ?? '',
         }),
     },
 ]
