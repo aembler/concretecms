@@ -4,6 +4,7 @@
             {% for hub in _hubs %}
                 <li>
                     <a href="{{ hub.getHomePageUrl }}" class="rounded-lg">
+                        <span class="h-5 w-5 shrink-0 text-base-content/70">{{ hub.getIcon.toHtmlObject|raw }}</span>
                         {{ hub.getLabel }}
                     </a>
                 </li>

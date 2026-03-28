@@ -2,13 +2,13 @@
 
 namespace Concrete\Core\Application\UserInterface\Hub\Importer;
 
+use Concrete\Core\Application\UserInterface\Hub\HubInterface;
 use Concrete\Core\Entity\Hub\PageHub;
-use Concrete\Core\Package\PackageService;
 use Concrete\Core\Page\Page;
 
 class PageImporter implements ImporterInterface
 {
-    public function createFromImport(\SimpleXMLElement $node): \Concrete\Core\Application\UserInterface\Hub\HubInterface
+    public function createFromImport(\SimpleXMLElement $node): HubInterface
     {
         if (!isset($node->page)) {
             throw new \RuntimeException('Page hubs require a <page> child node.');
@@ -29,7 +29,13 @@ class PageImporter implements ImporterInterface
         if (!empty($pageNode['label'])) {
             $label = (string) $pageNode['label'];
         }
-        $hub = new PageHub($page, $label);
+
+        $icon = null;
+        if (isset($node->icon)) {
+            $icon = trim((string) $node->icon);
+        }
+
+        $hub = new PageHub($page, $label, $icon ?: null);
         return $hub;
     }
 }

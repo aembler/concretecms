@@ -4,6 +4,8 @@ namespace Concrete\Core\Entity\Hub;
 
 use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
 use Concrete\Core\Application\UserInterface\Hub\Controller\PageController;
+use Concrete\Core\Application\UserInterface\Icon\IconInterface;
+use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
 use Concrete\Core\Page\Page;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,6 +27,11 @@ class PageHub extends Hub
          * @ORM\Column(type="string")
          */
         public ?string $label = null,
+
+        /**
+         * @ORM\Column(type="text", nullable=true)
+         */
+        public ?string $icon = null,
     ) {
         if ($page) {
             $this->cID = (int) $page->getCollectionID();
@@ -69,5 +76,10 @@ class PageHub extends Hub
             return $page->getCollectionLink();
         }
         return '#';
+    }
+
+    public function getIcon(): IconInterface
+    {
+        return new InlineSvgIcon((string) $this->icon);
     }
 }

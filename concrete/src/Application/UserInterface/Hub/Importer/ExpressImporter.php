@@ -28,7 +28,12 @@ class ExpressImporter implements ImporterInterface
             throw new \RuntimeException('Unable to resolve the express entity referenced by this express hub import node.');
         }
 
-        $hub = new ExpressHub($entity);
+        $icon = null;
+        if (isset($node->icon)) {
+            $icon = trim((string) $node->icon);
+        }
+
+        $hub = new ExpressHub($entity, $icon ?: null);
         return $hub;
     }
 }

@@ -4,6 +4,8 @@ namespace Concrete\Core\Entity\Hub;
 
 use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
 use Concrete\Core\Application\UserInterface\Hub\Controller\ExpressController;
+use Concrete\Core\Application\UserInterface\Icon\IconInterface;
+use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
 use Concrete\Core\Entity\Express\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -18,6 +20,11 @@ class ExpressHub extends Hub
          * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\Express\Entity")
          */
         public ?Entity $entity = null,
+
+        /**
+         * @ORM\Column(type="text", nullable=true)
+         */
+        public ?string $icon = null,
     ) {
     }
 
@@ -53,4 +60,8 @@ class ExpressHub extends Hub
         return '#';
     }
 
+    public function getIcon(): IconInterface
+    {
+        return new InlineSvgIcon((string) $this->icon);
+    }
 }

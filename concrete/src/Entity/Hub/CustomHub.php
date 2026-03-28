@@ -5,6 +5,7 @@ namespace Concrete\Core\Entity\Hub;
 use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
 use Concrete\Core\Application\UserInterface\Hub\Controller\CustomControllerInterface;
 use Concrete\Core\Application\UserInterface\Hub\Controller\Manager;
+use Concrete\Core\Application\UserInterface\Icon\IconInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -53,5 +54,10 @@ class CustomHub extends Hub
     public function getHomePageUrl(): string
     {
         return $this->getController()->getHomePageUrl();
+    }
+
+    public function getIcon(): IconInterface
+    {
+        return $this->getController()->getIcon();
     }
 }
