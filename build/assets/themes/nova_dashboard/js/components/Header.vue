@@ -10,15 +10,7 @@
         </a>
       </div>
 
-      <div class="hidden flex-1 lg:flex">
-        <ul class="menu menu-horizontal gap-0.5 p-0 text-sm font-medium">
-          <li v-for="hub in hubs" :key="hub.id">
-            <a :href="hub.menu?.url || '#'" class="c-toolbar-button">
-              {{ hub.menu?.label }}
-            </a>
-          </li>
-        </ul>
-      </div>
+      <div class="flex-1"></div>
       <div class="flex items-center gap-1">
         <div class="hidden lg:block mr-2">
           <Search />
@@ -59,10 +51,6 @@ defineProps({
   },
   logoSrc: {
     type: String,
-    required: true,
-  },
-  hubs: {
-    type: Array,
     required: true,
   },
 })

@@ -56,16 +56,4 @@ abstract class Hub implements HubInterface
     {
         $this->sortOrder = (int) $sortOrder;
     }
-
-    public function jsonSerialize(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'sortOrder' => $this->getSortOrder(),
-            'menu' => [
-                'label' => $this->getLabel(),
-                'url' => $this->getHomePageUrl(),
-            ],
-        ];
-    }
 }

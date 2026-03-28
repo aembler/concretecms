@@ -16,7 +16,9 @@
             {% include '@theme/templates/header.html.twig' %}
         {% endblock %}
 
-        <main class="mx-auto flex min-h-[calc(100vh-7.5rem)] w-full max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        {% include '@theme/templates/sidebar.html.twig' %}
+
+        <main class="mx-auto flex min-h-[calc(100vh-7.5rem)] w-full max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8 lg:pl-80">
             {% block content %}{% endblock %}
         </main>
 
