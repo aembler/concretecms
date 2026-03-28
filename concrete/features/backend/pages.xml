@@ -167,7 +167,9 @@
     </singlepages>
 
     <hubs>
-        <hub package="" handle="pages" />
+        <hub type="page" package="">
+            <page path="/dashboard/sitemap/full" label="Pages" />
+        </hub>
     </hubs>
 
 

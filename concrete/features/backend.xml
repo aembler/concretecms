@@ -133,4 +133,8 @@
         </page>
     </singlepages>
 
+    <hubs>
+        <hub type="custom" package="" handle="dashboard_welcome" />
+    </hubs>
+
 </concrete5-cif>

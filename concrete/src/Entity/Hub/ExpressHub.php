@@ -4,20 +4,22 @@ namespace Concrete\Core\Entity\Hub;
 
 use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
 use Concrete\Core\Application\UserInterface\Hub\Controller\ExpressController;
-use Concrete\Core\Application\UserInterface\Hub\HubInterface;
 use Concrete\Core\Entity\Express\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="HubRepository")
+ * @ORM\Table(name="ExpressHubs")
  */
-class ExpressHub extends AbstractHub
+class ExpressHub extends Hub
 {
-    /**
-     * @ORM\ManyToOne(targetEntity="\Concrete\Core\Entity\Express\Entity")
-     * @ORM\JoinColumn(name="exEntityID", referencedColumnName="id", nullable=true, onDelete="CASCADE")
-     */
-    protected $entity;
+    public function __construct(
+        /**
+         * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\Express\Entity")
+         */
+        public ?Entity $entity = null,
+    ) {
+    }
 
     /**
      * @return \Concrete\Core\Entity\Express\Entity|null
@@ -37,22 +39,6 @@ class ExpressHub extends AbstractHub
 
     public function getController(): ControllerInterface
     {
-        return new ExpressController($this->getEntity());
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->entity ? (string) $this->entity->getId() : '';
-    }
-
-    public static function fromXml(\SimpleXMLElement $node): HubInterface
-    {
-        $hub = new static();
-        $hub->setPackage(static::getPackageObject($node['package']));
-
-        return $hub;
+        return new ExpressController($this->entity);
     }
 }

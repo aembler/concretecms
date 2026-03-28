@@ -2,65 +2,70 @@
 
 namespace Concrete\Core\Entity\Hub;
 
-use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
-use Concrete\Core\Application\UserInterface\Hub\Controller\Manager;
-use Concrete\Core\Application\UserInterface\Hub\Controller\PageController;
 use Concrete\Core\Application\UserInterface\Hub\HubInterface;
+use Concrete\Core\Entity\PackageTrait;
+use Concrete\Core\Package\PackageService;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="HubRepository")
+ * @ORM\Table(name="Hubs")
+ * @ORM\InheritanceType("JOINED")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorMap({
+ *     "custom" = "CustomHub",
+ *     "page" = "PageHub",
+ *     "express" = "ExpressHub"
+ * })
  */
-class Hub extends AbstractHub
+abstract class Hub implements HubInterface
 {
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $identifier;
+    use PackageTrait;
 
     /**
-     * @return string
+     * @ORM\Id @ORM\Column(type="integer", options={"unsigned":true})
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
-    public function getIdentifier()
+    public $id;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    public $sortOrder = 0;
+
+    /**
+     * @return int|null
+     */
+    public function getId()
     {
-        return (string) $this->identifier;
+        return $this->id;
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getHandle()
+    public function getSortOrder()
     {
-        return $this->getIdentifier();
+        return $this->sortOrder;
     }
 
     /**
-     * @param string $identifier
+     * @param int $sortOrder
      */
-    public function setIdentifier($identifier): void
+    public function setSortOrder($sortOrder): void
     {
-        $this->identifier = (string) $identifier;
+        $this->sortOrder = (int) $sortOrder;
     }
 
-    /**
-     * @param string $handle
-     */
-    public function setHandle($handle): void
+    public function jsonSerialize(): array
     {
-        $this->setIdentifier($handle);
-    }
-
-    public static function fromXml(\SimpleXMLElement $node): HubInterface
-    {
-        $hub = new static();
-        $hub->setHandle((string) $node['handle']);
-        $hub->setPackage(static::getPackageObject($node['package']));
-
-        return $hub;
-    }
-
-    public function getController(): ControllerInterface
-    {
-        return app(Manager::class)->driver($this->getHandle());
+        return [
+            'id' => $this->getId(),
+            'sortOrder' => $this->getSortOrder(),
+            'menu' => [
+                'title' => $this->getController()->getMenuTitle(),
+                'url' => (string) $this->getController()->getHomePageUrl(),
+            ],
+        ];
     }
 }

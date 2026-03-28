@@ -2,12 +2,18 @@
 
 namespace Concrete\Core\Backup\ContentImporter\Importer\Routine;
 
-use Concrete\Core\Entity\Hub\AbstractHub;
+use Concrete\Core\Application\UserInterface\Hub\Controller\Manager;
 use Concrete\Core\Entity\Hub\Hub;
-use Concrete\Core\Application\UserInterface\Hub\CreateHubCommand;
+use Doctrine\ORM\EntityManager;
 
 class ImportHubsRoutine extends AbstractRoutine
 {
+
+    public function __construct(
+        private Manager $controllerManager,
+        private EntityManager $entityManager,
+    ) {}
+
     public function getHandle()
     {
         return 'hubs';
@@ -19,33 +25,21 @@ class ImportHubsRoutine extends AbstractRoutine
             return;
         }
 
-        $app = app();
-        $em = \Database::connection()->getEntityManager();
+        $repository = $this->entityManager->getRepository(Hub::class);
+        $sortOrder = $repository->getNextSortOrder();
+
         foreach ($sx->hubs->hub as $node) {
-            $identifier = (string) $node['handle'];
-            $existing = $this->findExistingHubByIdentifier($em, $identifier);
-            if ($existing) {
-                continue;
-            }
+            $type = (string) $node['type'];
+            $driver = $type === 'custom' ? (string) $node['handle'] : $type;
+            $controller = $this->controllerManager->driver($driver);
+            $importer = $controller->getImporter();
+            $hub = $importer->createFromImport($node);
+            $hub->setPackage(static::getPackageObject($node['package']));
+            $hub->setSortOrder($sortOrder);
+            $sortOrder++;
 
-            $hub = Hub::fromXml($node);
-            $app->executeCommand(new CreateHubCommand($hub));
+            $this->entityManager->persist($hub);
         }
-    }
-
-    /**
-     * @param \Doctrine\ORM\EntityManagerInterface $entityManager
-     * @param string $identifier
-     *
-     * @return \Concrete\Core\Entity\Hub\AbstractHub|null
-     */
-    protected function findExistingHubByIdentifier($entityManager, $identifier)
-    {
-        $hubs = $entityManager->getRepository(AbstractHub::class)->findAll();
-        foreach ($hubs as $hub) {
-            if ($hub->getIdentifier() === $identifier) {
-                return $hub;
-            }
-        }
+        $this->entityManager->flush();
     }
 }
