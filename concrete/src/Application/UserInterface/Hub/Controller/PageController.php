@@ -10,10 +10,6 @@ use Concrete\Core\Navigation\NavigationInterface;
 
 class PageController implements ControllerInterface
 {
-
-    public function __construct(
-        public PageHub $hub
-    ) {}
     public function getNavigation(): NavigationInterface
     {
         return new Navigation();

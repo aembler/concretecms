@@ -12,16 +12,6 @@ use Concrete\Core\Url\UrlInterface;
 
 class ExpressController implements ControllerInterface
 {
-    /**
-     * @var \Concrete\Core\Entity\Express\Entity|null
-     */
-    protected $entity;
-
-    public function __construct(Entity $entity = null)
-    {
-        $this->entity = $entity;
-    }
-
     public function getNavigation(): NavigationInterface
     {
         return new Navigation();

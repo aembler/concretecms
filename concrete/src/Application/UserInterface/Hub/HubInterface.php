@@ -14,4 +14,6 @@ interface HubInterface
     public function getHomePageUrl(): string;
 
     public function getIcon(): IconInterface;
+
+    public function inHub(HubIdentifier $hub): bool;
 }

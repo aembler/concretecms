@@ -4,6 +4,7 @@ namespace Concrete\Core\Page\Controller;
 
 use Concrete\Core\Application\Service\DashboardMenu;
 use Concrete\Core\Application\UserInterface\Dashboard\Navigation\FavoritesNavigationFactory;
+use Concrete\Core\Application\UserInterface\Hub\HubIdentifier;
 use Concrete\Core\Cookie\CookieJar;
 use Concrete\Core\Entity\Hub\Hub;
 use Concrete\Core\Filesystem\ElementManager;
@@ -99,6 +100,12 @@ class DashboardPageController extends PageController
             $this->set('_bookmarked', false);
         }
         $this->set('_hubs', $this->entityManager->getRepository(Hub::class)->findBy([], ['sortOrder' => 'asc']));
+        $this->set('_currentHub', $this->getHub());
+    }
+
+    public function getHub(): ?HubIdentifier
+    {
+        return null;
     }
 
     /**

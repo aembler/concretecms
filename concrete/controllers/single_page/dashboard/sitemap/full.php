@@ -2,12 +2,20 @@
 
 namespace Concrete\Controller\SinglePage\Dashboard\Sitemap;
 
+use Concrete\Core\Application\UserInterface\Hub\HubIdentifier;
+use Concrete\Core\Feature\Features;
 use Concrete\Core\Page\Controller\DashboardPageController;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
 class Full extends DashboardPageController
 {
+
+    public function getHub(): ?HubIdentifier
+    {
+        return new HubIdentifier(Features::PAGES);
+    }
+
     public function view()
     {
         $this->set('canRead', $this->canRead());

@@ -20,22 +20,22 @@ class PageHub extends Hub
      */
     public int $cID = 0;
 
-    public function __construct(
-        ?Page $page = null,
+    /**
+     * @ORM\Column(type="string")
+     */
+    public ?string $label = null;
 
-        /**
-         * @ORM\Column(type="string")
-         */
-        public ?string $label = null,
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    public ?string $icon = null;
 
-        /**
-         * @ORM\Column(type="text", nullable=true)
-         */
-        public ?string $icon = null,
-    ) {
-        if ($page) {
-            $this->cID = (int) $page->getCollectionID();
-        }
+    public function __construct(string $handle, Page $page, string $label, ?string $icon = null)
+    {
+        $this->handle = $handle;
+        $this->label = $label;
+        $this->icon = $icon;
+        $this->cID = (int) $page->getCollectionID();
     }
 
     public function getPage(): ?Page

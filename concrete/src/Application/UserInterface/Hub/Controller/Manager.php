@@ -15,13 +15,6 @@ class Manager extends CoreManager
         parent::__construct($app);
     }
 
-    public function createPagesDriver()
-    {
-        return $this->app->make(PageController::class, [
-            'page' => Page::getByPath('/dashboard/pages'),
-        ]);
-    }
-
     public function createPageDriver()
     {
         return $this->app->make(PageController::class);
@@ -32,8 +25,8 @@ class Manager extends CoreManager
         return $this->app->make(ExpressController::class);
     }
 
-    public function createDashboardWelcomeDriver()
+    public function createDesktopDriver()
     {
-        return $this->app->make(DashboardWelcomeController::class);
+        return $this->app->make(DesktopController::class);
     }
 }

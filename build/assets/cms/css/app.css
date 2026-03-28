@@ -2,7 +2,6 @@
 @import "../../../node_modules/@concretecms/backendui/dist/backendui.css";
 @import "./theme/theme.css";
 
-
 @import "./app/toolbar.css";
 @import "./app/animations.css";
 @import "./app/interactions.css";

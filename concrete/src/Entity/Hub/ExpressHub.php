@@ -15,17 +15,24 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ExpressHub extends Hub
 {
-    public function __construct(
-        /**
-         * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\Express\Entity")
-         */
-        public ?Entity $entity = null,
+    /**
+     * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\Express\Entity")
+     */
+    public ?Entity $entity = null;
 
-        /**
-         * @ORM\Column(type="text", nullable=true)
-         */
-        public ?string $icon = null,
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    public ?string $icon = null;
+
+    public function __construct(
+        string $handle,
+        Entity $entity,
+        ?string $icon = null,
     ) {
+        $this->handle = $handle;
+        $this->entity = $entity;
+        $this->icon = $icon;
     }
 
     /**

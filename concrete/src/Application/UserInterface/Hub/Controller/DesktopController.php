@@ -6,11 +6,12 @@ use Concrete\Core\Application\UserInterface\Hub\Importer\CustomImporter;
 use Concrete\Core\Application\UserInterface\Hub\Importer\ImporterInterface;
 use Concrete\Core\Application\UserInterface\Icon\IconInterface;
 use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
+use Concrete\Core\Feature\Features;
 use Concrete\Core\Navigation\Navigation;
 use Concrete\Core\Navigation\NavigationInterface;
 use Concrete\Core\Page\Page;
 
-class DashboardWelcomeController implements CustomControllerInterface
+class DesktopController implements CustomControllerInterface
 {
     public function getNavigation(): NavigationInterface
     {
@@ -35,6 +36,6 @@ class DashboardWelcomeController implements CustomControllerInterface
 
     public function getImporter(): ImporterInterface
     {
-        return new CustomImporter('dashboard_welcome');
+        return new CustomImporter(Features::DESKTOP);
     }
 }

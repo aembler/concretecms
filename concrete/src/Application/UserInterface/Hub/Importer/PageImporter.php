@@ -35,7 +35,7 @@ class PageImporter implements ImporterInterface
             $icon = trim((string) $node->icon);
         }
 
-        $hub = new PageHub($page, $label, $icon ?: null);
+        $hub = new PageHub((string) $node['handle'], $page, $label, $icon ?: null);
         return $hub;
     }
 }

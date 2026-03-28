@@ -33,7 +33,7 @@ class ExpressImporter implements ImporterInterface
             $icon = trim((string) $node->icon);
         }
 
-        $hub = new ExpressHub($entity, $icon ?: null);
+        $hub = new ExpressHub((string) $node['handle'], $entity, $icon ?: null);
         return $hub;
     }
 }

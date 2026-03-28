@@ -167,7 +167,7 @@
     </singlepages>
 
     <hubs>
-        <hub type="page" package="">
+        <hub type="page" package="" handle="pages">
             <icon><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7.75 4.75h7.19c.33 0 .65.13.88.37l2.06 2.06c.23.23.37.55.37.88v10.19A1.75 1.75 0 0 1 16.5 20h-8A1.75 1.75 0 0 1 6.75 18.25v-11.75A1.75 1.75 0 0 1 8.5 4.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 10h6M9.5 13h6M9.5 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>]]></icon>
             <page path="/dashboard/sitemap/full" label="Pages" />
         </hub>

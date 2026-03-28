@@ -14,12 +14,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class CustomHub extends Hub
 {
-    public function __construct(
-        /**
-         * @ORM\Column(type="string", length=255)
-         */
-        public string $handle = '',
-    ) {
+    public function __construct(string $handle)
+    {
+        $this->handle = $handle;
     }
 
     /**
