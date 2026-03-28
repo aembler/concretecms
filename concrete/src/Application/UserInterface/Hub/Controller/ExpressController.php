@@ -27,11 +27,6 @@ class ExpressController implements ControllerInterface
         return new Navigation();
     }
 
-    public function getMenuTitle(): string
-    {
-        return $this->entity ? (string) $this->entity->getName() : '';
-    }
-
     public function getHomePageUrl(): UrlInterface
     {
         return Url::createFromUrl('https://www.yahoo.com');

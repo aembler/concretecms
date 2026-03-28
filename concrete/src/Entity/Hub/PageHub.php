@@ -61,4 +61,13 @@ class PageHub extends Hub
     {
         return new PageController($this);
     }
+
+    public function getHomePageUrl(): string
+    {
+        $page = $this->getPage();
+        if ($page) {
+            return $page->getCollectionLink();
+        }
+        return '#';
+    }
 }

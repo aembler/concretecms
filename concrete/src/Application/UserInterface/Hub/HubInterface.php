@@ -7,4 +7,9 @@ use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
 interface HubInterface extends \JsonSerializable
 {
     public function getController(): ControllerInterface;
+
+    public function getLabel(): string;
+
+    public function getHomePageUrl(): string;
+
 }

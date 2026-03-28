@@ -41,4 +41,16 @@ class ExpressHub extends Hub
     {
         return new ExpressController($this->entity);
     }
+
+    public function getLabel(): string
+    {
+        /** @todo - have a proper plural name */
+        return camelcase($this->entity->getPluralHandle());
+    }
+
+    public function getHomePageUrl(): string
+    {
+        return '#';
+    }
+
 }

@@ -63,8 +63,8 @@ abstract class Hub implements HubInterface
             'id' => $this->getId(),
             'sortOrder' => $this->getSortOrder(),
             'menu' => [
-                'title' => $this->getController()->getMenuTitle(),
-                'url' => (string) $this->getController()->getHomePageUrl(),
+                'label' => $this->getLabel(),
+                'url' => $this->getHomePageUrl(),
             ],
         ];
     }

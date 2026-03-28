@@ -3,8 +3,8 @@
 namespace Concrete\Core\Entity\Hub;
 
 use Concrete\Core\Application\UserInterface\Hub\Controller\ControllerInterface;
+use Concrete\Core\Application\UserInterface\Hub\Controller\CustomControllerInterface;
 use Concrete\Core\Application\UserInterface\Hub\Controller\Manager;
-use Concrete\Core\Application\UserInterface\Hub\HubInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -37,8 +37,21 @@ class CustomHub extends Hub
         $this->handle = (string) $handle;
     }
 
+    /**
+     * @return CustomControllerInterface
+     */
     public function getController(): ControllerInterface
     {
         return app(Manager::class)->driver($this->getHandle());
+    }
+
+    public function getLabel(): string
+    {
+        return $this->getController()->getLabel();
+    }
+
+    public function getHomePageUrl(): string
+    {
+        return $this->getController()->getHomePageUrl();
     }
 }

@@ -6,24 +6,25 @@ use Concrete\Core\Application\UserInterface\Hub\Importer\CustomImporter;
 use Concrete\Core\Application\UserInterface\Hub\Importer\ImporterInterface;
 use Concrete\Core\Navigation\Navigation;
 use Concrete\Core\Navigation\NavigationInterface;
+use Concrete\Core\Page\Page;
 use Concrete\Core\Url\UrlInterface;
 
-class DashboardWelcomeController implements ControllerInterface
+class DashboardWelcomeController implements CustomControllerInterface
 {
     public function getNavigation(): NavigationInterface
     {
         return new Navigation();
     }
 
-    public function getMenuTitle(): string
+    public function getLabel(): string
     {
         return t('Overview');
     }
 
-    public function getHomePageUrl(): UrlInterface
+    public function getHomePageUrl(): string
     {
-        return app('url/resolver/path')
-            ->resolve(['/dashboard/welcome']);
+        $page = Page::getByPath('/dashboard/welcome');
+        return $page->getCollectionLink();
     }
 
     public function getImporter(): ImporterInterface

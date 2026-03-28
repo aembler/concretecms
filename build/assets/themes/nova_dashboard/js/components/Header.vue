@@ -14,7 +14,7 @@
         <ul class="menu menu-horizontal gap-0.5 p-0 text-sm font-medium">
           <li v-for="hub in hubs" :key="hub.id">
             <a :href="hub.menu?.url || '#'" class="c-toolbar-button">
-              {{ hub.menu?.title || hub.identifier }}
+              {{ hub.menu?.label }}
             </a>
           </li>
         </ul>
