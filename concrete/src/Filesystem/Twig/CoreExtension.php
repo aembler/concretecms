@@ -11,6 +11,8 @@ use Concrete\Core\Authentication\AuthenticationType;
 use Concrete\Core\Block\View\BlockViewTemplate;
 use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\File\File;
+use Concrete\Core\Filesystem\Element;
+use Concrete\Core\Filesystem\ElementManager;
 use Concrete\Core\Filesystem\Twig\Extension\FormProxy;
 use Concrete\Core\Form\Service\Form;
 use Concrete\Core\Html\Image;
@@ -229,10 +231,10 @@ class CoreExtension extends AbstractExtension implements ApplicationAwareInterfa
             /** Render an element */
             new TwigFunction('element', function (...$args): string {
                 ob_start();
-                View::element(...$args);
-
+                $element = $this->app->make(ElementManager::class)->get(...$args);
+                $element->render();
                 return ob_get_clean();
-            }),
+            }, ['is_safe' => ['html']]),
 
             new TwigFunction('csrf_token', function ($tokenName): string {
                 ob_start();

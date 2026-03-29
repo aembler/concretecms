@@ -2,15 +2,14 @@
 
 namespace Concrete\Core\Page\Controller;
 
-use Concrete\Core\Application\Service\DashboardMenu;
+use Concrete\Core\Application\UserInterface\Dashboard\Component\Navigation;
 use Concrete\Core\Application\UserInterface\Dashboard\Navigation\FavoritesNavigationFactory;
-use Concrete\Core\Application\UserInterface\Hub\HubIdentifier;
 use Concrete\Core\Cookie\CookieJar;
-use Concrete\Core\Entity\Hub\Hub;
 use Concrete\Core\Filesystem\ElementManager;
 use Concrete\Core\Navigation\Breadcrumb\BreadcrumbInterface;
 use Concrete\Core\Navigation\Breadcrumb\Dashboard\DashboardBreadcrumbFactory;
 use Concrete\Core\Navigation\Item\PageItem;
+use Concrete\Core\Navigation\NavigationInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Mobile_Detect;
 
@@ -99,13 +98,8 @@ class DashboardPageController extends PageController
         } else {
             $this->set('_bookmarked', false);
         }
-        $this->set('_hubs', $this->entityManager->getRepository(Hub::class)->findBy([], ['sortOrder' => 'asc']));
-        $this->set('_currentHub', $this->getHub());
-    }
-
-    public function getHub(): ?HubIdentifier
-    {
-        return null;
+        $this->set('_navigation', $this->app->make(Navigation::class)
+            ->navigation);
     }
 
     /**
