@@ -19,6 +19,9 @@ $categories = $navigation->getItems();
          * @var $cat \Concrete\Core\Navigation\Item\ItemInterface
          */
         $cat = $categories[$i];
+        if (!($cat instanceof \Concrete\Core\Navigation\Item\LinkItemInterface)) {
+            continue;
+        }
         if ($rowCount == 3 || $i == 0) {
             $offset = '';
             ?>
