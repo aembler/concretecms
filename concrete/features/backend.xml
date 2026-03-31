@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <concrete5-cif version="1.0">
 
+    <attributekeys>
+        <attributekey handle="icon_dashboard" name="Dashboard Icon" package="" searchable="0" indexed="0"
+                      type="textarea" internal="1" category="collection">
+            <type mode=""/>
+        </attributekey>
+    </attributekeys>
+
     <singlepages>
         <page name="Dashboard" path="/dashboard" filename="/dashboard/view.php" pagetype="" description="" package=""
               global="true">
@@ -10,8 +17,11 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Welcome" path="/dashboard/welcome" filename="/dashboard/welcome.php" description="" package="">
+        <page name="Welcome Back" path="/dashboard/welcome" filename="/dashboard/welcome.php" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M4 10.5 12 4l8 6.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 9.5V19a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 20v-4.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V20" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.75 6.75H5.5a2.5 2.5 0 1 0 0 5h1.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="m6.25 4.75 2.5 2-2.5 2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
                 <attributekey handle="desktop_priority">
                     <value>2</value>
                 </attributekey>
@@ -126,6 +136,9 @@
         <page name="System &amp; Settings" path="/dashboard/system" filename="/dashboard/system/view.php" pagetype=""
               description="Secure and setup your site." package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 8.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" stroke-width="1.75"/><path d="M18.25 13.5a1 1 0 0 0 .2 1.1l.05.05a1.75 1.75 0 1 1-2.48 2.48l-.05-.05a1 1 0 0 0-1.1-.2 1 1 0 0 0-.62.92V18a1.75 1.75 0 1 1-3.5 0v-.08a1 1 0 0 0-.66-.94 1 1 0 0 0-1.06.22l-.05.05a1.75 1.75 0 1 1-2.48-2.48l.05-.05a1 1 0 0 0 .2-1.1 1 1 0 0 0-.92-.62H6a1.75 1.75 0 1 1 0-3.5h.08a1 1 0 0 0 .94-.66 1 1 0 0 0-.22-1.06l-.05-.05a1.75 1.75 0 1 1 2.48-2.48l.05.05a1 1 0 0 0 1.1.2h.12a1 1 0 0 0 .62-.92V6a1.75 1.75 0 1 1 3.5 0v.08a1 1 0 0 0 .66.94 1 1 0 0 0 1.06-.22l.05-.05a1.75 1.75 0 1 1 2.48 2.48l-.05.05a1 1 0 0 0-.2 1.1v.12a1 1 0 0 0 .92.62H18a1.75 1.75 0 1 1 0 3.5h-.08a1 1 0 0 0-.94.66v.12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>dashboard, configuration</value>
                 </attributekey>

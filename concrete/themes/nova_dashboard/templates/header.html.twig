@@ -1,5 +1,12 @@
-<div
-    data-nova-dashboard-header
-    data-help-url="{{ url('/ccm/system/dialogs/help/help') }}?ccm_token={{ csrf_token_value('view_help') }}"
-    data-logo-src="{{ interface.getToolbarLogoRealSrc() }}"
-></div>
+<header class="sticky top-0 z-50 border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
+    <div class="navbar mx-auto max-w-screen-2xl px-4 lg:px-6"
+         data-addons-url="{{ url('/dashboard/extend/addons') }}"
+         data-nova-dashboard-header
+         data-extend-themes-url="{{ url('/dashboard/extend/themes') }}"
+         data-extend-update-url="{{ url('/dashboard/extend/update') }}"
+         data-extend-url="{{ url('/dashboard/extend') }}"
+         data-help-url="{{ url('/ccm/system/dialogs/help/help') }}?ccm_token={{ csrf_token_value('view_help') }}"
+         data-logo-src="{{ interface.getToolbarLogoRealSrc() }}"
+         data-settings-url="{{ url('/dashboard/system') }}"
+    ></div>
+</header>

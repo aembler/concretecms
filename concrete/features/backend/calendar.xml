@@ -3,8 +3,14 @@
 
     <singlepages>
 
-        <page name="Calendar &amp; Events" path="/dashboard/calendar" filename="/dashboard/calendar/view.php"
-              pagetype="" description="" package=""/>
+        <page name="Calendars &amp; Events" path="/dashboard/calendar" filename="/dashboard/calendar/view.php"
+              pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4" y="5.75" width="16" height="14.5" rx="1.5" stroke="currentColor" stroke-width="1.75"/><path d="M8 3.75v4M16 3.75v4M4 10h16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8.5 13.5h3v3h-3zM13.5 13.5H16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="View Calendar" path="/dashboard/calendar/events" filename="/dashboard/calendar/events.php"
               pagetype="" description="" package=""/>
         <page name="Event List" path="/dashboard/calendar/event_list" filename="/dashboard/calendar/event_list.php"

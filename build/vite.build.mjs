@@ -299,6 +299,14 @@ function copyVendorAssets() {
         path.resolve(__dirname, `node_modules/vue/dist/${vueFile}`),
         path.resolve(concreteRoot, 'js/vue.js')
     )
+    copyDirectory(
+        path.resolve(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'),
+        path.resolve(concreteRoot, 'css/webfonts')
+    )
+    copyFile(
+        path.resolve(__dirname, 'node_modules/@fortawesome/fontawesome-free/css/all.css'),
+        path.resolve(concreteRoot, 'css/fontawesome/all.css')
+    )
     copyFile(
         path.resolve(__dirname, 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js'),
         path.resolve(concreteRoot, 'js/bootstrap.js')

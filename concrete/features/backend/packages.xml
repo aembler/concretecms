@@ -9,6 +9,9 @@
                 <attributekey handle="meta_keywords">
                     <value>add-on, addon, add on, package, app, ecommerce, discussions, forums, themes, templates, blocks</value>
                 </attributekey>
+                <attributekey handle="exclude_nav">
+                    <value><![CDATA[1]]></value>
+                </attributekey>
             </attributes>
         </page>
         <page name="Add Functionality" path="/dashboard/extend/install" filename="/dashboard/extend/install.php"

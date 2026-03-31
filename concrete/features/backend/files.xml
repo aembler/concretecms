@@ -3,8 +3,14 @@
 
     <singlepages>
 
-        <page name="Files" path="/dashboard/files" filename="/dashboard/files/view.php" pagetype=""
-              description="All documents and images." package=""/>
+        <page name="Files &amp; Media" path="/dashboard/files" filename="/dashboard/files/view.php" pagetype=""
+              description="All documents and images." package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4l1.5 2h7A1.5 1.5 0 0 1 20 9.5v8A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-10Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M4 10.5h16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m10 14 2 2 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="File Manager" path="/dashboard/files/search" filename="/dashboard/files/search.php" pagetype=""
               description="" package="">
             <attributes>

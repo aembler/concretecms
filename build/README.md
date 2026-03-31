@@ -16,6 +16,9 @@ Once you have installed the grunt client, you need to install the project depend
 npm install
 ```
 
+Font Awesome note:
+Concrete still copies `@fortawesome/fontawesome-free` into `concrete/css/fontawesome/all.css` and `concrete/css/webfonts` as part of the build pipeline, but this is legacy support only. New UI work should prefer inline SVG icons over Font Awesome so we can phase the CSS fallback out over time.
+
 ### Task parameters
 
 Every task may have its own parameters. These parameters may be specified inline or in a file called `Gruntfile.parameters.js`.

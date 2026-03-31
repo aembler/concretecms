@@ -2,11 +2,14 @@
 <concrete5-cif version="1.0">
 
     <singlepages>
-        <page name="Sitemap" path="/dashboard/sitemap" filename="/dashboard/sitemap/view.php" pagetype=""
+        <page name="Pages &amp; Sitemap" path="/dashboard/sitemap" filename="/dashboard/sitemap/view.php" pagetype=""
               description="Whole world at a glance." package="">
             <attributes>
                 <attributekey handle="meta_keywords">
                     <value>pages, add page, delete page, copy, move, alias</value>
+                </attributekey>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 5v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M6 19v-2.5m6 2.5v-2.5m6 2.5v-2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M6 16.5h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 9v3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.75"/><rect x="3" y="16" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.75"/><rect x="9" y="16" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.75"/><rect x="15" y="16" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
                 </attributekey>
             </attributes>
         </page>
@@ -35,9 +38,15 @@
             </attributes>
         </page>
 
-        <page name="Pages &amp; Themes" path="/dashboard/pages" filename="/dashboard/pages/view.php" pagetype=""
-              description="Reskin your site." package=""/>
-        <page name="Themes" path="/dashboard/pages/themes" filename="/dashboard/pages/themes/view.php" pagetype=""
+        <page name="Design and Templates" path="/dashboard/design" filename="/dashboard/design/view.php" pagetype=""
+              description="Reskin your site." package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="m6 15 7.75-7.75a2.12 2.12 0 1 1 3 3L9 18H6v-3Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="m13 8 3 3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M4.75 19.25h14.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+            </attributes>
+        </page>
+        <page name="Themes" path="/dashboard/design/themes" filename="/dashboard/design/themes/view.php" pagetype=""
               description="Reskin your site." package="">
             <attributes>
                 <attributekey handle="meta_keywords">
@@ -45,7 +54,7 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Inspect" path="/dashboard/pages/themes/inspect" filename="/dashboard/pages/themes/inspect.php"
+        <page name="Inspect" path="/dashboard/design/themes/inspect" filename="/dashboard/design/themes/inspect.php"
               pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="meta_keywords">
@@ -56,12 +65,12 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Page Types" path="/dashboard/pages/types" filename="/dashboard/pages/types/view.php" pagetype=""
+        <page name="Page Types" path="/dashboard/design/types" filename="/dashboard/design/types/view.php" pagetype=""
               description="" package="">
         </page>
 
-        <page name="Organize Page Type Order" path="/dashboard/pages/types/organize"
-              filename="/dashboard/pages/types/organize.php" pagetype=""
+        <page name="Organize Page Type Order" path="/dashboard/design/types/organize"
+              filename="/dashboard/design/types/organize.php" pagetype=""
               description="" package="">
             <attributes>
                 <attributekey handle="exclude_nav">
@@ -70,7 +79,7 @@
             </attributes>
         </page>
 
-        <page name="Add Page Type" path="/dashboard/pages/types/add" filename="/dashboard/pages/types/add.php"
+        <page name="Add Page Type" path="/dashboard/design/types/add" filename="/dashboard/design/types/add.php"
               pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="exclude_nav">
@@ -80,7 +89,7 @@
 
         </page>
 
-        <page name="Compose Form" path="/dashboard/pages/types/form" filename="/dashboard/pages/types/form.php"
+        <page name="Compose Form" path="/dashboard/design/types/form" filename="/dashboard/design/types/form.php"
               pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="exclude_nav">
@@ -89,8 +98,8 @@
             </attributes>
         </page>
 
-        <page name="Defaults and Output" path="/dashboard/pages/types/output"
-              filename="/dashboard/pages/types/output.php" pagetype="" description="" package="">
+        <page name="Defaults and Output" path="/dashboard/design/types/output"
+              filename="/dashboard/design/types/output.php" pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
@@ -98,8 +107,8 @@
             </attributes>
         </page>
 
-        <page name="Page Type Attributes" path="/dashboard/pages/types/attributes"
-              filename="/dashboard/pages/types/attributes.php" pagetype="" description="" package="">
+        <page name="Page Type Attributes" path="/dashboard/design/types/attributes"
+              filename="/dashboard/design/types/attributes.php" pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
@@ -107,8 +116,8 @@
             </attributes>
         </page>
 
-        <page name="Page Type Permissions" path="/dashboard/pages/types/permissions"
-              filename="/dashboard/pages/types/permissions.php" pagetype="" description="" package="">
+        <page name="Page Type Permissions" path="/dashboard/design/types/permissions"
+              filename="/dashboard/design/types/permissions.php" pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
@@ -116,10 +125,10 @@
             </attributes>
         </page>
 
-        <page name="Page Templates" path="/dashboard/pages/templates" filename="/dashboard/pages/templates/view.php"
+        <page name="Page Templates" path="/dashboard/design/templates" filename="/dashboard/design/templates/view.php"
               pagetype="" description="Form factors for pages in your site." package=""/>
-        <page name="Add Page Template" path="/dashboard/pages/templates/add"
-              filename="/dashboard/pages/templates/add.php" pagetype="" description="Add page templates to your site."
+        <page name="Add Page Template" path="/dashboard/design/templates/add"
+              filename="/dashboard/design/templates/add.php" pagetype="" description="Add page templates to your site."
               package="">
             <attributes>
                 <attributekey handle="exclude_nav">
@@ -127,10 +136,10 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Containers" path="/dashboard/pages/containers" filename="/dashboard/pages/containers/view.php"
+        <page name="Containers" path="/dashboard/design/containers" filename="/dashboard/design/containers/view.php"
               pagetype="" description="Container Templates for Areas." package=""/>
-        <page name="Add Container" path="/dashboard/pages/containers/add"
-              filename="/dashboard/pages/containers/add.php" pagetype="" description="Add page containers."
+        <page name="Add Container" path="/dashboard/design/containers/add"
+              filename="/dashboard/design/containers/add.php" pagetype="" description="Add page containers."
               package="">
             <attributes>
                 <attributekey handle="exclude_nav">
@@ -138,7 +147,7 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Attributes" path="/dashboard/pages/attributes" filename="/dashboard/pages/attributes.php"
+        <page name="Attributes" path="/dashboard/design/attributes" filename="/dashboard/design/attributes.php"
               pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="meta_keywords">
@@ -146,7 +155,7 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Single Pages" path="/dashboard/pages/single" filename="/dashboard/pages/single.php" pagetype=""
+        <page name="Single Pages" path="/dashboard/design/single" filename="/dashboard/design/single.php" pagetype=""
               description="" package="">
             <attributes>
                 <attributekey handle="meta_keywords">
@@ -155,7 +164,7 @@
             </attributes>
         </page>
 
-        <page name="RSS Feeds" path="/dashboard/pages/feeds" filename="/dashboard/pages/feeds.php" pagetype=""
+        <page name="RSS Feeds" path="/dashboard/design/feeds" filename="/dashboard/design/feeds.php" pagetype=""
               description="" package="">
             <attributes>
                 <attributekey handle="meta_keywords">

@@ -2,7 +2,7 @@
 <concrete5-cif version="1.0">
     <singlepages>
 
-        <page name="Welcome" path="/dashboard/welcome" filename="/dashboard/welcome.php" description="" package="">
+        <page name="Welcome Back" path="/dashboard/welcome" filename="/dashboard/welcome.php" description="" package="">
             <attributes>
                 <attributekey handle="desktop_priority">
                     <value>2</value>

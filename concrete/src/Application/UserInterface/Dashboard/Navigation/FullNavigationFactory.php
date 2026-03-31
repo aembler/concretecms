@@ -4,6 +4,7 @@ namespace Concrete\Core\Application\UserInterface\Dashboard\Navigation;
 
 use Concrete\Core\Application\Application;
 use Concrete\Core\Entity\Navigation\Menu;
+use Concrete\Core\Navigation\Item\DividerItem;
 use Concrete\Core\Page\Page;
 use Doctrine\ORM\EntityManager;
 
@@ -49,6 +50,29 @@ class FullNavigationFactory
         $this->cache = $cache;
     }
 
+    protected function insertWelcomeDivider(Navigation $navigation): Navigation
+    {
+        $welcome = Page::getByPath('/dashboard/welcome');
+        if (!$welcome || $welcome->isError()) {
+            return $navigation;
+        }
+
+        $welcomePageID = $welcome->getCollectionID();
+        $items = $navigation->getItems();
+        $updatedItems = [];
+
+        foreach ($items as $item) {
+            $updatedItems[] = $item;
+            if (method_exists($item, 'getPageID') && $item->getPageID() === $welcomePageID) {
+                $updatedItems[] = new DividerItem();
+            }
+        }
+
+        $navigation->setItems($updatedItems);
+
+        return $navigation;
+    }
+
     public function getMenu(): ?Menu
     {
         $dashboardMenuID = $this->app->make('config/database')->get('app.dashboard_menu');
@@ -74,6 +98,7 @@ class FullNavigationFactory
                 $home = Page::getByPath('/dashboard');
                 $navigation = $this->dashboardSitemapNavigationFactory->createNavigation($home);
             }
+            $navigation = $this->insertWelcomeDivider($navigation);
             $this->cache->set($navigation);
         } else {
             $navigation = $this->cache->get();

@@ -4,7 +4,13 @@
     <singlepages>
 
         <page name="Boards" path="/dashboard/boards" filename="/dashboard/boards/view.php" pagetype=""
-              description="Express Data Objects" package=""/>
+              description="Express Data Objects" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="1.5" stroke="currentColor" stroke-width="1.75"/><path d="M12 5v14M4 10h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="16.5" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="14.5" r="1.5" fill="currentColor"/><circle cx="18" cy="14.5" r="1.5" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="View Boards" path="/dashboard/boards/boards" filename="/dashboard/boards/boards.php" pagetype=""
               description="" package="">
 

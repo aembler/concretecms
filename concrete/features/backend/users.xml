@@ -3,9 +3,12 @@
 
     <singlepages>
 
-        <page name="Members" path="/dashboard/users" filename="/dashboard/users/view.php" pagetype=""
+        <page name="Users &amp; Groups" path="/dashboard/users" filename="/dashboard/users/view.php" pagetype=""
               description="Add and manage the user accounts and groups on your website." package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.75"/><path d="M15.5 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="1.75"/><path d="M4.5 18a4.5 4.5 0 0 1 9 0" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M14 18a3.5 3.5 0 0 1 6 0" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>users, groups, people, find, delete user, remove user, change password, password</value>
                 </attributekey>

@@ -171,7 +171,6 @@ return [
 
         'core_marketplace' => \Concrete\Core\Marketplace\MarketplaceServiceProvider::class,
         'core_templates' => \Concrete\Core\Filesystem\TemplateServiceProvider::class,
-        'core_hubs' => \Concrete\Core\Application\UserInterface\Hub\HubServiceProvider::class,
     ],
 
     /*
@@ -261,7 +260,6 @@ return [
         'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportBoardDataSourcesRoutine',
         'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportBoardTemplatesRoutine',
         'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportBoardSlotTemplatesRoutine',
-        'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportHubsRoutine',
         'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportAttributeCategoriesRoutine',
         'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportAttributeTypesRoutine',
         'Concrete\Core\Backup\ContentImporter\Importer\Routine\ImportWorkflowTypesRoutine',

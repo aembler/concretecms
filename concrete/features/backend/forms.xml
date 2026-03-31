@@ -3,9 +3,12 @@
 
     <singlepages>
 
-        <page name="Reports" path="/dashboard/reports" filename="/dashboard/reports.php" pagetype=""
+        <page name="Reports &amp; Forms" path="/dashboard/reports" filename="/dashboard/reports.php" pagetype=""
               description="Get data from forms and logs." package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M6 4.75h12A1.25 1.25 0 0 1 19.25 6v12A1.25 1.25 0 0 1 18 19.25H6A1.25 1.25 0 0 1 4.75 18V6A1.25 1.25 0 0 1 6 4.75Z" stroke="currentColor" stroke-width="1.75"/><path d="M8 15.5 10.5 13l2 1.75L16 10.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9.5h3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>forms, log, error, email, mysql, exception, survey</value>
                 </attributekey>

@@ -18,6 +18,7 @@
     "compat:prod": "node ./vite.build.mjs --mode production"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4",
     "@concretecms/backendui": "0.0.0",
     "@concretecms/bedrock": "0.0.0",
     "@tailwindcss/typography": "^0.5.16",
