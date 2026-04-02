@@ -665,10 +665,10 @@ return [
         ],
         'core/cms' => [
             [
-                ['javascript', 'jquery'],
-                ['javascript', 'bootstrap'],
+                //['javascript', 'jquery'],
+                //['javascript', 'bootstrap'],
                 ['javascript', 'moment'],
-                ['javascript', 'vue'],
+                //['javascript', 'vue'],
                 ['css', 'font-awesome'],
                 ['javascript', 'core/cms'],
                 ['javascript-localized', 'core/cms'],

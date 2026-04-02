@@ -4,18 +4,48 @@
     <singlepages>
         <page name="API" path="/dashboard/system/api" filename="/dashboard/system/api/view.php"
               pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8 8.5 5 12l3 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 8.5 19 12l-3 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.5 6.5 10.5 17.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage API access, integration endpoints, and the configuration needed for external applications.</value>
+                </attributekey>
+            </attributes>
         </page>
         <page name="API Integrations" path="/dashboard/system/api/integrations"
               filename="/dashboard/system/api/integrations.php" pagetype=""
               description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4.75" y="7" width="5.5" height="10" rx="1.5" stroke="currentColor" stroke-width="1.75"/><rect x="13.75" y="7" width="5.5" height="10" rx="1.5" stroke="currentColor" stroke-width="1.75"/><path d="M10.75 12h2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Register and manage API integrations that connect external systems to this installation.</value>
+                </attributekey>
+            </attributes>
         </page>
         <page name="Scopes" path="/dashboard/system/api/scopes"
               filename="/dashboard/system/api/scopes.php" pagetype=""
               description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.25" stroke="currentColor" stroke-width="1.75"/><path d="M9.5 12h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 9.5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Define API scopes so integrations request only the permissions and capabilities they need.</value>
+                </attributekey>
+            </attributes>
         </page>
         <page name="API Settings" path="/dashboard/system/api/settings"
               filename="/dashboard/system/api/settings.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 8.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" stroke-width="1.75"/><path d="M18.25 13.5a1 1 0 0 0 .2 1.1l.05.05a1.75 1.75 0 1 1-2.48 2.48l-.05-.05a1 1 0 0 0-1.1-.2 1 1 0 0 0-.62.92V18a1.75 1.75 0 1 1-3.5 0v-.08a1 1 0 0 0-.66-.94 1 1 0 0 0-1.06.22l-.05.05a1.75 1.75 0 1 1-2.48-2.48l.05-.05a1 1 0 0 0 .2-1.1 1 1 0 0 0-.92-.62H6a1.75 1.75 0 1 1 0-3.5h.08a1 1 0 0 0 .94-.66 1 1 0 0 0-.22-1.06l-.05-.05a1.75 1.75 0 1 1 2.48-2.48l.05.05a1 1 0 0 0 1.1.2h.12a1 1 0 0 0 .62-.92V6a1.75 1.75 0 1 1 3.5 0v.08a1 1 0 0 0 .66.94 1 1 0 0 0 1.06-.22l.05-.05a1.75 1.75 0 1 1 2.48 2.48l-.05.05a1 1 0 0 0-.2 1.1v.12a1 1 0 0 0 .92.62H18a1.75 1.75 0 1 1 0 3.5h-.08a1 1 0 0 0-.94.66v.12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure the global API behavior that governs authentication, security, and integration defaults.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>API, programming, public, app</value>
                 </attributekey>

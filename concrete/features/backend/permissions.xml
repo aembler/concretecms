@@ -5,10 +5,25 @@
 
         <page name="Permissions &amp; Access" path="/dashboard/system/permissions"
               filename="/dashboard/system/permissions/view.php" pagetype=""
-              description="Control who sees and edits your site." package=""/>
+              description="Control who sees and edits your site." package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 4.75 18 7v4.75c0 3.8-2.43 6.4-6 7.5-3.57-1.1-6-3.7-6-7.5V7l6-2.25Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="m9.5 12 1.75 1.75L14.75 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage access rules, permission strategy, and security controls that govern who can do what.</value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="Site Access" path="/dashboard/system/permissions/site"
               filename="/dashboard/system/permissions/site.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M5.5 18.5h13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M7.5 18.5v-7.25a4.5 4.5 0 1 1 9 0v7.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Control who can access the site and whether the public can browse content or sign in.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>editors, hide site, offline, private, public, access</value>
                 </attributekey>
@@ -17,6 +32,12 @@
         <page name="Task Permissions" path="/dashboard/system/permissions/tasks"
               filename="/dashboard/system/permissions/tasks.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8 7h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 12h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 17h7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="5.25" cy="7" r="1.25" fill="currentColor"/><circle cx="5.25" cy="12" r="1.25" fill="currentColor"/><circle cx="5.25" cy="17" r="1.25" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Define who can perform important administrative tasks throughout the dashboard.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>security, actions, administrator, admin, package, marketplace, search</value>
                 </attributekey>
@@ -24,16 +45,47 @@
         </page>
         <page name="User Permissions" path="/dashboard/system/permissions/users"
               filename="/dashboard/system/permissions/users.php" pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.75"/><path d="M6 18a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Set the permissions and capabilities assigned to users and groups across the site.</value>
+                </attributekey>
+            </attributes>
         </page>
         <page name="Advanced Permissions" path="/dashboard/system/permissions/advanced"
               filename="/dashboard/system/permissions/advanced.php" pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 8.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" stroke-width="1.75"/><path d="M18.25 13.5a1 1 0 0 0 .2 1.1l.05.05a1.75 1.75 0 1 1-2.48 2.48l-.05-.05a1 1 0 0 0-1.1-.2 1 1 0 0 0-.62.92V18a1.75 1.75 0 1 1-3.5 0v-.08a1 1 0 0 0-.66-.94 1 1 0 0 0-1.06.22l-.05.05a1.75 1.75 0 1 1-2.48-2.48l.05-.05a1 1 0 0 0 .2-1.1 1 1 0 0 0-.92-.62H6a1.75 1.75 0 1 1 0-3.5h.08a1 1 0 0 0 .94-.66 1 1 0 0 0-.22-1.06l-.05-.05a1.75 1.75 0 1 1 2.48-2.48l.05.05a1 1 0 0 0 1.1.2h.12a1 1 0 0 0 .62-.92V6a1.75 1.75 0 1 1 3.5 0v.08a1 1 0 0 0 .66.94 1 1 0 0 0 1.06-.22l.05-.05a1.75 1.75 0 1 1 2.48 2.48l-.05.05a1 1 0 0 0-.2 1.1v.12a1 1 0 0 0 .92.62H18a1.75 1.75 0 1 1 0 3.5h-.08a1 1 0 0 0-.94.66v.12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Enable and adjust advanced permission behavior for more granular control over editing and administration.</value>
+                </attributekey>
+            </attributes>
         </page>
         <page name="Workflows" path="/dashboard/system/permissions/workflows"
               filename="/dashboard/system/permissions/workflows.php"
-              pagetype="" description="" package=""/>
+              pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="12" r="2" stroke="currentColor" stroke-width="1.75"/><circle cx="17" cy="7" r="2" stroke="currentColor" stroke-width="1.75"/><circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.75"/><path d="m8.75 11 6.5-3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m8.75 13 6.5 3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage workflow rules so approvals and publishing steps follow the process your team needs.</value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="IP Deny List" path="/dashboard/system/permissions/denylist"
               filename="/dashboard/system/permissions/denylist.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.25" stroke="currentColor" stroke-width="1.75"/><path d="M8.5 8.5l7 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m15.5 8.5-7 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Block unwanted traffic by maintaining a deny list of IP addresses and ranges.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>security, lock ip, lock out, block ip, address, restrict, access</value>
                 </attributekey>
@@ -42,6 +94,12 @@
         <page name="Configure IP Blocking" path="/dashboard/system/permissions/denylist/configure"
               filename="/dashboard/system/permissions/denylist/configure.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 8.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" stroke-width="1.75"/><path d="M18.25 13.5a1 1 0 0 0 .2 1.1l.05.05a1.75 1.75 0 1 1-2.48 2.48l-.05-.05a1 1 0 0 0-1.1-.2 1 1 0 0 0-.62.92V18a1.75 1.75 0 1 1-3.5 0v-.08a1 1 0 0 0-.66-.94 1 1 0 0 0-1.06.22l-.05.05a1.75 1.75 0 1 1-2.48-2.48l.05-.05a1 1 0 0 0 .2-1.1 1 1 0 0 0-.92-.62H6a1.75 1.75 0 1 1 0-3.5h.08a1 1 0 0 0 .94-.66 1 1 0 0 0-.22-1.06l-.05-.05a1.75 1.75 0 1 1 2.48-2.48l.05.05a1 1 0 0 0 1.1.2h.12a1 1 0 0 0 .62-.92V6a1.75 1.75 0 1 1 3.5 0v.08a1 1 0 0 0 .66.94 1 1 0 0 0 1.06-.22l.05-.05a1.75 1.75 0 1 1 2.48 2.48l-.05.05a1 1 0 0 0-.2 1.1v.12a1 1 0 0 0 .92.62H18a1.75 1.75 0 1 1 0 3.5h-.08a1 1 0 0 0-.94.66v.12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Adjust the settings that control how IP-based blocking is enforced.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value>1</value>
                 </attributekey>
@@ -50,6 +108,12 @@
         <page name="IP Range" path="/dashboard/system/permissions/denylist/range"
               filename="/dashboard/system/permissions/denylist/range.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 12h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="6" cy="12" r="1.75" stroke="currentColor" stroke-width="1.75"/><circle cx="18" cy="12" r="1.75" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Define blocked IP ranges so wider spans of addresses can be restricted efficiently.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value>1</value>
                 </attributekey>
@@ -58,6 +122,12 @@
         <page name="Captcha Setup" path="/dashboard/system/permissions/captcha"
               filename="/dashboard/system/permissions/captcha.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8 8h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 12h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 16h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><rect x="5" y="5" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure CAPTCHA protection so forms and registration flows are better protected from abuse.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>security, registration</value>
                 </attributekey>
@@ -66,6 +136,12 @@
         <page name="Spam Control" path="/dashboard/system/permissions/antispam"
               filename="/dashboard/system/permissions/antispam.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="12" r="7.25" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage anti-spam services and thresholds that help keep unwanted submissions out of the site.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>antispam, block spam, security</value>
                 </attributekey>
@@ -74,6 +150,12 @@
         <page name="Maintenance Mode" path="/dashboard/system/permissions/maintenance"
               filename="/dashboard/system/permissions/maintenance.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 18h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M9 18v-3.5a3 3 0 0 1 6 0V18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m8.5 9 7 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m15.5 9-7 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Put the site into maintenance mode so access can be limited during updates or scheduled work.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>lock site, under construction, hide, hidden</value>
                 </attributekey>
@@ -82,6 +164,12 @@
         <page name="Trusted Proxies" path="/dashboard/system/permissions/trusted_proxies"
               filename="/dashboard/system/permissions/trusted_proxies.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4.75" y="6" width="5.5" height="12" rx="1.5" stroke="currentColor" stroke-width="1.75"/><rect x="13.75" y="6" width="5.5" height="12" rx="1.5" stroke="currentColor" stroke-width="1.75"/><path d="M10.75 10h2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M10.75 14h2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Define trusted proxy servers so forwarded IP and protocol information is interpreted correctly.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>trusted, proxy, proxies, ip, header, cloudflare</value>
                 </attributekey>

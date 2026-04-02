@@ -22,16 +22,39 @@
         </page>
 
         <page name="Express" path="/dashboard/system/express" filename="/dashboard/system/express/view.php" pagetype=""
-              description="Express" package=""/>
+              description="Express" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="6.5" rx="6.5" ry="2.75" stroke="currentColor" stroke-width="1.75"/><path d="M5.5 6.5v5c0 1.52 2.91 2.75 6.5 2.75s6.5-1.23 6.5-2.75v-5" stroke="currentColor" stroke-width="1.75"/><path d="M5.5 11.5v5c0 1.52 2.91 2.75 6.5 2.75s6.5-1.23 6.5-2.75v-5" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage Express data objects, their structure, and the entry behavior that powers custom datasets.</value>
+                </attributekey>
+            </attributes>
+        </page>
 
         <page name="Data Objects" path="/dashboard/system/express/entities"
               filename="/dashboard/system/express/entities.php" pagetype=""
               description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="5" y="6" width="6.5" height="5" rx="1.25" stroke="currentColor" stroke-width="1.75"/><rect x="12.5" y="6" width="6.5" height="5" rx="1.25" stroke="currentColor" stroke-width="1.75"/><rect x="8.75" y="13" width="6.5" height="5" rx="1.25" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Define and manage Express data objects that model structured content and records in your application.</value>
+                </attributekey>
+            </attributes>
         </page>
 
         <page name="Attributes" path="/dashboard/system/express/entities/attributes"
               filename="/dashboard/system/express/entities/attributes.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M5.5 8.5h13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M5.5 15.5h13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="9" cy="8.5" r="2" fill="currentColor"/><circle cx="15" cy="15.5" r="2" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure the attributes that define the fields available on a specific Express object.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
                 </attributekey>
@@ -44,6 +67,12 @@
         <page name="Associations" path="/dashboard/system/express/entities/associations"
               filename="/dashboard/system/express/entities/associations.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75"/><circle cx="16.5" cy="7" r="2.25" stroke="currentColor" stroke-width="1.75"/><circle cx="16.5" cy="17" r="2.25" stroke="currentColor" stroke-width="1.75"/><path d="m10 11 4.25-2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M10 13l4.25 2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage the associations that connect one Express object to another.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
                 </attributekey>
@@ -56,6 +85,12 @@
         <page name="Forms" path="/dashboard/system/express/entities/forms"
               filename="/dashboard/system/express/entities/forms.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="6" y="5.5" width="12" height="13" rx="1.75" stroke="currentColor" stroke-width="1.75"/><path d="M9 9h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M9 13h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Customize the forms used to add and edit entries for an Express object.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
                 </attributekey>
@@ -68,6 +103,12 @@
         <page name="Customize Search" path="/dashboard/system/express/entities/customize_search"
               filename="/dashboard/system/express/entities/customize_search.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="5.75" stroke="currentColor" stroke-width="1.75"/><path d="m14.75 14.75 4.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Adjust how Express entries are searched and filtered so editors can find records more easily.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
                 </attributekey>
@@ -80,6 +121,12 @@
         <page name="Update Entry Display Order" path="/dashboard/system/express/entities/order_entries"
               filename="/dashboard/system/express/entities/order_entries.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8 7h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 12h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 17h7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="5.25" cy="7" r="1.25" fill="currentColor"/><circle cx="5.25" cy="12" r="1.25" fill="currentColor"/><circle cx="5.25" cy="17" r="1.25" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Change the display order for Express entries when manual ordering is required.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value><![CDATA[1]]></value>
                 </attributekey>
@@ -91,6 +138,14 @@
 
         <page name="Custom Entry Locations" path="/dashboard/system/express/entries"
               filename="/dashboard/system/express/entries.php" pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 20s5-4.75 5-9a5 5 0 1 0-10 0c0 4.25 5 9 5 9Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><circle cx="12" cy="11" r="1.75" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure custom locations and paths where Express entries should live within the site structure.</value>
+                </attributekey>
+            </attributes>
         </page>
 
 

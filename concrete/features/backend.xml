@@ -142,9 +142,6 @@
                 <attributekey handle="meta_keywords">
                     <value>dashboard, configuration</value>
                 </attributekey>
-                <attributekey handle="exclude_nav">
-                    <value>1</value>
-                </attributekey>
             </attributes>
         </page>
     </singlepages>

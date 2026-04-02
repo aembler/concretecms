@@ -1,0 +1,48 @@
+{% if categories is not empty %}
+    <div class="space-y-8">
+        {% for category in categories %}
+            <section class="space-y-4">
+                <div class="menu-title w-full whitespace-nowrap border-b border-primary/15 px-0 pb-2 text-sm font-semibold uppercase tracking-[0.16em] normal-case text-primary">
+                    {{ t(category.name) }}
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {% for page in category.pages %}
+                        <a
+                            href="{{ page.url }}"
+                            class="flex h-full gap-3 rounded-box border border-base-300 bg-base-100 px-4 py-3 transition-colors hover:border-base-content/20 hover:bg-base-200"
+                        >
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-base-200 p-2 text-base-content/80">
+                                {% if page.icon %}
+                                    {% if page.icon.type == 'inline-svg' and page.icon.svg is defined %}
+                                        <span class="block h-full w-full" aria-hidden="true">{{ page.icon.svg|raw }}</span>
+                                    {% elseif page.icon.type == 'font-awesome' and page.icon.className is defined %}
+                                        <i class="{{ page.icon.className }} text-lg" aria-hidden="true"></i>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="block h-full w-full" aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 8.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" stroke-width="1.75"/>
+                                            <path d="M18.25 13.5a1 1 0 0 0 .2 1.1l.05.05a1.75 1.75 0 1 1-2.48 2.48l-.05-.05a1 1 0 0 0-1.1-.2 1 1 0 0 0-.62.92V18a1.75 1.75 0 1 1-3.5 0v-.08a1 1 0 0 0-.66-.94 1 1 0 0 0-1.06.22l-.05.05a1.75 1.75 0 1 1-2.48-2.48l.05-.05a1 1 0 0 0 .2-1.1 1 1 0 0 0-.92-.62H6a1.75 1.75 0 1 1 0-3.5h.08a1 1 0 0 0 .94-.66 1 1 0 0 0-.22-1.06l-.05-.05a1.75 1.75 0 1 1 2.48-2.48l.05.05a1 1 0 0 0 1.1.2h.12a1 1 0 0 0 .62-.92V6a1.75 1.75 0 1 1 3.5 0v.08a1 1 0 0 0 .66.94 1 1 0 0 0 1.06-.22l.05-.05a1.75 1.75 0 1 1 2.48 2.48l-.05.05a1 1 0 0 0-.2 1.1v.12a1 1 0 0 0 .92.62H18a1.75 1.75 0 1 1 0 3.5h-.08a1 1 0 0 0-.94.66v.12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                {% endif %}
+                            </span>
+
+                            <span class="min-w-0">
+                                <span class="menu-title block px-0 pb-1 text-sm font-semibold normal-case text-base-content">
+                                    {{ t(page.name) }}
+                                </span>
+                                {% if page.description %}
+                                    <span class="block text-sm leading-snug text-base-content/70">
+                                        {{ t(page.description) }}
+                                    </span>
+                                {% endif %}
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+    </div>
+{% endif %}

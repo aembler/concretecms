@@ -4,11 +4,26 @@
     <singlepages>
 
         <page name="SEO &amp; Statistics" path="/dashboard/system/seo" filename="/dashboard/system/seo/view.php"
-              pagetype="" description="Enable pretty URLs and tracking codes." package=""/>
+              pagetype="" description="Enable pretty URLs and tracking codes." package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="5.75" stroke="currentColor" stroke-width="1.75"/><path d="m14.75 14.75 4.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage URL structure, search indexing, and tracking settings that shape how your site is discovered.</value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="URLs and Redirection" path="/dashboard/system/seo/urls" filename="/dashboard/system/seo/urls.php"
               pagetype=""
               description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M9 8.5h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m12 5.5 3 3-3 3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15.5H9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m12 18.5-3-3 3-3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure URL behavior, redirection, and canonical handling so visitors and search engines land in the right place.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>vanity, pretty url, redirection, hostname, canonical, seo, pageview, view</value>
                 </attributekey>
@@ -17,6 +32,12 @@
         <page name="Bulk SEO Updater" path="/dashboard/system/seo/bulk" filename="/dashboard/system/seo/bulk.php"
               pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7.5 7h9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M7.5 12h9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M7.5 17h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="5" cy="7" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="17" r="1" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Update SEO-related data in bulk so large groups of pages can be improved more efficiently.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>bulk, seo, change keywords, engine, optimization, search</value>
                 </attributekey>
@@ -25,6 +46,12 @@
         <page name="Tracking Codes" path="/dashboard/system/seo/codes" filename="/dashboard/system/seo/codes.php"
               pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8 8.5 5 12l3 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 8.5 19 12l-3 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.5 6.5 10.5 17.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage tracking code injection so analytics and measurement tools are added in a controlled way.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>traffic, statistics, google analytics, quant, pageviews, hits</value>
                 </attributekey>
@@ -33,6 +60,12 @@
         <page name="Excluded URL Word List" path="/dashboard/system/seo/excluded"
               filename="/dashboard/system/seo/excluded.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 8h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M7 16h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m14.5 13.5 4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m18.5 13.5-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Maintain the list of words excluded from generated URLs so slugs stay readable and consistent.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>pretty, slug</value>
                 </attributekey>
@@ -41,6 +74,12 @@
         <page name="Search Index" path="/dashboard/system/seo/searchindex"
               filename="/dashboard/system/seo/searchindex.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="5.75" stroke="currentColor" stroke-width="1.75"/><path d="m14.75 14.75 4.5 4.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8.5 10.5h4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Control how the internal search index is built so site search stays useful and up to date.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>configure search, site search, search option</value>
                 </attributekey>
@@ -49,6 +88,12 @@
         <page name="URL Slug" path="/dashboard/system/seo/url_slug"
               filename="/dashboard/system/seo/url_slug.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8.5 8.5h7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8.5 15.5h4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="16.5" cy="15.5" r="1.5" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure URL slug behavior so page paths are generated and edited according to your rules.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>url, slug</value>
                 </attributekey>

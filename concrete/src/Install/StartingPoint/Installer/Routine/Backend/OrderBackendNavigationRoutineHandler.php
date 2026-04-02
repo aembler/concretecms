@@ -27,6 +27,30 @@ class OrderBackendNavigationRoutineHandler
     ];
 
     /**
+     * The canonical display order for known /dashboard/system pages.
+     */
+    protected const SYSTEM_DASHBOARD_PAGE_ORDER = [
+        '/dashboard/system/basics',
+        '/dashboard/system/social',
+        '/dashboard/system/express',
+        '/dashboard/system/multisite',
+        '/dashboard/system/multilingual',
+        '/dashboard/system/files',
+        '/dashboard/system/automation',
+        '/dashboard/system/notification',
+        '/dashboard/system/optimization',
+        '/dashboard/system/permissions',
+        '/dashboard/system/registration',
+        '/dashboard/system/mail',
+        '/dashboard/system/calendar',
+        '/dashboard/system/boards',
+        '/dashboard/system/conversations',
+        '/dashboard/system/attributes',
+        '/dashboard/system/update',
+        '/dashboard/system/api',
+    ];
+
+    /**
      * @var Application
      */
     protected $app;
@@ -36,34 +60,29 @@ class OrderBackendNavigationRoutineHandler
         $this->app = $app;
     }
 
-    protected function getTopLevelDashboardPages(Page $dashboard): array
+    protected function getChildPages(Page $page): array
     {
         $pages = [];
-        foreach ($dashboard->getCollectionChildrenArray() as $pageID) {
-            $page = Page::getByID($pageID, 'RECENT');
-            if (!$page || $page->isError()) {
+        foreach ($page->getCollectionChildrenArray() as $pageID) {
+            $child = Page::getByID($pageID, 'RECENT');
+            if (!$child || $child->isError()) {
                 continue;
             }
-            $pages[] = $page;
+            $pages[] = $child;
         }
 
         return $pages;
     }
 
-    protected function getDashboardPageOrderLookup(): array
+    protected function getPageOrderLookup(array $orderedPaths): array
     {
-        return array_flip(static::DASHBOARD_PAGE_ORDER);
+        return array_flip($orderedPaths);
     }
 
-    public function __invoke()
+    protected function reorderChildPages(Page $parentPage, array $orderedPaths): void
     {
-        $dashboard = Page::getByPath('/dashboard', 'RECENT');
-        if (!$dashboard || $dashboard->isError()) {
-            return;
-        }
-
-        $pages = $this->getTopLevelDashboardPages($dashboard);
-        $orderLookup = $this->getDashboardPageOrderLookup();
+        $pages = $this->getChildPages($parentPage);
+        $orderLookup = $this->getPageOrderLookup($orderedPaths);
 
         $knownPages = [];
         $unknownPages = [];
@@ -87,6 +106,21 @@ class OrderBackendNavigationRoutineHandler
             $displayOrder++;
         }
 
-        $dashboard->rescanChildrenDisplayOrder();
+        $parentPage->rescanChildrenDisplayOrder();
+    }
+
+    public function __invoke()
+    {
+        $dashboard = Page::getByPath('/dashboard', 'RECENT');
+        if (!$dashboard || $dashboard->isError()) {
+            return;
+        }
+
+        $this->reorderChildPages($dashboard, static::DASHBOARD_PAGE_ORDER);
+
+        $system = Page::getByPath('/dashboard/system', 'RECENT');
+        if ($system && !$system->isError()) {
+            $this->reorderChildPages($system, static::SYSTEM_DASHBOARD_PAGE_ORDER);
+        }
     }
 }

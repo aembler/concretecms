@@ -1,7 +1,7 @@
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger class="c-toolbar-button outline-none">
-      <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary to-indigo-700 text-xs font-semibold text-white shadow-sm">
+      <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-primary text-xs font-semibold text-white shadow-sm">
         A
       </div>
     </DropdownMenuTrigger>

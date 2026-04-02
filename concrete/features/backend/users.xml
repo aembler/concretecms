@@ -95,10 +95,25 @@
 
         <page name="Login &amp; Registration" path="/dashboard/system/registration"
               filename="/dashboard/system/registration/view.php" pagetype=""
-              description="Change login behaviors and setup public profiles." package=""/>
+              description="Change login behaviors and setup public profiles." package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.75"/><path d="M6 18a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M16.5 8h3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure how people register, log in, and manage their account-related access on the site.</value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="Account Options" path="/dashboard/system/registration/open"
               filename="/dashboard/system/registration/open.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.75"/><path d="M6 18a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M18 6.5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M15.5 9h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Choose whether public accounts can be created and how open registration should behave.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>signup, new user, community, public registration, public, registration</value>
                 </attributekey>
@@ -107,6 +122,12 @@
         <page name="Login Destination" path="/dashboard/system/registration/postlogin"
               filename="/dashboard/system/registration/postlogin.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 12h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m14 9 3 3-3 3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Set where users land after logging in so different audiences can be routed to the right destination.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>profile, login, redirect, specific, dashboard, administrators</value>
                 </attributekey>
@@ -115,6 +136,12 @@
         <page name="Public Profiles" path="/dashboard/system/registration/profiles"
               filename="/dashboard/system/registration/profiles.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.75"/><path d="M6 18a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><rect x="15.5" y="13.5" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Control the public profile feature so member information is shown appropriately on the site.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>member profile, member page, community, forums, social, avatar</value>
                 </attributekey>
@@ -123,6 +150,12 @@
         <page name="Authentication Types" path="/dashboard/system/registration/authentication"
               filename="/dashboard/system/registration/authentication.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="5" y="6" width="5.5" height="12" rx="1.5" stroke="currentColor" stroke-width="1.75"/><rect x="13.5" y="6" width="5.5" height="12" rx="1.5" stroke="currentColor" stroke-width="1.75"/><path d="M10.5 12h3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage the authentication methods available for signing in, including external providers.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>auth, authentication, types, oauth, facebook, login, registration</value>
                 </attributekey>
@@ -132,6 +165,12 @@
               filename="/dashboard/system/registration/global_password_reset.php" pagetype=""
               description="Signs out all users, resets all passwords and forces users to choose a new one" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 4.75a7.25 7.25 0 1 0 0 14.5" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Force a global password reset and sign-out when account security needs to be re-established quickly.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>global, password, reset, change password, force, sign out</value>
                 </attributekey>
@@ -139,11 +178,25 @@
         </page>
         <page name="User Deactivation Settings" path="/dashboard/system/registration/deactivation"
               filename="/dashboard/system/registration/deactivation.php" pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="12" r="7.25" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure the rules and messaging used when user accounts are deactivated.</value>
+                </attributekey>
+            </attributes>
         </page>
         <page name="Automated Logout" path="/dashboard/system/registration/automated_logout"
               filename="/dashboard/system/registration/automated_logout.php" pagetype=""
               description="Automate when users are logged out, or do it manually" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 18V8.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m8.75 11.25 3.25-3.25 3.25 3.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 18.5h11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure automatic logout behavior so sessions expire according to your security requirements.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>login, logout, user, agent, ip, change, security, session, invalidation, invalid</value>
                 </attributekey>
@@ -153,6 +206,12 @@
               filename="/dashboard/system/registration/password_requirements.php" pagetype=""
               description="Set password rule and regulations." package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8.5 11.5h7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 7.5v8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><rect x="5" y="4.75" width="14" height="14.5" rx="2" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Set the password standards users must meet to comply with your security policy.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>password, requirements, code, key, login, registration, security, nist</value>
                 </attributekey>
@@ -161,6 +220,12 @@
         <page name="Session Options" path="/dashboard/system/registration/session_options"
               filename="/dashboard/system/registration/session_options.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 8v4.25l2.75 1.75" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="7.25" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure session handling so login persistence and timeout behavior meet your needs.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>session, options</value>
                 </attributekey>

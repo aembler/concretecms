@@ -38,7 +38,7 @@
       <DropdownMenu>
         <DropdownMenuTrigger class="outline-none">
           <div
-              class="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
+              :class="toolbarButtonClasses(isExtendSection)"
               aria-label="Add Functionality"
               title="Add Functionality"
           >
@@ -66,7 +66,7 @@
 
     <div class="hidden sm:flex tooltip tooltip-bottom" data-tip="System and Settings"><a
         :href="settingsUrl"
-        class="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
+        :class="toolbarButtonClasses(isSettingsSection)"
         aria-label="Settings"
         title="Settings"
     >
@@ -82,6 +82,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import {PuzzlePieceIcon} from '@heroicons/vue/24/outline'
 import {CogIcon} from '@heroicons/vue/24/outline'
 import {
@@ -94,7 +95,7 @@ import HelpButton from '../../../../cms/js/components/Toolbar/Button/HelpButton.
 import Search from '../../../../cms/js/components/Toolbar/Search/Search.vue'
 import UserMenuButton from '../../../../cms/js/components/Toolbar/Button/UserMenuButton.vue'
 
-defineProps({
+const props = defineProps({
   addonsUrl: {
     type: String,
     required: true,
@@ -124,4 +125,24 @@ defineProps({
     required: true,
   },
 })
+
+const dispatcherFilename = typeof window.CCM_DISPATCHER_FILENAME === 'string'
+  ? window.CCM_DISPATCHER_FILENAME
+  : ''
+
+const currentPath = dispatcherFilename && window.location.pathname.startsWith(dispatcherFilename)
+  ? window.location.pathname.slice(dispatcherFilename.length) || '/'
+  : window.location.pathname
+
+const isSectionActive = (pathPrefix) => currentPath.startsWith(pathPrefix)
+
+const isExtendSection = computed(() => isSectionActive('/dashboard/extend'))
+const isSettingsSection = computed(() => isSectionActive('/dashboard/system'))
+
+const toolbarButtonClasses = (isActive) => [
+  'btn btn-sm btn-square',
+  isActive
+    ? 'btn-primary text-primary-content hover:text-primary-content'
+    : 'btn-ghost text-base-content/60 hover:text-base-content',
+]
 </script>

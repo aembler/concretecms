@@ -5,6 +5,12 @@
         <page name="Attributes" path="/dashboard/system/attributes" filename="/dashboard/system/attributes/view.php"
               pagetype="" description="Setup attributes for pages, users, files and more." package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M5.5 8.5h13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M5.5 15.5h13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="9" cy="8.5" r="2" fill="currentColor"/><circle cx="15" cy="15.5" r="2" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure the attribute infrastructure used to extend pages, users, files, and other objects across the site.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>attribute configuration</value>
                 </attributekey>
@@ -13,6 +19,12 @@
         <page name="Types" path="/dashboard/system/attributes/types" filename="/dashboard/system/attributes/types.php"
               pagetype="" description="Choose which attribute types are available for different items." package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4.75" y="5.25" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.75"/><rect x="14.75" y="5.25" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.75"/><rect x="9.75" y="14.25" width="4.5" height="4.5" rx="1" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Select which attribute types are available so different content objects can capture the right data.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>attributes, types</value>
                 </attributekey>
@@ -21,6 +33,12 @@
         <page name="Sets" path="/dashboard/system/attributes/sets" filename="/dashboard/system/attributes/sets.php"
               pagetype="" description="Group attributes into sets for easier organization" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="5" y="6" width="6.5" height="5" rx="1.25" stroke="currentColor" stroke-width="1.75"/><rect x="12.5" y="6" width="6.5" height="5" rx="1.25" stroke="currentColor" stroke-width="1.75"/><rect x="8.75" y="13" width="6.5" height="5" rx="1.25" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Organize related attributes into reusable sets that make editing and administration easier to manage.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>attributes, sets</value>
                 </attributekey>
@@ -29,6 +47,12 @@
         <page name="Topics" path="/dashboard/system/attributes/topics"
               filename="/dashboard/system/attributes/topics.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75"/><circle cx="16.5" cy="7" r="2.25" stroke="currentColor" stroke-width="1.75"/><circle cx="16.5" cy="17" r="2.25" stroke="currentColor" stroke-width="1.75"/><path d="m10 11 4.25-2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M10 13l4.25 2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Create and maintain topic trees so editors can classify content with structured taxonomy relationships.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>topics, tags, taxonomy</value>
                 </attributekey>
@@ -36,6 +60,14 @@
         </page>
         <page name="Add Topic Tree" path="/dashboard/system/attributes/topics/add"
               filename="/dashboard/system/attributes/topics/add.php" pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="1.75"/><circle cx="16" cy="8" r="2" stroke="currentColor" stroke-width="1.75"/><circle cx="16" cy="16" r="2" stroke="currentColor" stroke-width="1.75"/><path d="m9.75 11 4-2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m9.75 13 4 2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M19 5.5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M16.5 8h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Add a new topic tree when you need a fresh taxonomy structure for organizing related content.</value>
+                </attributekey>
+            </attributes>
         </page>
     </singlepages>
 

@@ -56,10 +56,25 @@
         </page>
 
         <page name="Files" path="/dashboard/system/files" filename="/dashboard/system/files/view.php" pagetype=""
-              description="" package=""/>
+              description="" package="">
+            <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M4.75 7.5A1.75 1.75 0 0 1 6.5 5.75h4.25l1.5 2h5.75A1.75 1.75 0 0 1 19.75 9.5v8A1.75 1.75 0 0 1 18 19.25H6.5A1.75 1.75 0 0 1 4.75 17.5v-10Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M4.75 10.25h15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage file-related system settings, storage behavior, image handling, and upload controls.</value>
+                </attributekey>
+            </attributes>
+        </page>
         <page name="Allowed File Types" path="/dashboard/system/files/filetypes"
               filename="/dashboard/system/files/filetypes.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8 4.75h6l3.25 3.25v9.25a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-10.5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.75"/><path d="M14 4.75V8h3.25" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 12.5h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Control which file extensions are allowed so uploads stay compatible and secure.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>security, files, media, extension, manager, upload</value>
                 </attributekey>
@@ -68,6 +83,12 @@
         <page name="File Manager Permissions" path="/dashboard/system/files/permissions"
               filename="/dashboard/system/files/permissions.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 4.75 18 7v4.75c0 3.8-2.43 6.4-6 7.5-3.57-1.1-6-3.7-6-7.5V7l6-2.25Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="m9.5 12 1.75 1.75L14.75 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Set access rules for the file manager so the right people can upload, edit, and organize media.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>file options, file manager, upload, modify</value>
                 </attributekey>
@@ -76,6 +97,12 @@
         <page name="Thumbnails" path="/dashboard/system/files/thumbnails"
               filename="/dashboard/system/files/thumbnails.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4.75" y="5.75" width="14.5" height="12.5" rx="1.75" stroke="currentColor" stroke-width="1.75"/><path d="m8.5 14 2.25-2.25 2 2 2.75-3.25 2 2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="9.25" r="1.25" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure thumbnail generation so images are resized and delivered in the formats your site needs.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>images, picture, responsive, retina</value>
                 </attributekey>
@@ -84,6 +111,12 @@
         <page name="Thumbnail Options" path="/dashboard/system/files/thumbnails/options"
               filename="/dashboard/system/files/thumbnails/options.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><rect x="4.75" y="5.75" width="14.5" height="12.5" rx="1.75" stroke="currentColor" stroke-width="1.75"/><path d="M8 9.5h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8 13.5h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="16.5" cy="13.5" r="1.25" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Fine-tune thumbnail output settings such as formats and quality for generated image variations.</value>
+                </attributekey>
                 <attributekey handle="exclude_nav">
                     <value>1</value>
                 </attributekey>
@@ -95,6 +128,12 @@
         <page name="Image Options" path="/dashboard/system/files/image_uploading"
               filename="/dashboard/system/files/image_uploading.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 19V8.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m8.75 11.75 3.25-3.25 3.25 3.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="16" width="14" height="3" rx="1.5" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Set upload-related image behavior such as resizing, orientation, and handling of incoming assets.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>uploading, upload, images, image, resizing, manager, exif, rotation, rotate, quality, compression, png, jpg, jpeg</value>
                 </attributekey>
@@ -103,6 +142,12 @@
         <page name="Image Editor" path="/dashboard/system/files/image_editor"
               filename="/dashboard/system/files/image_editor.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="m6 17.5 8.75-8.75 2.75 2.75L8.75 20.25H6V17.5Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="m13.75 9.75 2-2a1.75 1.75 0 1 1 2.5 2.5l-2 2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Choose and configure the image editor experience used when administrators adjust graphics in the dashboard.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>image, editor, active, default, edit, png, jpg, jpeg</value>
                 </attributekey>
@@ -111,6 +156,12 @@
         <page name="File Storage Locations" path="/dashboard/system/files/storage"
               filename="/dashboard/system/files/storage.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="7" rx="5.75" ry="2.25" stroke="currentColor" stroke-width="1.75"/><path d="M6.25 7v4c0 1.24 2.57 2.25 5.75 2.25s5.75-1.01 5.75-2.25V7" stroke="currentColor" stroke-width="1.75"/><path d="M6.25 11v4c0 1.24 2.57 2.25 5.75 2.25s5.75-1.01 5.75-2.25v-4" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Manage where files are stored so media can live locally or in alternative storage backends.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>security, alternate storage, hide files</value>
                 </attributekey>
@@ -119,6 +170,12 @@
         <page name="External File Providers" path="/dashboard/system/files/external_file_provider"
               filename="/dashboard/system/files/external_file_provider.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M8.5 14.5h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M8.5 9.5h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><rect x="5" y="6" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.75"/><circle cx="8.5" cy="9.5" r="1" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1" fill="currentColor"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Connect external file providers so editors can pull in media from third-party storage services.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>external, file, providers</value>
                 </attributekey>
@@ -127,6 +184,12 @@
         <page name="Export Options" path="/dashboard/system/files/export_options"
               filename="/dashboard/system/files/export_options.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 5v8.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m8.75 10.5 3.25 3.25 3.25-3.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="16" width="14" height="3" rx="1.5" stroke="currentColor" stroke-width="1.75"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Configure how file data exports are generated so downloads match your preferred encoding and format.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>files, export, csv, bom, encoding</value>
                 </attributekey>
@@ -135,6 +198,12 @@
         <page name="Upload Settings" path="/dashboard/system/files/uploads"
               filename="/dashboard/system/files/uploads.php" pagetype="" description="" package="">
             <attributes>
+                <attributekey handle="icon_dashboard">
+                    <value><![CDATA[<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none"><path d="M12 18V8.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="m8.75 11.25 3.25-3.25 3.25 3.25" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 18.5h11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>]]></value>
+                </attributekey>
+                <attributekey handle="meta_description">
+                    <value>Adjust upload limits and behavior so file transfers stay reliable for editors and administrators.</value>
+                </attributekey>
                 <attributekey handle="meta_keywords">
                     <value>files, upload, parallel, upload_max_filesize, post_max_size, limit, resize, chunk</value>
                 </attributekey>

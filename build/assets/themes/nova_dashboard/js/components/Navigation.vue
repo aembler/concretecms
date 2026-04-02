@@ -77,6 +77,8 @@ const props = defineProps({
 
 const isDivider = (item) => item?.type === 'divider'
 
+const isSettingsItem = (item) => typeof item?.url === 'string' && /\/dashboard\/system(?:\/|$)/.test(item.url)
+
 const isWelcomeItem = (item) => typeof item?.url === 'string' && /\/dashboard\/welcome(?:\/|$)/.test(item.url)
 
 const hasChildren = (item) => Array.isArray(item.children) && item.children.length > 0
@@ -141,6 +143,10 @@ const menuGroups = computed(() => {
   }
 
   for (const item of props.items) {
+    if (isSettingsItem(item)) {
+      continue
+    }
+
     if (isDivider(item)) {
       pushCurrentItems()
       groups.push({type: 'divider'})
@@ -159,7 +165,7 @@ const linkClasses = (item, size) => [
   '!grid grid-cols-[2.5rem_minmax(0,1fr)] items-center rounded-lg px-3 transition-colors',
   size === 'lg' ? '!py-1' : '!py-0.5',
   item.isActive || item.isActiveParent
-    ? 'menu-active'
-    : 'text-base-content/70 hover:bg-base-200 hover:text-base-content',
+    ? 'menu-active bg-primary'
+    : 'text-base-content/70 hover:text-base-content active:bg-transparent',
 ]
 </script>
