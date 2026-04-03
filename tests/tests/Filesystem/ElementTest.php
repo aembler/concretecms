@@ -56,6 +56,7 @@ class ElementTest extends TestCase
         $breadcrumb = new DashboardBreadcrumb();
         $breadcrumb->add(new Item('/dashboard', 'Dashboard'));
         $breadcrumb->add(new Item('/dashboard/system', 'System'));
+        $breadcrumb->add(new Item('/dashboard/system/seo', 'SEO'));
 
         $element = new Element('dashboard/navigation/breadcrumb');
         $element->set('breadcrumb', $breadcrumb);
@@ -65,6 +66,21 @@ class ElementTest extends TestCase
         $this->assertStringContainsString('class="breadcrumbs text-sm text-base-content/70"', $contents);
         $this->assertStringContainsString('<a href="/dashboard">Dashboard</a>', $contents);
         $this->assertStringContainsString('<span aria-current="page">System</span>', $contents);
+        $this->assertStringNotContainsString('SEO', $contents);
+    }
+
+    public function testRenderTwigElementRequiresMoreThanOneBreadcrumbAfterRemovingCurrentPage()
+    {
+        $breadcrumb = new DashboardBreadcrumb();
+        $breadcrumb->add(new Item('/dashboard', 'Dashboard'));
+        $breadcrumb->add(new Item('/dashboard/system', 'System'));
+
+        $element = new Element('dashboard/navigation/breadcrumb');
+        $element->set('breadcrumb', $breadcrumb);
+
+        $contents = trim($element->getContents());
+
+        $this->assertSame('', $contents);
     }
 
     public function testRenderDashboardSubnavTwigElement()

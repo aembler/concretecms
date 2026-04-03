@@ -16,6 +16,11 @@ class System extends DashboardPageController
 {
     public $helpers = array('form');
 
+    public function getSubnavElement()
+    {
+        return null;
+    }
+
     protected function getCategoryItems(): array
     {
         $system = Page::getByPath('/dashboard/system');

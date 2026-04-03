@@ -2,6 +2,7 @@
 
 namespace Concrete\Core\Page\Controller;
 
+use Concrete\Controller\Element\Dashboard\Navigation\Subnav;
 use Concrete\Core\Application\UserInterface\Dashboard\Component\Navigation;
 use Concrete\Core\Application\UserInterface\Dashboard\Navigation\FavoritesNavigationFactory;
 use Concrete\Core\Cookie\CookieJar;
@@ -118,6 +119,20 @@ class DashboardPageController extends PageController
         return $factory->getBreadcrumb($this->getPageObject());
     }
 
+    protected function getDisplayPageTitle(): string
+    {
+        $page = $this->getPageObject();
+        $parentPage = null;
+        if ($page->getCollectionParentID() > 0) {
+            $candidate = \Concrete\Core\Page\Page::getByID($page->getCollectionParentID(), 'ACTIVE');
+            if ($candidate instanceof \Concrete\Core\Page\Page && !$candidate->isError()) {
+                $parentPage = $candidate;
+            }
+        }
+
+        return t(($parentPage ?: $page)->getCollectionName());
+    }
+
     protected function createSubnav(): NavigationInterface
     {
         return $this->app->make(DashboardSubnavFactory::class)->getSubnav($this->getPageObject());
@@ -155,7 +170,7 @@ class DashboardPageController extends PageController
     {
         $pageTitle = $this->get('pageTitle');
         if (!$pageTitle) {
-            $this->set('pageTitle', t($this->c->getCollectionName()));
+            $this->set('pageTitle', $this->getDisplayPageTitle());
         }
         $breadcrumb = $this->getBreadcrumb();
         if (!$breadcrumb) {
@@ -164,16 +179,18 @@ class DashboardPageController extends PageController
         $_breadcrumb = $this->elementManager->get($this->getBreadcrumbElement(), [
             'breadcrumb' => $breadcrumb
         ]);
-        $_subnav = $this->elementManager->get($this->getSubnavElement(), [
-            'subnav' => $this->createSubnav(),
-        ]);
+        if ($this->getSubnavElement()) {
+            $_subnav = $this->elementManager->get($this->getSubnavElement(), [
+                'subnav' => $this->createSubnav(),
+            ]);
+        }
 
         $dbConfig = $this->app->make('config/database');
         $this->set('showPrivacyPolicyNotice', !$dbConfig->get('app.privacy_policy_accepted'));
         $this->set('token', $this->token);
         $this->set('error', $this->error);
         $this->set('_breadcrumb', $_breadcrumb);
-        $this->set('_subnav', $_subnav);
+        $this->set('_subnav', $_subnav ?? null);
     }
 
     /**
