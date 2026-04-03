@@ -10,6 +10,8 @@ use Concrete\Core\Navigation\Breadcrumb\BreadcrumbInterface;
 use Concrete\Core\Navigation\Breadcrumb\Dashboard\DashboardBreadcrumbFactory;
 use Concrete\Core\Navigation\Item\PageItem;
 use Concrete\Core\Navigation\NavigationInterface;
+use Concrete\Core\Navigation\Subnav\Dashboard\DashboardSubnavFactory;
+use Concrete\Core\Validation\CSRF\SimpleToken;
 use Doctrine\ORM\EntityManagerInterface;
 use Mobile_Detect;
 
@@ -18,7 +20,7 @@ class DashboardPageController extends PageController
     /**
      * The Token instance (available after the on_start method has been called).
      *
-     * @var \Concrete\Core\Validation\CSRF\Token|null
+     * @var \Concrete\Core\Validation\CSRF\SimpleToken
      */
     public $token;
 
@@ -84,7 +86,7 @@ class DashboardPageController extends PageController
     public function on_start()
     {
         $cookieJar = $this->app->make(CookieJar::class);
-        $this->token = $this->app->make('token');
+        $this->token = $this->app->make(SimpleToken::class);
         $this->error = $this->app->make('error');
         $this->entityManager = $this->app->make(EntityManagerInterface::class);
         $this->elementManager = $this->app->make(ElementManager::class);
@@ -116,6 +118,11 @@ class DashboardPageController extends PageController
         return $factory->getBreadcrumb($this->getPageObject());
     }
 
+    protected function createSubnav(): NavigationInterface
+    {
+        return $this->app->make(DashboardSubnavFactory::class)->getSubnav($this->getPageObject());
+    }
+
     /**
      * @return BreadcrumbInterface
      */
@@ -132,6 +139,11 @@ class DashboardPageController extends PageController
     protected function getBreadcrumbElement()
     {
         return 'dashboard/navigation/breadcrumb';
+    }
+
+    protected function getSubnavElement()
+    {
+        return 'dashboard/navigation/subnav';
     }
 
     /**
@@ -152,12 +164,16 @@ class DashboardPageController extends PageController
         $_breadcrumb = $this->elementManager->get($this->getBreadcrumbElement(), [
             'breadcrumb' => $breadcrumb
         ]);
+        $_subnav = $this->elementManager->get($this->getSubnavElement(), [
+            'subnav' => $this->createSubnav(),
+        ]);
 
         $dbConfig = $this->app->make('config/database');
         $this->set('showPrivacyPolicyNotice', !$dbConfig->get('app.privacy_policy_accepted'));
         $this->set('token', $this->token);
         $this->set('error', $this->error);
         $this->set('_breadcrumb', $_breadcrumb);
+        $this->set('_subnav', $_subnav);
     }
 
     /**

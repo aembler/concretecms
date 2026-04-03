@@ -1,0 +1,15 @@
+{% set items = subnav.getItems() %}
+{% if items|length > 1 %}
+    <div role="tablist" class="tabs tabs-border text-[var(--color-concrete-blue-accent)]">
+        {% for item in items %}
+            <a
+                role="tab"
+                href="{{ item.getUrl() }}"
+                class="tab whitespace-nowrap{% if item.isActive() %} tab-active{% endif %}"
+                {% if item.isActive() %}aria-current="page"{% endif %}
+            >
+                {{ item.getName() }}
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}

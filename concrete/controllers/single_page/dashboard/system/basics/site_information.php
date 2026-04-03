@@ -12,9 +12,6 @@ class SiteInformation extends DashboardPageController
     public function submit()
     {
         $u = $this->app->make(User::class);
-        if (!$this->token->validate('submit')) {
-            $this->error->add($this->token->getErrorMessage());
-        }
         if (!$u->isSuperUser()) {
             $this->error->add(t('Only the super user may modify site information.'));
         }

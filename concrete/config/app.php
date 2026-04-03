@@ -899,6 +899,7 @@ return [
             'priority' => 1,
             'class' => \Concrete\Core\Http\Middleware\ApplicationMiddleware::class,
         ],
+        'core_dashboard_simple_csrf' => \Concrete\Core\Http\Middleware\ValidateDashboardSimpleCsrfTokenMiddleware::class,
         'core_cookie' => \Concrete\Core\Http\Middleware\CookieMiddleware::class,
         'core_csp' => \Concrete\Core\Http\Middleware\ContentSecurityPolicyMiddleware::class,
         'core_hsts' => \Concrete\Core\Http\Middleware\StrictTransportSecurityMiddleware::class,

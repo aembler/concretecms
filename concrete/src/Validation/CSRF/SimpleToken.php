@@ -4,6 +4,7 @@ namespace Concrete\Core\Validation\CSRF;
 
 use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Http\Request;
+use HtmlObject\Element;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -115,6 +116,19 @@ class SimpleToken
         }
 
         return $this->isValid($this->getRequestToken($request));
+    }
+
+    public function output()
+    {
+        echo $this->asHiddenField();
+    }
+
+    public function asHiddenField(): Element
+    {
+        $token = $this->getSessionToken();
+        return new Element('input', null,
+            ['type' => 'hidden', 'name' => static::DEFAULT_TOKEN_NAME, 'value' => $token]
+        );
     }
 
     public function getErrorMessage(?SymfonyRequest $request = null): string

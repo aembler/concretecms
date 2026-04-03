@@ -2,6 +2,9 @@
 
 namespace Concrete\Tests\Filesystem;
 
+use Concrete\Core\Navigation\Breadcrumb\Dashboard\DashboardBreadcrumb;
+use Concrete\Core\Navigation\Item\Item;
+use Concrete\Core\Navigation\Subnav\Dashboard\DashboardSubnav;
 use Concrete\Core\Entity\Site\Type;
 use Concrete\Core\Filesystem\Element;
 use Concrete\Core\Filesystem\FileLocator;
@@ -46,6 +49,38 @@ class ElementTest extends TestCase
 
         $contents = trim(preg_replace('~>\s+<~', '><', $contents));
         $this->assertEquals('<div class="ccm-ui"><div id="ccm-progressive-operation-progress-bar" data-total-items="20"><div class="progress progress-striped active"><div class="progress-bar" style="width: 0%;"></div></div></div><div><span id="ccm-progressive-operation-status">1</span> of 50</div></div>', $contents);
+    }
+
+    public function testRenderTwigElement()
+    {
+        $breadcrumb = new DashboardBreadcrumb();
+        $breadcrumb->add(new Item('/dashboard', 'Dashboard'));
+        $breadcrumb->add(new Item('/dashboard/system', 'System'));
+
+        $element = new Element('dashboard/navigation/breadcrumb');
+        $element->set('breadcrumb', $breadcrumb);
+
+        $contents = trim(preg_replace('~>\s+<~', '><', $element->getContents()));
+
+        $this->assertStringContainsString('class="breadcrumbs text-sm text-base-content/70"', $contents);
+        $this->assertStringContainsString('<a href="/dashboard">Dashboard</a>', $contents);
+        $this->assertStringContainsString('<span aria-current="page">System</span>', $contents);
+    }
+
+    public function testRenderDashboardSubnavTwigElement()
+    {
+        $subnav = new DashboardSubnav();
+        $subnav->add(new Item('/dashboard/system/seo', 'SEO'));
+        $subnav->add(new Item('/dashboard/system/seo/urls', 'URLs', true));
+
+        $element = new Element('dashboard/navigation/subnav', ['subnav' => $subnav]);
+
+        $contents = trim(preg_replace('~>\s+<~', '><', $element->getContents()));
+
+        $this->assertStringContainsString('class="tabs tabs-boxed inline-flex max-w-full overflow-x-auto bg-base-200/80 p-1"', $contents);
+        $this->assertStringContainsString('href="/dashboard/system/seo"', $contents);
+        $this->assertStringContainsString('class="tab whitespace-nowrap tab-active"', $contents);
+        $this->assertStringContainsString('aria-current="page"', $contents);
     }
 
     public function testPackageLocator()

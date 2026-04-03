@@ -12,7 +12,7 @@ abstract class AbstractSelectQuestion extends AbstractQuestion
     {
         $wrapper = new Element('div', null, ['class' => 'mb-3']);
         $wrapper->appendChild(
-            (new Element('label', null, ['for' => 'q_' . $this->getKey(), 'class' => 'form-label']))->setValue(
+            (new Element('label', null, ['for' => 'q_' . $this->getKey(), 'class' => 'block mb-2 form-label']))->setValue(
                 $this->getLabel()
             )
         );
@@ -23,7 +23,7 @@ abstract class AbstractSelectQuestion extends AbstractQuestion
                 'name' => $this->getKey(),
                 'id' => 'q_' . $this->getKey(),
                 'required' => 'required',
-                'class' => 'form-select',
+                'class' => 'select',
             ]
         );
         $select->appendChild((new Element('option'))->setAttribute('value', '')->setValue(t('** Choose')));

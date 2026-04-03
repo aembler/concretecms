@@ -26,7 +26,7 @@ class DashboardBreadcrumbFactory
         foreach($pages as $page) {
             $breadcrumb->add(new Item($page->getCollectionLink(), t($page->getCollectionName())));
         }
-        $breadcrumb->add(new Item($dashboardPage->getCollectionLink(), t($dashboardPage->getCollectionName())));
+//        $breadcrumb->add(new Item($dashboardPage->getCollectionLink(), t($dashboardPage->getCollectionName())));
         return $breadcrumb;
     }
 }

@@ -4,6 +4,7 @@ namespace Concrete\Core\Http\Middleware;
 
 use Concrete\Core\Http\ResponseFactoryInterface;
 use Concrete\Core\Validation\CSRF\SimpleToken;
+use http\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -49,6 +50,6 @@ class ValidateSimpleCsrfTokenMiddleware implements MiddlewareInterface
             ], Response::HTTP_FORBIDDEN);
         }
 
-        return $this->responseFactory->create($message, Response::HTTP_FORBIDDEN);
+        throw new \RuntimeException($message);
     }
 }

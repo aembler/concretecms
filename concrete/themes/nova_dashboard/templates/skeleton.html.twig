@@ -24,6 +24,7 @@
             </aside>
 
             <main class="flex min-h-[calc(100vh-7.5rem)] w-full flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8 bg-base-100">
+                {% block page_header %}{% endblock %}
                 {% block content %}{% endblock %}
             </main>
         </div>

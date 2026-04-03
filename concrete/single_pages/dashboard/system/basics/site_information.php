@@ -5,10 +5,12 @@ if ($u->isSuperUser()) {
 ?>
 <form action="<?= $view->action('submit') ?>" method="post">
     <?php
-    $token->output('submit');
+    $token->output();
     ?>
 
-    <?=$survey->render(); ?>
+    <div class="prose">
+        <?=$survey->render(); ?>
+    </div>
 
     <div class="ccm-dashboard-form-actions-wrapper">
         <div class="ccm-dashboard-form-actions d-flex">
