@@ -1,6 +1,8 @@
-import { createApp } from 'vue'
+import { createApp, defineCustomElement } from 'vue'
 
 import { createConcretePinia } from '../../../cms/js/stores/pinia'
+import ConcreteBackendForm from './components/Backend/ConcreteBackendForm.ce.vue'
+import ConcreteBackendFormActions from './components/Backend/ConcreteBackendFormActions.ce.vue'
 import Header from './components/Header.vue'
 import Navigation from './components/Navigation.vue'
 
@@ -48,4 +50,15 @@ mountPoints.forEach(({ selector, component, getProps = () => ({}) }) => {
             .use(pinia)
             .mount(element)
     })
+})
+
+const customElementsToRegister = [
+    ['concrete-backend-form', defineCustomElement(ConcreteBackendForm, { shadowRoot: false })],
+    ['concrete-backend-form-actions', defineCustomElement(ConcreteBackendFormActions, { shadowRoot: false })],
+]
+
+customElementsToRegister.forEach(([tagName, component]) => {
+    if (!customElements.get(tagName)) {
+        customElements.define(tagName, component)
+    }
 })

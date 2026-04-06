@@ -1,0 +1,38 @@
+
+<concrete-backend-form action="{{ controller.action('save') }}" method="post">
+    <div class="grid gap-6">
+        <fieldset class="fieldset">
+            <label class="label text-sm font-semibold text-base-content" for="tracking_code_header">
+                {{ t('Header Tracking Codes') }}
+            </label>
+            <textarea
+                id="tracking_code_header"
+                name="tracking_code_header"
+                class="textarea textarea-bordered h-64 w-full font-mono text-sm leading-6"
+                spellcheck="false"
+            >{{- tracking_code_header -}}</textarea>
+            <p class="label text-xs text-base-content/70">
+                {{ t('Content entered here will be injected inside the page header on every page.') }}
+            </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+            <label class="label text-sm font-semibold text-base-content" for="tracking_code_footer">
+                {{ t('Footer Tracking Codes') }}
+            </label>
+            <textarea
+                id="tracking_code_footer"
+                name="tracking_code_footer"
+                class="textarea textarea-bordered h-64 w-full font-mono text-sm leading-6"
+                spellcheck="false"
+            >{{- tracking_code_footer -}}</textarea>
+            <p class="label text-xs text-base-content/70">
+                {{ t('Content entered here will be injected before the closing body tag on every page.') }}
+            </p>
+        </fieldset>
+    </div>
+
+    <concrete-backend-form-actions>
+        <button type="submit" class="btn btn-primary">{{ t('Save') }}</button>
+    </concrete-backend-form-actions>
+</concrete-backend-form>

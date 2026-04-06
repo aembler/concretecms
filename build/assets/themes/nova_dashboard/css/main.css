@@ -1,4 +1,6 @@
 @import "../../../cms/css/app.css";
 @source "./";
+@source "../js/";
 @source "../../../../../concrete/elements/";
+@source "../../../../../concrete/single_pages/";
 @source "../../../../../concrete/themes/nova_dashboard";

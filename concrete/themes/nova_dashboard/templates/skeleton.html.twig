@@ -17,13 +17,13 @@
         {% endblock %}
 
         <div class="mx-auto w-full max-w-screen-2xl lg:flex lg:items-start">
-            <aside class="sticky top-16 z-40 hidden h-[calc(100vh-4rem)] w-72 shrink-0 self-start border-r border-base-300 bg-base-200 lg:block">
+            <aside class="sticky top-16 z-40 hidden w-72 shrink-0 self-start border-r border-base-300 bg-base-200 lg:block">
                 <div class="h-full overflow-y-auto px-2 py-6">
                     {% include '@theme/templates/sidebar.html.twig' %}
                 </div>
             </aside>
 
-            <main class="flex min-h-[calc(100vh-7.5rem)] w-full flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8 bg-base-100">
+            <main class="pb-20 flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8 bg-base-100">
                 {% block page_header %}{% endblock %}
                 {% block content %}{% endblock %}
             </main>

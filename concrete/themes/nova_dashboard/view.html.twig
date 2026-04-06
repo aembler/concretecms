@@ -1,11 +1,19 @@
 {% extends '@theme/templates/skeleton.html.twig' %}
 {% block page_header %}
+
+    {% if success %}
+        <div class="alert alert-success alert-outline mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ success }}
+        </div>
+    {% endif %}
+
     {% if pageTitle %}
         <header class="mb-6 border-b border-base-300/80 pb-4">
             {% if _breadcrumb is defined and _breadcrumb %}
-                <div class="mb-3">
-                    {{ _breadcrumb.getContents()|raw }}
-                </div>
+                {{ _breadcrumb.getContents()|raw }}
             {% endif %}
             <h1 class="text-2xl font-semibold tracking-tight text-base-content sm:text-[1.9rem]">
                 {{ pageTitle }}
@@ -20,14 +28,6 @@
 {% endblock %}
 
 {% block content %}
-    {% if success %}
-        <div class="alert alert-success alert-outline mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ success }}
-        </div>
-    {% endif %}
 
     {{ innerContent|raw }}
 

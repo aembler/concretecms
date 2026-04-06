@@ -1,15 +1,17 @@
 {% set items = breadcrumb.getItems()|slice(0, -1) %}
 {% set total = items|length %}
 {% if total > 1 %}
-    <div class="breadcrumbs text-sm text-base-content/70">
-        <ul>
-            {% for item in items %}
-                <li>
-                    <a href="{{ item.getURL() }}">
-                        {{ item.getName }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+    <div class="mb-3">
+        <div class="breadcrumbs text-sm text-base-content/70">
+            <ul>
+                {% for item in items %}
+                    <li>
+                        <a href="{{ item.getURL() }}">
+                            {{ item.getName }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 {% endif %}

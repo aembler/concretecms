@@ -35,7 +35,7 @@ endif;
 // @var Result $result
 // @var DropdownMenu $resultsBulkMenu
 ?>
-<div id="ccm-search-results-table">
+<div id="ccm-search-results-table" class="prose">
     <table class="ccm-search-results-table" data-search-results="pages">
         <thead>
         <tr>
