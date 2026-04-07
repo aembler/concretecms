@@ -1,0 +1,294 @@
+<style>
+    .ccm-block-type-icon {
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: hsl(var(--bc));
+    }
+
+    .ccm-block-type-icon img {
+        display: block;
+        max-width: 32px;
+        max-height: 32px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .ccm-block-type-icon .ccm-ui-inline-svg-icon,
+    .ccm-block-type-icon .ccm-ui-inline-svg-icon svg {
+        display: block;
+        width: 32px;
+        height: 32px;
+        max-width: 32px;
+        max-height: 32px;
+    }
+</style>
+
+{% if controller.getAction() == 'inspect' %}
+    <div class="space-y-6">
+        <div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+            <div class="border-b border-base-300 px-6 py-5">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div class="space-y-2">
+                        <div class="badge badge-outline">{{ bt.getBlockTypeHandle() }}</div>
+                        <div class="flex items-center gap-3">
+                            <span class="ccm-block-type-icon rounded-xl bg-base-200 p-2">
+                                {{ blockTypeService.getBlockTypeIcon(bt).toHtmlObject()|raw }}
+                            </span>
+                            <h2 class="text-2xl font-semibold text-base-content">
+                                {{ bt.getBlockTypeName() }}
+                            </h2>
+                        </div>
+                        {% if bt.getBlockTypeDescription() %}
+                            <p class="max-w-3xl text-sm leading-6 text-base-content/70">
+                                {{ bt.getBlockTypeDescription() }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ urlResolver.resolve(['/dashboard/blocks/types']) }}" class="btn btn-ghost">
+                            {{ t('Back to Block Types') }}
+                        </a>
+                        <a href="{{ urlResolver.resolve(['/dashboard/blocks/types', 'refresh', bt.getBlockTypeID(), token.generate('ccm-refresh-blocktype')]) }}" class="btn btn-outline">
+                            {{ t('Refresh') }}
+                        </a>
+                        {% if currentUserIsSuperUser %}
+                            <button type="button" class="btn btn-error" onclick="removeBlockType()">
+                                {{ t('Remove') }}
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-4 px-6 py-6 md:grid-cols-2">
+                <div class="rounded-xl bg-base-200/70 p-4">
+                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/50">
+                        {{ t('Block Type Handle') }}
+                    </div>
+                    <div class="mt-2 font-mono text-sm text-base-content">
+                        {{ bt.getBlockTypeHandle() }}
+                    </div>
+                </div>
+
+                <div class="rounded-xl bg-base-200/70 p-4">
+                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/50">
+                        {{ t('Package') }}
+                    </div>
+                    <div class="mt-2 text-sm text-base-content">
+                        {{ bt.getPackageHandle() ? bt.getPackageHandle() : t('Application') }}
+                    </div>
+                </div>
+
+                <div class="rounded-xl bg-base-200/70 p-4">
+                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/50">
+                        {{ t('Usage Count') }}
+                    </div>
+                    <div class="mt-2 text-2xl font-semibold text-base-content">
+                        {{ num }}
+                    </div>
+                </div>
+
+                <div class="rounded-xl bg-base-200/70 p-4">
+                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/50">
+                        {{ t('Usage Count on Active Pages') }}
+                    </div>
+                    <div class="mt-2 text-2xl font-semibold text-base-content">
+                        {% if numActive > 0 %}
+                            <a href="{{ controller.action('search', bt.getBlockTypeID()) }}" class="link link-primary">
+                                {{ numActive }}
+                            </a>
+                        {% else %}
+                            0
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if bt.isBlockTypeInternal() %}
+                <div class="mx-6 mb-6 rounded-xl border border-info/20 bg-info/10 px-4 py-3 text-sm text-info-content">
+                    {{ t('This is an internal block type.') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if currentUserIsSuperUser %}
+        <script>
+            function removeBlockType() {
+                {% if bt.canUnInstall() %}
+                if (confirm({{ t('This will remove all instances of the %s block type. This cannot be undone. Are you sure?', bt.getBlockTypeHandle())|json_encode|raw }})) {
+                    location.href = {{ (urlResolver.resolve(['/dashboard/blocks/types', 'uninstall', bt.getBlockTypeID(), token.generate('ccm-uninstall-blocktype')]) ~ '')|json_encode|raw }};
+                }
+                {% else %}
+                alert({{ t('This block type is internal. It cannot be uninstalled.')|json_encode|raw }});
+                {% endif %}
+            }
+        </script>
+    {% endif %}
+{% else %}
+    <div class="space-y-8">
+        <section class="space-y-4">
+            <div class="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <h2 class="text-2xl font-semibold text-base-content">{{ t('Awaiting Installation') }}</h2>
+                    <p class="mt-1 text-sm text-base-content/70">
+                        {{ t('Block types found in your application that are ready to be installed.') }}
+                    </p>
+                </div>
+            </div>
+
+            {% if availableBlockTypes is not empty %}
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {% for bt in availableBlockTypes %}
+                        <div class="card border border-base-300 bg-base-100 shadow-sm">
+                            <div class="card-body gap-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="ccm-block-type-icon rounded-xl bg-base-200 p-2">
+                                        {{ blockTypeService.getBlockTypeIcon(bt).toHtmlObject()|raw }}
+                                    </span>
+                                    <div class="space-y-2">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <h3 class="card-title text-base">{{ bt.getBlockTypeName() }}</h3>
+                                            <span class="badge badge-outline badge-sm">{{ bt.getBlockTypeHandle() }}</span>
+                                        </div>
+                                        <p class="text-sm leading-6 text-base-content/70">
+                                            {{ bt.getBlockTypeDescription() ? bt.getBlockTypeDescription() : t('No description provided.') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card-actions justify-end">
+                                    <a href="{{ urlResolver.resolve(['/dashboard/blocks/types', 'install', bt.getBlockTypeHandle()]) }}" class="btn btn-primary btn-sm">
+                                        {{ t('Install') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="rounded-box border border-dashed border-base-300 bg-base-100 px-5 py-8 text-sm text-base-content/70">
+                    {{ t('No custom block types are awaiting installation.') }}
+                </div>
+            {% endif %}
+
+            {% if marketplaceEnabled %}
+                <div class="alert border border-success/20 bg-success/10 text-sm">
+                    <div>
+                        <div class="font-semibold text-base-content">{{ t('Extend your library') }}</div>
+                        <div class="text-base-content/70">{{ t('Browse our marketplace of add-ons to extend your site!') }}</div>
+                    </div>
+                    <a class="btn btn-success btn-sm" href="{{ urlResolver.resolve(['/dashboard/extend/addons']) }}">
+                        {{ t('More Add-ons') }}
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="space-y-4">
+            <div>
+                <h2 class="text-2xl font-semibold text-base-content">{{ t('Installed Block Types') }}</h2>
+                <p class="mt-1 text-sm text-base-content/70">
+                    {{ t('Browse installed block types by set and inspect their details.') }}
+                </p>
+            </div>
+
+            {% for normalBlockTypesAndSet in normalBlockTypesAndSets %}
+                {% set blockTypeSet = normalBlockTypesAndSet.blockTypeSet %}
+                {% set normalBlockTypes = normalBlockTypesAndSet.blockTypes %}
+                <div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+                    <div class="border-b border-base-300 px-5 py-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-base-content">
+                                    {{ blockTypeSet ? blockTypeSet.getBlockTypeSetDisplayName() : t('Other') }}
+                                </h3>
+                                <p class="mt-1 text-sm text-base-content/60">
+                                    {{ normalBlockTypes|length }}
+                                    {{ normalBlockTypes|length == 1 ? t('block type') : t('block types') }}
+                                </p>
+                            </div>
+                            {% if blockTypeSet %}
+                                <div class="badge badge-ghost">{{ t('Set') }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if normalBlockTypes is not empty %}
+                        <div class="divide-y divide-base-300">
+                            {% for bt in normalBlockTypes %}
+                                <a
+                                    href="{{ controller.action('inspect', bt.getBlockTypeID()) }}"
+                                    class="flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-base-200/60"
+                                    title="{{ bt.getBlockTypeDescription() }}"
+                                >
+                                    <div class="flex min-w-0 items-start gap-3">
+                                        <span class="ccm-block-type-icon rounded-xl bg-base-200 p-2">
+                                            {{ blockTypeService.getBlockTypeIcon(bt).toHtmlObject()|raw }}
+                                        </span>
+                                        <div class="min-w-0 space-y-1">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <span class="font-semibold text-base-content">{{ bt.getBlockTypeName() }}</span>
+                                                <span class="badge badge-outline badge-sm">{{ bt.getBlockTypeHandle() }}</span>
+                                            </div>
+                                            <p class="text-sm leading-6 text-base-content/70">
+                                                {{ bt.getBlockTypeDescription() ? bt.getBlockTypeDescription() : t('No description provided.') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-medium text-primary">{{ t('Inspect') }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="px-5 py-6 text-sm text-base-content/60">
+                            {{ t('No block types in this set.') }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {#
+                Disabled legacy jQuery UI sortable integration for block type set ordering and
+                block type reordering/moving between sets. The old page exposed drag handles and
+                posted to sort_blocktypesets/sort_blocktypes, but that behavior is not wired up
+                in this first Twig/Tailwind pass.
+            #}
+        </section>
+
+        <section class="space-y-4">
+            <div>
+                <h2 class="text-2xl font-semibold text-base-content">{{ t('Internal Block Types') }}</h2>
+                <p class="mt-1 text-sm text-base-content/70">
+                    {{ t('System block types that are available internally within Concrete CMS.') }}
+                </p>
+            </div>
+
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {% for bt in internalBlockTypes %}
+                    <a
+                        href="{{ controller.action('inspect', bt.getBlockTypeID()) }}"
+                        class="rounded-box border border-base-300 bg-base-100 px-4 py-4 shadow-sm transition-colors hover:bg-base-200/60"
+                    >
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex min-w-0 items-start gap-3">
+                                <span class="ccm-block-type-icon rounded-xl bg-base-200 p-2">
+                                    {{ blockTypeService.getBlockTypeIcon(bt).toHtmlObject()|raw }}
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-base-content">{{ bt.getBlockTypeName() }}</div>
+                                    <div class="mt-1 text-sm text-base-content/70">{{ bt.getBlockTypeDescription() ? bt.getBlockTypeDescription() : t('No description provided.') }}</div>
+                                </div>
+                            </div>
+                            <span class="badge badge-ghost badge-sm">{{ bt.getBlockTypeHandle() }}</span>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endif %}

@@ -20,6 +20,8 @@ class Types extends DashboardPageController
     public function on_start()
     {
         $this->set('ci', $this->app->make('helper/concrete/urls'));
+        $this->set('blockTypeService', $this->app->make(BlockType::class));
+        $this->set('currentUserIsSuperUser', $this->app->make(User::class)->isSuperUser());
         $this->set('urlResolver', $this->app->make(ResolverManagerInterface::class));
         parent::on_start();
     }
@@ -45,27 +47,6 @@ class Types extends DashboardPageController
         $this->set('availableBlockTypes', $availableBlockTypes);
         $this->set('marketplaceEnabled', (bool) $config->get('concrete.marketplace.enabled'));
         $this->set('enableMoveBlocktypesAcrossSets', (bool) $config->get('concrete.misc.enable_move_blocktypes_across_sets'));
-        $this->addHeaderItem(<<<EOT
-<style>
-    #ccm-btlist-btsets .fa-bars {
-        visibility: hidden;
-        cursor: ns-resize;
-    }
-    #ccm-btlist-btsets .ccm-btlist-btset-name:hover .fa-bars {
-        visibility: visible;
-    }
-    #ccm-btlist-btsets .ccm-btlist-bt:hover .fa-bars {
-        visibility: visible;
-    }
-    #ccm-btlist-btsets .ui-sortable-helper .fa-bars {
-        visibility: visible;
-    }
-    #ccm-btlist-btsets .ccm-btlist-bts {
-        min-height: 30px;
-    }
-</style>
-EOT
-        );
     }
 
     public function inspect($btID = 0)

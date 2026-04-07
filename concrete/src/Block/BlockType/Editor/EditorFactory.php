@@ -33,7 +33,7 @@ class EditorFactory
         $record = $locator->getRecord(
             BlockTypeService::getBlockTypeRelativePath(
                 $object->getBlockTypeHandle(),
-                'manifest.xml',
+                FILENAME_BLOCK_MANIFEST,
                 $packageHandle,
                 $blockType->getBlockTypeActiveVersion()
             )

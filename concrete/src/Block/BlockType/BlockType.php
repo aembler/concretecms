@@ -5,6 +5,7 @@ namespace Concrete\Core\Block\BlockType;
 use Concrete\Core\Application\Service\Urls;
 use Concrete\Core\Application\UserInterface\Icon\IconInterface;
 use Concrete\Core\Application\UserInterface\Icon\ImageFileIcon;
+use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Block\ProvidesIconInterface;
 use Concrete\Core\Cache\Level\RequestCache;
@@ -19,6 +20,10 @@ class BlockType
 {
     public function getBlockTypeIcon(BlockTypeEntity $blockType): IconInterface
     {
+        $manifestSvg = $this->getManifestIconSvg($blockType);
+        if ($manifestSvg !== null) {
+            return new InlineSvgIcon($manifestSvg);
+        }
 
         $controller = $blockType->getController();
         if ($controller instanceof ProvidesIconInterface) {
@@ -32,6 +37,41 @@ class BlockType
             (string) $urls->getBlockTypeIconURL($blockType),
             (string) $blockType->getBlockTypeName()
         );
+    }
+
+    protected function getManifestIconSvg(BlockTypeEntity $blockType): ?string
+    {
+        $app = Application::getFacadeApplication();
+        $locator = $app->make(FileLocator::class);
+        $packageHandle = (string) $blockType->getPackageHandle();
+        if ($packageHandle !== '') {
+            $locator->addLocation(new FileLocator\PackageLocation($packageHandle));
+        }
+
+        $manifestPath = static::getBlockTypeRelativePath(
+            $blockType->getBlockTypeHandle(),
+            FILENAME_BLOCK_MANIFEST,
+            $packageHandle,
+            $blockType->getBlockTypeActiveVersion()
+        );
+        $record = $locator->getRecord($manifestPath);
+        if ($record === null || !$record->exists()) {
+            return null;
+        }
+
+        $document = new \DOMDocument();
+        $loaded = @$document->load($record->getFile());
+        if (!$loaded) {
+            return null;
+        }
+
+        $xpath = new \DOMXPath($document);
+        $svgNode = $xpath->query('/*[local-name()="concrete-bdf"]/*[local-name()="blocktype"]/*[local-name()="icon"]/*[local-name()="svg"]')->item(0);
+        if (!$svgNode instanceof \DOMElement) {
+            return null;
+        }
+
+        return trim($document->saveXML($svgNode) ?: '') ?: null;
     }
 
     public static function getVersionedBlockTypeDirectory($btHandle, int $version): string
@@ -148,30 +188,34 @@ class BlockType
         $app = Application::getFacadeApplication();
         $em = $app->make(EntityManagerInterface::class);
         $pkgHandle = (string) (is_object($pkg) ? $pkg->getPackageHandle() : $pkg);
-        $class = static::getBlockTypeMappedClass($btHandle, $pkgHandle, 1);
-        $bta = $app->build($class);
+        $factory = $app->make(BlockTypeEntityFactory::class);
+        $directory = $factory->getDirectoryByHandle($btHandle, $pkgHandle);
+        $hasController = $factory->directoryHasController($directory);
+        $bta = null;
 
-        $locator = $app->make(FileLocator::class);
-        if ($pkgHandle !== '') {
-            $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
+        if ($hasController) {
+            $class = static::getBlockTypeMappedClass($btHandle, $pkgHandle, 1);
+            $bta = $app->build($class);
+
+            $locator = $app->make(FileLocator::class);
+            if ($pkgHandle !== '') {
+                $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
+            }
+            $dbPath = static::getBlockTypeRelativePath($btHandle, FILENAME_BLOCK_DB, $pkgHandle, 1);
+            $path = dirname($locator->getRecord($dbPath)->getFile());
+
+            // Attempt to run the subclass methods (install schema from db.xml, etc.)
+            $bta->install($path, $importMode);
         }
-        $dbPath = static::getBlockTypeRelativePath($btHandle, FILENAME_BLOCK_DB, $pkgHandle, 1);
-        $path = dirname($locator->getRecord($dbPath)->getFile());
-
-        //Attempt to run the subclass methods (install schema from db.xml, etc.)
-        $bta->install($path, $importMode);
 
         // Prevent the database records being stored in wrong language
         $loc = $app->make(Localization::class);
         $loc->pushActiveContext(Localization::CONTEXT_SYSTEM);
         try {
-            //Install the block
-            $bt = new BlockTypeEntity();
-            $bt->loadFromController($bta);
+            $bt = $factory->createFromDirectory($directory);
             if (is_object($pkg)) {
                 $bt->setPackageID($pkg->getPackageID());
             }
-            $bt->setBlockTypeHandle($btHandle);
             $bt->setBlockTypeActiveVersion(1);
         } finally {
             $loc->popActiveContext();
@@ -180,7 +224,7 @@ class BlockType
         $em->persist($bt);
         $em->flush();
 
-        if ($bta->getBlockTypeDefaultSet()) {
+        if ($bta !== null && $bta->getBlockTypeDefaultSet()) {
             $set = Set::getByHandle($bta->getBlockTypeDefaultSet());
             if ($set !== null) {
                 $set->addBlockType($bt);

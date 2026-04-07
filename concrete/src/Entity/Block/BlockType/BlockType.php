@@ -82,11 +82,11 @@ class BlockType
     /**
      * @ORM\Column(type="integer")
      */
-    protected $btInterfaceHeight;
+    protected $btInterfaceHeight = 0;
     /**
      * @ORM\Column(type="integer")
      */
-    protected $btInterfaceWidth;
+    protected $btInterfaceWidth = 0;
 
     /**
      * @ORM\Column(type="integer", options={"unsigned": true})
@@ -726,10 +726,13 @@ EOT
     public function loadController(?int $version = null)
     {
         $class = $this->getBlockTypeClass($version);
+        if (!$class) {
+            $this->controller = null;
+
+            return;
+        }
 
         /** @var Controller controller */
-        if ($class) {
-            $this->controller = Facade::getFacadeApplication()->make($class, ['obj' => $this]);
-        }
+        $this->controller = Facade::getFacadeApplication()->make($class, ['obj' => $this]);
     }
 }

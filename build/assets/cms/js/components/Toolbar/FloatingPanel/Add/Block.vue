@@ -15,15 +15,6 @@ type PanelIcon = {
   svg?: string
 }
 
-type DialogBlockTypeEditor = {
-  component: 'DialogEditor'
-  componentProps: {
-    dialogTitle: string
-    dialogWidth: string | number
-    dialogHeight: string | number
-  }
-}
-
 type AddContentDropTarget = {
   areaId?: number | string
   pageId?: number | string
@@ -75,11 +66,11 @@ let dragPreview: HTMLElement | null = null
 let dragPreviewContainer: HTMLElement | null = null
 let dragPanelBounds: DOMRect | null = null
 let hasExitedAddPanel = false
-const addDialogEditor = ref<DialogBlockTypeEditor | null>(null)
-const addDialogTarget = ref<AddBlockTargetRef | null>(null)
-const addDialogKey = ref(0)
-const addDialogComponent = computed(() => {
-  return blockEditorRegistry.resolveEditorComponent(addDialogEditor.value?.component)
+const activeAddEditor = ref<BlockTypeEditor>(null)
+const activeAddTarget = ref<AddBlockTargetRef | null>(null)
+const activeAddEditorKey = ref(0)
+const activeAddEditorComponent = computed(() => {
+  return blockEditorRegistry.resolveEditorComponent(activeAddEditor.value?.component)
 })
 
 function ensureAddContentPageState() {
@@ -230,38 +221,35 @@ function toAddBlockTarget(dropTarget: AddContentDropTarget): AddBlockTargetRef {
   }
 }
 
-function openAddDialog(dropTarget: AddContentDropTarget, draggedItem: AddContentDraggedItem) {
+function openAddEditor(dropTarget: AddContentDropTarget, draggedItem: AddContentDraggedItem) {
   const editor = draggedItem?.payload?.editor
-  if (!isDialogEditor(editor)) {
+  if (!isValidBlockTypeEditor(editor)) {
     return
   }
 
-  addDialogEditor.value = editor
-  addDialogTarget.value = toAddBlockTarget(dropTarget)
-  addDialogKey.value += 1
+  activeAddEditor.value = editor
+  activeAddTarget.value = toAddBlockTarget(dropTarget)
+  activeAddEditorKey.value += 1
 }
 
-function isDialogEditor(editor: BlockTypeEditor): editor is DialogBlockTypeEditor {
+function isValidBlockTypeEditor(editor: BlockTypeEditor): editor is NonNullable<BlockTypeEditor> {
   return Boolean(
     editor
-    && editor.component === 'DialogEditor'
-    && editor.componentProps
-    && typeof editor.componentProps.dialogTitle === 'string'
-    && (typeof editor.componentProps.dialogWidth === 'string' || typeof editor.componentProps.dialogWidth === 'number')
-    && (typeof editor.componentProps.dialogHeight === 'string' || typeof editor.componentProps.dialogHeight === 'number')
+    && typeof editor.component === 'string'
+    && blockEditorRegistry.hasEditorComponent(editor.component)
   )
 }
 
-function handleAddDialogUpdated() {
-  addDialogEditor.value = null
-  addDialogTarget.value = null
+function handleAddEditorUpdated() {
+  activeAddEditor.value = null
+  activeAddTarget.value = null
   setAddContentDragActive(false)
   floatingPanels.close(addPanelId)
 }
 
-function handleAddDialogClosed() {
-  addDialogEditor.value = null
-  addDialogTarget.value = null
+function handleAddEditorClosed() {
+  activeAddEditor.value = null
+  activeAddTarget.value = null
   setAddContentDragActive(false)
 }
 
@@ -318,9 +306,9 @@ onMounted(() => {
           if (addEditor === null && activeDropTarget && draggedItem) {
             floatingPanels.close(addPanelId)
             enqueueAddBlockOperation({ ...activeDropTarget }, draggedItem)
-          } else if (blockEditorRegistry.hasEditorComponent(addEditor?.component) && activeDropTarget && draggedItem) {
+          } else if (isValidBlockTypeEditor(addEditor) && activeDropTarget && draggedItem) {
             keepAddPanelHidden = true
-            openAddDialog(activeDropTarget, draggedItem)
+            openAddEditor(activeDropTarget, draggedItem)
           }
         }
         setAddContentDragActive(keepAddPanelHidden)
@@ -396,17 +384,17 @@ onBeforeUnmount(() => {
   </button>
 
   <component
-    :is="addDialogComponent"
-    v-if="addDialogEditor && addDialogTarget && addDialogComponent"
-    :key="addDialogKey"
-    :editor="addDialogEditor"
+    :is="activeAddEditorComponent"
+    v-if="activeAddEditor && activeAddTarget && activeAddEditorComponent"
+    :key="activeAddEditorKey"
+    :editor="activeAddEditor"
     mode="add"
     :block-type-id="props.blockTypeId || 0"
     :block-id="0"
-    :area-handle="addDialogTarget.areaHandle"
-    :page-id="addDialogTarget.pageId"
-    :add-target="addDialogTarget"
-    @updated="handleAddDialogUpdated"
-    @closed="handleAddDialogClosed"
+    :area-handle="activeAddTarget.areaHandle"
+    :page-id="activeAddTarget.pageId"
+    :add-target="activeAddTarget"
+    @updated="handleAddEditorUpdated"
+    @closed="handleAddEditorClosed"
   />
 </template>

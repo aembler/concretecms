@@ -2,7 +2,6 @@
 
 namespace Concrete\Core\Block\BlockType;
 
-use Concrete\Core\Entity\Block\BlockType\BlockType as BlockTypeEntity;
 use Concrete\Core\Legacy\DatabaseItemList;
 use Concrete\Core\Support\Facade\Application;
 
@@ -82,6 +81,7 @@ class BlockTypeList extends DatabaseItemList
 
         $app = Application::getFacadeApplication();
         $db = $app->make('database/connection');
+        $factory = $app->make(BlockTypeEntityFactory::class);
 
         $btHandles = $db->GetCol('select btHandle from BlockTypes order by btDisplayOrder asc, btName asc, btID asc');
 
@@ -91,23 +91,11 @@ class BlockTypeList extends DatabaseItemList
             while (($file = readdir($handle)) !== false) {
                 if (strpos($file, '.') === false) {
                     $fdir = $dir . '/' . $file;
-                    if (is_dir($fdir) && !in_array($file, $btHandles) && file_exists($fdir . '/' . FILENAME_BLOCK_CONTROLLER)) {
+                    if (is_dir($fdir) && !in_array($file, $btHandles)) {
                         $bt = BlockType::getByHandle($file);
                         if (!is_object($bt)) {
-                            $bt = new BlockTypeEntity();
-                            $bt->setBlockTypeHandle($file);
-                            $class = $bt->getBlockTypeClass();
-                            $bta = Application::getFacadeApplication()->build($class);
-                            $bt->setBlockTypeName($bta->getBlockTypeName());
-                            $bt->setBlockTypeDescription($bta->getBlockTypeDescription());
-                            $bt->hasCustomViewTemplate = file_exists(DIR_FILES_BLOCK_TYPES . '/' . $file . '/' . FILENAME_BLOCK_VIEW);
-                            $bt->hasCustomEditTemplate = file_exists(DIR_FILES_BLOCK_TYPES . '/' . $file . '/' . FILENAME_BLOCK_EDIT);
-                            $bt->hasCustomAddTemplate = file_exists(DIR_FILES_BLOCK_TYPES . '/' . $file . '/' . FILENAME_BLOCK_ADD);
-                            $bt->installed = false;
-                        } else {
-                            $bt->installed = true;
+                            $bt = $factory->createFromDirectory($fdir);
                         }
-
                         $blocktypes[] = $bt;
                     }
                 }
