@@ -7,6 +7,7 @@ namespace Concrete\Core\Block\Manifest;
 use Concrete\Core\Block\Manifest\Error\ManifestError;
 use Concrete\Core\Block\Manifest\Exception\MalformedManifestException;
 use Concrete\Core\Block\Manifest\FormLayout\ContainerElement;
+use Concrete\Core\Block\Manifest\FormLayout\Fieldset;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface;
 use Concrete\Core\Block\Manifest\FormLayout\Tab;
@@ -185,8 +186,12 @@ final class BlockManifestParser
             case 'tab':
                 return $this->parseContainerElement($element, Tab::class, $fields, $tabs, $seenFieldRefs, $errors);
 
+            case 'fieldset':
+                return $this->parseFieldsetElement($element, $fields, $seenFieldRefs, $errors);
+
             case 'tabref':
                 $tabId = $this->getRequiredAttribute($element, 'tab', '<tabref>');
+                $excludedFieldIds = $this->parseTabReferenceExcludedFields($element);
                 if (!isset($tabs[$tabId])) {
                     $errors[] = new ManifestError(
                         'unknown_tab_reference',
@@ -196,10 +201,10 @@ final class BlockManifestParser
                         ]
                     );
 
-                    return new TabReference($tabId);
+                    return new TabReference($tabId, $excludedFieldIds);
                 }
 
-                return $this->resolveTab($tabs[$tabId], $fields, $seenFieldRefs, $errors);
+                return $this->resolveTab($tabs[$tabId], $fields, $seenFieldRefs, $errors, $excludedFieldIds);
         }
 
         throw new MalformedManifestException(sprintf('Unsupported form layout element <%s>.', $element->getName()));
@@ -219,6 +224,30 @@ final class BlockManifestParser
         $children = $this->parseLayoutChildren($element, $fields, $tabs, $seenFieldRefs, $errors);
 
         return new $className($id, $name, $children);
+    }
+
+    /**
+     * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
+     * @param array<string, bool> $seenFieldRefs
+     * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
+     */
+    protected function parseFieldsetElement(SimpleXMLElement $element, array $fields, array &$seenFieldRefs, array &$errors): Fieldset
+    {
+        $legend = trim((string) ($element['legend'] ?? ''));
+        $children = [];
+        foreach ($element->children() as $child) {
+            if (!($child instanceof SimpleXMLElement)) {
+                continue;
+            }
+
+            if ($child->getName() !== 'fieldref') {
+                throw new MalformedManifestException(sprintf('Unsupported fieldset child element <%s>.', $child->getName()));
+            }
+
+            $children[] = $this->parseLayoutElement($child, $fields, [], $seenFieldRefs, $errors);
+        }
+
+        return new Fieldset($legend, $legend, $children);
     }
 
     /**
@@ -266,34 +295,91 @@ final class BlockManifestParser
      * @param array<string, bool> $seenFieldRefs
      * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
      */
-    protected function resolveTab(Tab $tab, array $fields, array &$seenFieldRefs, array &$errors): Tab
+    protected function resolveTab(Tab $tab, array $fields, array &$seenFieldRefs, array &$errors, array $excludedFieldIds = []): Tab
     {
         $children = [];
+        $excludedFieldMap = array_fill_keys($excludedFieldIds, true);
         foreach ($tab->getChildren() as $child) {
-            if (!($child instanceof FieldReference)) {
+            if ($child instanceof FieldReference) {
+                if (!isset($excludedFieldMap[$child->getFieldId()])) {
+                    $children[] = $this->resolveFieldReference($child, $fields, $seenFieldRefs, $errors);
+                }
                 continue;
             }
 
-            $fieldId = $child->getFieldId();
-            if (isset($seenFieldRefs[$fieldId])) {
-                throw new MalformedManifestException(sprintf('Field "%s" may only appear once in the form layout.', $fieldId));
-            }
-            $seenFieldRefs[$fieldId] = true;
+            if ($child instanceof Fieldset) {
+                $fieldsetChildren = [];
+                foreach ($child->getChildren() as $fieldsetChild) {
+                    if (!($fieldsetChild instanceof FieldReference)) {
+                        continue;
+                    }
 
-            if (!isset($fields[$fieldId])) {
-                $errors[] = new ManifestError(
-                    'unknown_field_reference',
-                    sprintf('Unknown field reference "%s" in form layout.', $fieldId),
-                    [
-                        'fieldId' => $fieldId,
-                    ]
-                );
-            }
+                    if (isset($excludedFieldMap[$fieldsetChild->getFieldId()])) {
+                        continue;
+                    }
 
-            $children[] = new FieldReference($fieldId);
+                    $fieldsetChildren[] = $this->resolveFieldReference($fieldsetChild, $fields, $seenFieldRefs, $errors);
+                }
+
+                if ($fieldsetChildren !== []) {
+                    $children[] = new Fieldset($child->getId(), $child->getName(), $fieldsetChildren);
+                }
+            }
         }
 
         return new Tab($tab->getId(), $tab->getName(), $children);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function parseTabReferenceExcludedFields(SimpleXMLElement $element): array
+    {
+        $excludedFieldIds = [];
+        foreach ($element->children() as $child) {
+            if (!($child instanceof SimpleXMLElement)) {
+                continue;
+            }
+
+            if ($child->getName() !== 'excludefield') {
+                throw new MalformedManifestException(sprintf('Unsupported tabref child element <%s>.', $child->getName()));
+            }
+
+            $fieldId = $this->getRequiredAttribute($child, 'field', '<excludefield>');
+            if (in_array($fieldId, $excludedFieldIds, true)) {
+                throw new MalformedManifestException(sprintf('Field "%s" may only be excluded once from tab reference.', $fieldId));
+            }
+
+            $excludedFieldIds[] = $fieldId;
+        }
+
+        return $excludedFieldIds;
+    }
+
+    /**
+     * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
+     * @param array<string, bool> $seenFieldRefs
+     * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
+     */
+    protected function resolveFieldReference(FieldReference $fieldReference, array $fields, array &$seenFieldRefs, array &$errors): FieldReference
+    {
+        $fieldId = $fieldReference->getFieldId();
+        if (isset($seenFieldRefs[$fieldId])) {
+            throw new MalformedManifestException(sprintf('Field "%s" may only appear once in the form layout.', $fieldId));
+        }
+        $seenFieldRefs[$fieldId] = true;
+
+        if (!isset($fields[$fieldId])) {
+            $errors[] = new ManifestError(
+                'unknown_field_reference',
+                sprintf('Unknown field reference "%s" in form layout.', $fieldId),
+                [
+                    'fieldId' => $fieldId,
+                ]
+            );
+        }
+
+        return new FieldReference($fieldId);
     }
 
     protected function loadXml(string $xml, string $source = ''): SimpleXMLElement

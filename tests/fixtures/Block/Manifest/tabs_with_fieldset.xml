@@ -1,0 +1,10 @@
+<concrete-bdf version="1.0">
+    <tabs>
+        <tab id="core.design" name="Design">
+            <fieldset legend="Colors">
+                <fieldref field="core.styles.text_color" />
+                <fieldref field="core.styles.background_color" />
+            </fieldset>
+        </tab>
+    </tabs>
+</concrete-bdf>

@@ -11,9 +11,18 @@ final class TabReference implements FormLayoutElementInterface
      */
     protected $tabId;
 
-    public function __construct(string $tabId)
+    /**
+     * @var list<string>
+     */
+    protected $excludedFieldIds;
+
+    /**
+     * @param list<string> $excludedFieldIds
+     */
+    public function __construct(string $tabId, array $excludedFieldIds = [])
     {
         $this->tabId = $tabId;
+        $this->excludedFieldIds = array_values($excludedFieldIds);
     }
 
     public function getTabId(): string
@@ -27,13 +36,22 @@ final class TabReference implements FormLayoutElementInterface
     }
 
     /**
-     * @return array{type: string, tab: string}
+     * @return list<string>
+     */
+    public function getExcludedFieldIds(): array
+    {
+        return $this->excludedFieldIds;
+    }
+
+    /**
+     * @return array{type: string, tab: string, excludeFields: list<string>}
      */
     public function jsonSerialize(): array
     {
         return [
             'type' => $this->getType(),
             'tab' => $this->tabId,
+            'excludeFields' => $this->excludedFieldIds,
         ];
     }
 }

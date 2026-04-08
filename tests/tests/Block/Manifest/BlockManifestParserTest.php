@@ -12,6 +12,7 @@ use Concrete\Core\Block\Manifest\Field\FieldManager;
 use Concrete\Core\Block\Manifest\Field\Type\ColorFieldType;
 use Concrete\Core\Block\Manifest\Field\Type\TextareaFieldType;
 use Concrete\Core\Block\Manifest\Field\Type\TextFieldType;
+use Concrete\Core\Block\Manifest\FormLayout\Fieldset;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\Tab;
 use Concrete\Core\Block\Manifest\FormLayout\TabReference;
@@ -283,5 +284,144 @@ XML);
         } finally {
             @unlink($duplicateSource);
         }
+    }
+
+    public function testParserCanParseFieldsetsInsideTabs(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample" description="Example">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+            <field id="accent" type="color" label="Headline Color" />
+            <field id="body" type="textarea" label="Body" rows="3" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldset legend="Headline">
+                    <fieldref field="headline" />
+                    <fieldref field="accent" />
+                </fieldset>
+                <fieldset>
+                    <fieldref field="body" />
+                </fieldset>
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(1, $layout);
+        $this->assertInstanceOf(Tab::class, $layout[0]);
+        $this->assertCount(2, $layout[0]->getChildren());
+        $this->assertInstanceOf(Fieldset::class, $layout[0]->getChildren()[0]);
+        $this->assertSame('Headline', $layout[0]->getChildren()[0]->getLegend());
+        $this->assertSame('headline', $layout[0]->getChildren()[0]->getChildren()[0]->getFieldId());
+        $this->assertSame('accent', $layout[0]->getChildren()[0]->getChildren()[1]->getFieldId());
+        $this->assertInstanceOf(Fieldset::class, $layout[0]->getChildren()[1]);
+        $this->assertSame('', $layout[0]->getChildren()[1]->getLegend());
+        $this->assertSame('body', $layout[0]->getChildren()[1]->getChildren()[0]->getFieldId());
+    }
+
+    public function testTabReferenceCanExcludeDirectChildFields(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+            <field id="accent" type="color" label="Accent" />
+        </fields>
+        <tabs>
+            <tab id="sample.design" name="Design">
+                <fieldref field="headline" />
+                <fieldref field="accent" />
+            </tab>
+        </tabs>
+        <formlayout>
+            <tabref tab="sample.design">
+                <excludefield field="accent" />
+            </tabref>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(1, $layout);
+        $this->assertInstanceOf(Tab::class, $layout[0]);
+        $this->assertCount(1, $layout[0]->getChildren());
+        $this->assertSame('headline', $layout[0]->getChildren()[0]->getFieldId());
+    }
+
+    public function testTabReferenceCanExcludeFieldsInsideFieldsetsAndDropsEmptyFieldsets(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+            <field id="accent" type="color" label="Accent" />
+            <field id="body" type="textarea" label="Body" />
+        </fields>
+        <tabs>
+            <tab id="sample.design" name="Design">
+                <fieldset legend="Headline">
+                    <fieldref field="headline" />
+                    <fieldref field="accent" />
+                </fieldset>
+                <fieldset legend="Body">
+                    <fieldref field="body" />
+                </fieldset>
+            </tab>
+        </tabs>
+        <formlayout>
+            <tabref tab="sample.design">
+                <excludefield field="headline" />
+                <excludefield field="accent" />
+            </tabref>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(1, $layout);
+        $this->assertInstanceOf(Tab::class, $layout[0]);
+        $this->assertCount(1, $layout[0]->getChildren());
+        $this->assertInstanceOf(Fieldset::class, $layout[0]->getChildren()[0]);
+        $this->assertSame('Body', $layout[0]->getChildren()[0]->getLegend());
+        $this->assertCount(1, $layout[0]->getChildren()[0]->getChildren());
+        $this->assertSame('body', $layout[0]->getChildren()[0]->getChildren()[0]->getFieldId());
+    }
+
+    public function testTabReferenceKeepsEmptyTabsAfterExclusions(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+        </fields>
+        <tabs>
+            <tab id="sample.design" name="Design">
+                <fieldref field="headline" />
+            </tab>
+        </tabs>
+        <formlayout>
+            <tabref tab="sample.design">
+                <excludefield field="headline" />
+            </tabref>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(1, $layout);
+        $this->assertInstanceOf(Tab::class, $layout[0]);
+        $this->assertSame('sample.design', $layout[0]->getId());
+        $this->assertCount(0, $layout[0]->getChildren());
     }
 }
