@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Concrete\Tests\Block\Manifest;
 
 use Concrete\Core\Block\Manifest\BlockManifestParser;
+use Concrete\Core\Block\Manifest\FieldDefinitionParser;
+use Concrete\Core\Block\Manifest\GlobalFieldRegistry;
 use Concrete\Core\Block\Manifest\Exception\MalformedManifestException;
 use Concrete\Core\Block\Manifest\Field\FieldManager;
 use Concrete\Core\Block\Manifest\Field\Type\ColorFieldType;
@@ -23,7 +25,13 @@ final class BlockManifestParserTest extends TestCase
         $manager->register(new TextareaFieldType());
         $manager->register(new ColorFieldType());
 
-        return new BlockManifestParser($manager);
+        return new BlockManifestParser(
+            new FieldDefinitionParser($manager),
+            new GlobalFieldRegistry(
+                new FieldDefinitionParser($manager),
+                app('cache/request')
+            )
+        );
     }
 
     public function testParsesManifestWithKnownFieldTypes(): void
@@ -134,5 +142,27 @@ XML);
         $this->assertSame('unknown_field_type', $manifest->getErrors()[0]->getCode());
         $this->assertFalse($manifest->getField('headline')->hasKnownFieldType());
         $this->assertSame('mystery', $manifest->getField('headline')->getType());
+    }
+
+    public function testAppliesOptionalFieldsPrefixToFieldIdentifiers(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields prefix="design">
+            <field id="accent" type="color" label="Accent" />
+        </fields>
+        <formlayout>
+            <tab id="design" name="Design">
+                <field id="design.accent" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $this->assertNotNull($manifest->getField('design.accent'));
+        $this->assertNull($manifest->getField('accent'));
+        $this->assertSame('design.accent', $manifest->getLayout()[0]->getChildren()[0]->getFieldId());
     }
 }

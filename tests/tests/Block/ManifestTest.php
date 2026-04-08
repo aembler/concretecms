@@ -6,6 +6,8 @@ namespace Concrete\Tests\Block;
 
 use Concrete\Core\Block\Manifest\BlockManifestParser;
 use Concrete\Core\Block\Manifest\Field\FieldManager;
+use Concrete\Core\Block\Manifest\FieldDefinitionParser;
+use Concrete\Core\Block\Manifest\GlobalFieldRegistry;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\Tab;
 use Concrete\Tests\TestCase;
@@ -67,5 +69,19 @@ XML);
         $this->assertCount(1, $layout[1]->getChildren());
         $this->assertInstanceOf(FieldReference::class, $layout[1]->getChildren()[0]);
         $this->assertSame('accent', $layout[1]->getChildren()[0]->getFieldId());
+    }
+
+    public function testGlobalFieldRegistryLoadsDefaultStylesSource(): void
+    {
+        $registry = new GlobalFieldRegistry(
+            app(FieldDefinitionParser::class)
+        );
+        $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/styles.xml');
+
+        $this->assertTrue($registry->has('styles.text_color'));
+        $this->assertTrue($registry->has('styles.background_color'));
+        $this->assertFalse($registry->has('text_color'));
+        $this->assertCount(2, $registry->getFields());
+        $this->assertCount(0, $registry->getErrors());
     }
 }

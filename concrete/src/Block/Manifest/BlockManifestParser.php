@@ -6,7 +6,6 @@ namespace Concrete\Core\Block\Manifest;
 
 use Concrete\Core\Block\Manifest\Error\ManifestError;
 use Concrete\Core\Block\Manifest\Exception\MalformedManifestException;
-use Concrete\Core\Block\Manifest\Field\FieldManager;
 use Concrete\Core\Block\Manifest\FormLayout\ContainerElement;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface;
@@ -18,11 +17,17 @@ final class BlockManifestParser
     /**
      * @var \Concrete\Core\Block\Manifest\Field\FieldManager
      */
-    protected $fieldManager;
+    protected $fieldDefinitionParser;
 
-    public function __construct(FieldManager $fieldManager)
+    /**
+     * @var \Concrete\Core\Block\Manifest\GlobalFieldRegistry
+     */
+    protected $globalFieldRegistry;
+
+    public function __construct(FieldDefinitionParser $fieldDefinitionParser, GlobalFieldRegistry $globalFieldRegistry)
     {
-        $this->fieldManager = $fieldManager;
+        $this->fieldDefinitionParser = $fieldDefinitionParser;
+        $this->globalFieldRegistry = $globalFieldRegistry;
     }
 
     public function parseFile(string $filename): BlockManifest
@@ -41,6 +46,7 @@ final class BlockManifestParser
 
     public function parseString(string $xml, string $source = ''): BlockManifest
     {
+        $this->globalFieldRegistry->getFields();
         $element = $this->loadXml($xml, $source);
         if ($element->getName() !== 'concrete-bdf') {
             throw new MalformedManifestException('The manifest root element must be <concrete-bdf>.');
@@ -84,43 +90,7 @@ final class BlockManifestParser
      */
     protected function parseFields(SimpleXMLElement $blockType, array &$errors): array
     {
-        $result = [];
-        $fieldNodes = $blockType->xpath('./fields/field');
-        if (!is_array($fieldNodes)) {
-            return $result;
-        }
-
-        foreach ($fieldNodes as $fieldNode) {
-            if (!($fieldNode instanceof SimpleXMLElement)) {
-                continue;
-            }
-
-            $fieldId = $this->getRequiredAttribute($fieldNode, 'id', '<field>');
-            if (isset($result[$fieldId])) {
-                throw new MalformedManifestException(sprintf('Duplicate field id "%s" found in manifest.', $fieldId));
-            }
-
-            $fieldTypeHandle = $this->getRequiredAttribute($fieldNode, 'type', sprintf('<field id="%s">', $fieldId));
-            $label = trim((string) ($fieldNode['label'] ?? $fieldId));
-            $definition = $this->collectAttributes($fieldNode);
-            $fieldType = $this->fieldManager->get($fieldTypeHandle);
-            if ($fieldType !== null) {
-                $definition = $fieldType->normalizeDefinition($definition);
-            } else {
-                $errors[] = new ManifestError(
-                    'unknown_field_type',
-                    sprintf('Unknown field type "%s" for field "%s".', $fieldTypeHandle, $fieldId),
-                    [
-                        'fieldId' => $fieldId,
-                        'fieldType' => $fieldTypeHandle,
-                    ]
-                );
-            }
-
-            $result[$fieldId] = new FieldDefinition($fieldId, $fieldTypeHandle, $label, $definition, $fieldType);
-        }
-
-        return $result;
+        return $this->fieldDefinitionParser->parseFieldGroups($blockType, $errors);
     }
 
     /**
@@ -230,19 +200,6 @@ final class BlockManifestParser
         }
 
         return $value;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function collectAttributes(SimpleXMLElement $element): array
-    {
-        $attributes = [];
-        foreach ($element->attributes() as $key => $value) {
-            $attributes[(string) $key] = trim((string) $value);
-        }
-
-        return $attributes;
     }
 
     protected function extractIconMarkup(SimpleXMLElement $blockType): string
