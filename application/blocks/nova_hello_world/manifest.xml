@@ -15,7 +15,10 @@
         </fields>
         <formlayout>
             <tab id="content" name="Content">
-				<field id="text" />
+				<fieldref field="text" />
+            </tab>
+            <tab id="design" name="Design">
+                <fieldref field="core.styles.text_color" />
             </tab>
         </formlayout>
     </blocktype>

@@ -2,6 +2,8 @@
 namespace Concrete\Controller\Backend;
 
 use Concrete\Controller\Backend\UserInterface as BackendUserInterface;
+use Concrete\Core\Block\BlockType\BlockTypeEntityFactory;
+use Concrete\Core\Block\Manifest\BlockManifestParser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class BlockType
@@ -15,7 +17,13 @@ class BlockType
     {
         $blockType = \Concrete\Core\Block\BlockType\BlockType::getByID($blockTypeId);
         if ($blockType) {
-            return new JsonResponse([]);
+            $directory = app(BlockTypeEntityFactory::class)->getDirectoryByHandle(
+                (string) $blockType->getBlockTypeHandle(),
+                (string) $blockType->getPackageHandle()
+            );
+            $manifest = app(BlockManifestParser::class)->parseFile($directory . '/' . FILENAME_BLOCK_MANIFEST);
+
+            return new JsonResponse($manifest);
         } else {
             throw new \UserMessageException(t('Block type does not exist.'));
         }
