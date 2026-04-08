@@ -16,11 +16,6 @@ final class GlobalFieldRegistry
     protected $fieldDefinitionParser;
 
     /**
-     * @var \Concrete\Core\Block\Manifest\GroupDefinitionParser
-     */
-    protected $groupDefinitionParser;
-
-    /**
      * @var \Concrete\Core\Cache\Cache|null
      */
     protected $cache;
@@ -30,10 +25,9 @@ final class GlobalFieldRegistry
      */
     protected $sources = [];
 
-    public function __construct(FieldDefinitionParser $fieldDefinitionParser, GroupDefinitionParser $groupDefinitionParser, ?Cache $cache = null)
+    public function __construct(FieldDefinitionParser $fieldDefinitionParser, ?Cache $cache = null)
     {
         $this->fieldDefinitionParser = $fieldDefinitionParser;
-        $this->groupDefinitionParser = $groupDefinitionParser;
         $this->cache = $cache;
     }
 
@@ -64,26 +58,6 @@ final class GlobalFieldRegistry
         return $payload['errors'];
     }
 
-    /**
-     * @return array<string, \Concrete\Core\Block\Manifest\GroupDefinition>
-     */
-    public function getGroups(): array
-    {
-        $payload = $this->load();
-
-        return $payload['groups'];
-    }
-
-    public function hasGroup(string $groupId): bool
-    {
-        return isset($this->getGroups()[$groupId]);
-    }
-
-    public function getGroup(string $groupId): ?GroupDefinition
-    {
-        return $this->getGroups()[$groupId] ?? null;
-    }
-
     public function has(string $fieldId): bool
     {
         return isset($this->getFields()[$fieldId]);
@@ -97,7 +71,6 @@ final class GlobalFieldRegistry
     /**
      * @return array{
      *   fields: array<string, \Concrete\Core\Block\Manifest\FieldDefinition>,
-     *   groups: array<string, \Concrete\Core\Block\Manifest\GroupDefinition>,
      *   errors: list<\Concrete\Core\Block\Manifest\Error\ManifestError>
      * }
      */
@@ -106,7 +79,7 @@ final class GlobalFieldRegistry
         if ($this->cache !== null) {
             $item = $this->cache->getItem($this->getCacheKey());
             $payload = $item->get();
-            if (is_array($payload) && isset($payload['fields'], $payload['groups'], $payload['errors'])) {
+            if (is_array($payload) && isset($payload['fields'], $payload['errors'])) {
                 return $payload;
             }
 
@@ -123,14 +96,12 @@ final class GlobalFieldRegistry
     /**
      * @return array{
      *   fields: array<string, \Concrete\Core\Block\Manifest\FieldDefinition>,
-     *   groups: array<string, \Concrete\Core\Block\Manifest\GroupDefinition>,
      *   errors: list<\Concrete\Core\Block\Manifest\Error\ManifestError>
      * }
      */
     protected function parseSources(): array
     {
         $fields = [];
-        $groups = [];
         $errors = [];
 
         foreach ($this->sources as $source) {
@@ -156,20 +127,10 @@ final class GlobalFieldRegistry
 
                 $fields[$fieldId] = $fieldDefinition;
             }
-
-            $parsedGroups = $this->groupDefinitionParser->parseGroupGroups($element, $fields, $errors);
-            foreach ($parsedGroups as $groupId => $groupDefinition) {
-                if (isset($groups[$groupId])) {
-                    throw new MalformedManifestException(sprintf('Duplicate global group id "%s" found while loading %s.', $groupId, $source));
-                }
-
-                $groups[$groupId] = $groupDefinition;
-            }
         }
 
         return [
             'fields' => $fields,
-            'groups' => $groups,
             'errors' => $errors,
         ];
     }

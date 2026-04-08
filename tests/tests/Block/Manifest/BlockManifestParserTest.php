@@ -7,7 +7,6 @@ namespace Concrete\Tests\Block\Manifest;
 use Concrete\Core\Block\Manifest\BlockManifestParser;
 use Concrete\Core\Block\Manifest\FieldDefinitionParser;
 use Concrete\Core\Block\Manifest\GlobalFieldRegistry;
-use Concrete\Core\Block\Manifest\GroupDefinitionParser;
 use Concrete\Core\Block\Manifest\Exception\MalformedManifestException;
 use Concrete\Core\Block\Manifest\Field\FieldManager;
 use Concrete\Core\Block\Manifest\Field\Type\ColorFieldType;
@@ -28,10 +27,8 @@ final class BlockManifestParserTest extends TestCase
 
         return new BlockManifestParser(
             new FieldDefinitionParser($manager),
-            new GroupDefinitionParser(),
             new GlobalFieldRegistry(
                 new FieldDefinitionParser($manager),
-                new GroupDefinitionParser(),
                 app('cache/request')
             )
         );

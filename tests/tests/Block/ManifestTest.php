@@ -10,7 +10,6 @@ use Concrete\Core\Block\Manifest\FieldDefinitionParser;
 use Concrete\Core\Block\Manifest\GlobalFieldRegistry;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\Tab;
-use Concrete\Core\Block\Manifest\GroupDefinitionParser;
 use Concrete\Tests\TestCase;
 
 final class ManifestTest extends TestCase
@@ -75,22 +74,14 @@ XML);
     public function testGlobalFieldRegistryLoadsDefaultStylesSource(): void
     {
         $registry = new GlobalFieldRegistry(
-            app(FieldDefinitionParser::class),
-            app(GroupDefinitionParser::class)
+            app(FieldDefinitionParser::class)
         );
         $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/styles.xml');
-        $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/groups.xml');
 
         $this->assertTrue($registry->has('styles.text_color'));
         $this->assertTrue($registry->has('styles.background_color'));
         $this->assertFalse($registry->has('text_color'));
         $this->assertCount(2, $registry->getFields());
-        $this->assertTrue($registry->hasGroup('design.color'));
-        $this->assertCount(1, $registry->getGroups());
-        $this->assertSame(
-            ['styles.text_color', 'styles.background_color'],
-            $registry->getGroup('design.color')->getFieldReferences()
-        );
         $this->assertCount(0, $registry->getErrors());
     }
 }
