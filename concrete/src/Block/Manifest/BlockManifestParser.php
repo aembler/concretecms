@@ -24,9 +24,15 @@ final class BlockManifestParser
      */
     protected $globalFieldRegistry;
 
-    public function __construct(FieldDefinitionParser $fieldDefinitionParser, GlobalFieldRegistry $globalFieldRegistry)
+    /**
+     * @var \Concrete\Core\Block\Manifest\GroupDefinitionParser
+     */
+    protected $groupDefinitionParser;
+
+    public function __construct(FieldDefinitionParser $fieldDefinitionParser, GroupDefinitionParser $groupDefinitionParser, GlobalFieldRegistry $globalFieldRegistry)
     {
         $this->fieldDefinitionParser = $fieldDefinitionParser;
+        $this->groupDefinitionParser = $groupDefinitionParser;
         $this->globalFieldRegistry = $globalFieldRegistry;
     }
 
@@ -67,6 +73,8 @@ final class BlockManifestParser
 
         $errors = [];
         $fields = $this->parseFields($blockType, $errors);
+        $this->globalFieldRegistry->getGroups();
+        $groups = $this->groupDefinitionParser->parseGroupGroups($blockType, $fields, $errors);
         $seenFieldRefs = [];
         $layout = $this->parseFormLayout($blockType, $fields, $seenFieldRefs);
 
@@ -78,6 +86,7 @@ final class BlockManifestParser
             $schemaVersion,
             $icon,
             $fields,
+            $groups,
             $layout,
             $errors
         );

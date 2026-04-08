@@ -45,6 +45,11 @@ final class BlockManifest implements \JsonSerializable
     protected $fields;
 
     /**
+     * @var array<string, \Concrete\Core\Block\Manifest\GroupDefinition>
+     */
+    protected $groups;
+
+    /**
      * @var list<\Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface>
      */
     protected $layout;
@@ -56,6 +61,7 @@ final class BlockManifest implements \JsonSerializable
 
     /**
      * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
+     * @param array<string, \Concrete\Core\Block\Manifest\GroupDefinition> $groups
      * @param list<\Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface> $layout
      * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
      */
@@ -67,6 +73,7 @@ final class BlockManifest implements \JsonSerializable
         string $schemaVersion,
         string $icon,
         array $fields,
+        array $groups,
         array $layout,
         array $errors = []
     ) {
@@ -77,6 +84,7 @@ final class BlockManifest implements \JsonSerializable
         $this->schemaVersion = $schemaVersion;
         $this->icon = $icon;
         $this->fields = $fields;
+        $this->groups = $groups;
         $this->layout = $layout;
         $this->errors = $errors;
     }
@@ -125,6 +133,19 @@ final class BlockManifest implements \JsonSerializable
     }
 
     /**
+     * @return array<string, \Concrete\Core\Block\Manifest\GroupDefinition>
+     */
+    public function getGroups(): array
+    {
+        return $this->groups;
+    }
+
+    public function getGroup(string $groupId): ?GroupDefinition
+    {
+        return $this->groups[$groupId] ?? null;
+    }
+
+    /**
      * @return list<\Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface>
      */
     public function getLayout(): array
@@ -154,6 +175,7 @@ final class BlockManifest implements \JsonSerializable
      *   schemaVersion: string,
      *   icon: string,
      *   fields: array<string, \Concrete\Core\Block\Manifest\FieldDefinition>,
+     *   groups: array<string, \Concrete\Core\Block\Manifest\GroupDefinition>,
      *   layout: list<\Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface>,
      *   errors: list<\Concrete\Core\Block\Manifest\Error\ManifestError>
      * }
@@ -168,6 +190,7 @@ final class BlockManifest implements \JsonSerializable
             'schemaVersion' => $this->schemaVersion,
             'icon' => $this->icon,
             'fields' => $this->fields,
+            'groups' => $this->groups,
             'layout' => $this->layout,
             'errors' => $this->errors,
         ];
