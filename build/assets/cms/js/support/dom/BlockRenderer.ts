@@ -19,6 +19,7 @@ type InsertBlockOptions = {
   target: AddBlockTargetRef
   replacementHtml: string
   evaluateScripts?: boolean
+  ignoreContainer?: boolean
 }
 
 export class BlockRenderer {
@@ -64,14 +65,48 @@ export class BlockRenderer {
 
   async insertBlock(options: InsertBlockOptions): Promise<HTMLElement> {
     const { newBlockElement, scripts } = this.parseReplacementHtml(options.replacementHtml)
-    this.insertBlockElementAtTarget(newBlockElement, options.target)
-    this.insertFollowingAreaBlockTarget(newBlockElement, options.target)
+    const insertedElement = this.wrapBlockElementInContainer(
+      newBlockElement,
+      options.target.container ?? null,
+      Boolean(options.ignoreContainer)
+    )
+    this.insertBlockElementAtTarget(insertedElement, options.target)
+    this.insertFollowingAreaBlockTarget(insertedElement, newBlockElement, options.target)
 
     if (options.evaluateScripts !== false) {
       await this.executeScripts(scripts)
     }
 
     return newBlockElement
+  }
+
+  private wrapBlockElementInContainer(
+    blockElement: HTMLElement,
+    container: { start?: string; end?: string } | null,
+    ignoreContainer: boolean
+  ): HTMLElement {
+    if (ignoreContainer || !container) {
+      return blockElement
+    }
+
+    const start = container.start ?? ''
+    const end = container.end ?? ''
+    if (!start && !end) {
+      return blockElement
+    }
+
+    const template = document.createElement('template')
+    template.innerHTML = `${start}<div data-block-render-slot="true"></div>${end}`
+
+    const slot = template.content.querySelector('[data-block-render-slot="true"]')
+    if (!(slot instanceof HTMLElement)) {
+      return blockElement
+    }
+
+    slot.replaceWith(blockElement)
+
+    const wrappedRoot = template.content.firstElementChild
+    return wrappedRoot instanceof HTMLElement ? wrappedRoot : blockElement
   }
 
   findExistingBlockElement(blockId: string | number): HTMLElement | null {
@@ -126,7 +161,7 @@ export class BlockRenderer {
       }
     }
 
-    const targetSelector = `concrete-area-block-target[data-page-id="${pageId}"][data-area-handle="${areaHandle}"][data-after-block-id="${afterBlockId}"]`
+    const targetSelector = `concrete-area-block-target[page-id="${pageId}"][area-handle="${areaHandle}"][after-block-id="${afterBlockId}"]`
     const areaTarget = document.querySelector(targetSelector)
     if (areaTarget) {
       areaTarget.insertAdjacentElement('afterend', blockElement)
@@ -163,13 +198,17 @@ export class BlockRenderer {
     throw new Error(`Could not find insert target for area "${String(target.areaHandle || '')}"`)
   }
 
-  private insertFollowingAreaBlockTarget(blockElement: HTMLElement, target: AddBlockTargetRef): void {
+  private insertFollowingAreaBlockTarget(
+    insertedElement: HTMLElement,
+    blockElement: HTMLElement,
+    target: AddBlockTargetRef
+  ): void {
     const insertedBlockId = this.resolveInsertedBlockId(blockElement)
     if (!insertedBlockId) {
       return
     }
 
-    const existingNextTarget = blockElement.nextElementSibling
+    const existingNextTarget = insertedElement.nextElementSibling
     if (
       existingNextTarget instanceof HTMLElement
       && existingNextTarget.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
@@ -187,8 +226,11 @@ export class BlockRenderer {
     const baseTargetIndex = Number(target.targetIndex || 0)
     const resolvedTargetIndex = Number.isFinite(baseTargetIndex) ? (baseTargetIndex + 1) : 0
     targetEl.setAttribute('target-index', String(resolvedTargetIndex))
+    if (target.container) {
+      targetEl.setAttribute('container', JSON.stringify(target.container))
+    }
 
-    blockElement.insertAdjacentElement('afterend', targetEl)
+    insertedElement.insertAdjacentElement('afterend', targetEl)
   }
 
   private resolveInsertedBlockId(blockElement: HTMLElement): string {

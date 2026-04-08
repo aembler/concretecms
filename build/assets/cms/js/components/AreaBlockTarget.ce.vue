@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
+import type { PendingAddEditorRequest } from '../stores/types/page-operations'
+import { useBlockEditorRegistry } from '../stores/block-editor-registry'
+import ContainerShell from './Ui/ContainerShell.vue'
 
 const props = withDefaults(defineProps<{
   areaId?: number | string
@@ -8,15 +11,21 @@ const props = withDefaults(defineProps<{
   areaHandle?: string
   afterBlockId?: number | string
   targetIndex?: number | string
+  container?: {
+    start?: string
+    end?: string
+  } | string | null
 }>(), {
   areaId: 0,
   pageId: 0,
   areaHandle: '',
   afterBlockId: 0,
   targetIndex: 0,
+  container: null,
 })
 
 const uiStore = useConcreteUiStore()
+const blockEditorRegistry = useBlockEditorRegistry()
 const targetRef = ref<HTMLElement | null>(null)
 let stickyReleaseTimer: ReturnType<typeof setTimeout> | null = null
 let activationFrameId: number | null = null
@@ -45,6 +54,58 @@ const ownPageId = computed(() => Number(props.pageId || 0))
 const ownAfterBlockId = computed(() => Number(props.afterBlockId || 0))
 const ownTargetIndex = computed(() => Number(props.targetIndex || 0))
 const ownAreaHandle = computed(() => String(props.areaHandle || ''))
+const parsedContainer = computed<{ start?: string; end?: string } | null>(() => {
+  if (!props.container) {
+    return null
+  }
+
+  if (typeof props.container === 'string') {
+    try {
+      return JSON.parse(props.container)
+    } catch {
+      return null
+    }
+  }
+
+  return props.container
+})
+const activeAddEditorRequest = computed<PendingAddEditorRequest | null>(() => {
+  const request = (pageState.value?.pendingAddEditorRequest ?? null) as PendingAddEditorRequest | null
+  if (!request) {
+    return null
+  }
+
+  const matchesTargetIndex = typeof request.target.targetIndex === 'undefined'
+    || Number(request.target.targetIndex || 0) === ownTargetIndex.value
+
+  if (
+    Number(request.target.areaId || 0) !== ownAreaId.value
+    || Number(request.target.pageId || 0) !== ownPageId.value
+    || String(request.target.areaHandle || '') !== ownAreaHandle.value
+    || Number(request.target.afterBlockId || 0) !== ownAfterBlockId.value
+    || !matchesTargetIndex
+  ) {
+    return null
+  }
+
+  return request
+})
+const activeAddEditorComponent = computed(() => {
+  return blockEditorRegistry.resolveEditorComponent(activeAddEditorRequest.value?.editor?.component)
+})
+const activeAddEditorMeta = ref({
+  pageContentMode: 'preserve' as const,
+  placement: 'dialog' as const,
+  editorContentSource: 'none' as const,
+})
+const shouldWrapAddEditorInContainer = computed(() => {
+  return Boolean(
+    activeAddEditorRequest.value
+    && parsedContainer.value
+    && !activeAddEditorRequest.value.ignoreContainer
+    && activeAddEditorMeta.value.placement === 'page'
+  )
+})
 
 const isActiveTarget = computed(() => {
   const dropTarget = pageState.value?.addContentDropTarget
@@ -78,6 +139,14 @@ watch(isDragActive, (active) => {
   })
 })
 
+watch(
+  () => activeAddEditorRequest.value?.editor?.component,
+  async (componentName) => {
+    activeAddEditorMeta.value = await blockEditorRegistry.resolveEditorMeta(componentName)
+  },
+  { immediate: true }
+)
+
 function isPointerInsideTarget(
   pointer: { x: number; y: number } | null,
   paddingX = 0,
@@ -106,6 +175,7 @@ function claimDropTarget() {
     areaHandle: ownAreaHandle.value,
     afterBlockId: ownAfterBlockId.value,
     targetIndex: ownTargetIndex.value,
+    container: parsedContainer.value,
   }
 }
 
@@ -169,6 +239,25 @@ onBeforeUnmount(() => {
     stickyReleaseTimer = null
   }
 })
+
+function clearActiveAddEditorRequest() {
+  if (!activeAddEditorRequest.value) {
+    return
+  }
+
+  uiStore.clearPendingAddEditorRequest(activeAddEditorRequest.value.id)
+}
+
+function handleAddEditorUpdated() {
+  clearActiveAddEditorRequest()
+  uiStore.setPageInteractionsEnabled(true)
+}
+
+function handleAddEditorClosed() {
+  clearActiveAddEditorRequest()
+  uiStore.setPageInteractionsEnabled(true)
+}
+
 </script>
 
 <template>
@@ -178,6 +267,7 @@ onBeforeUnmount(() => {
     :class="[
       isDragActive ? 'is-drag-active' : '',
       isActiveTarget ? 'is-active-target' : '',
+      activeAddEditorRequest ? 'is-hosting-add-editor' : '',
     ]"
     :data-area-id="ownAreaId"
     :data-page-id="ownPageId"
@@ -190,5 +280,41 @@ onBeforeUnmount(() => {
     >
       + Add
     </div>
+
+    <ContainerShell
+      v-if="activeAddEditorRequest && activeAddEditorComponent && shouldWrapAddEditorInContainer"
+      :container="parsedContainer"
+    >
+      <component
+        :is="activeAddEditorComponent"
+        :key="activeAddEditorRequest.id"
+        :editor="activeAddEditorRequest.editor"
+        mode="add"
+        :block-type-id="activeAddEditorRequest.blockTypeId"
+        :block-id="0"
+        :area-handle="activeAddEditorRequest.target.areaHandle"
+        :page-id="activeAddEditorRequest.target.pageId"
+        :add-target="activeAddEditorRequest.target"
+        :ignore-container="activeAddEditorRequest.ignoreContainer ?? false"
+        @updated="handleAddEditorUpdated"
+        @closed="handleAddEditorClosed"
+      />
+    </ContainerShell>
+
+    <component
+      :is="activeAddEditorComponent"
+      v-else-if="activeAddEditorRequest && activeAddEditorComponent"
+      :key="activeAddEditorRequest.id"
+      :editor="activeAddEditorRequest.editor"
+      mode="add"
+      :block-type-id="activeAddEditorRequest.blockTypeId"
+      :block-id="0"
+      :area-handle="activeAddEditorRequest.target.areaHandle"
+      :page-id="activeAddEditorRequest.target.pageId"
+      :add-target="activeAddEditorRequest.target"
+      :ignore-container="activeAddEditorRequest.ignoreContainer ?? false"
+      @updated="handleAddEditorUpdated"
+      @closed="handleAddEditorClosed"
+    />
   </div>
 </template>

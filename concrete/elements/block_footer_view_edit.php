@@ -9,14 +9,17 @@ if ($blockType->getBlockTypeHandle() === BLOCK_HANDLE_CONTAINER_PROXY) { ?>
 <?php } else { ?>
 
     </concrete-block>
-    <?php
-    View::element('block_area_block_target', [
-        'a' => $a,
-        'afterBlockId' => $b->getBlockID(),
-        'targetIndex' => ((int) $b->getBlockDisplayOrder()) + 1,
-    ]);
-    ?>
 <?php } ?>
 
 <?php
 View::element('block_footer_view', ['a' => $a, 'b' => $b, 'c' => $c, 'pt' => $pt]);
+?>
+
+<?php
+View::element('block_area_block_target', [
+        'a' => $a,
+        'afterBlockId' => $b->getBlockID(),
+        'targetIndex' => ((int) $b->getBlockDisplayOrder()) + 1,
+]);
+?>
+

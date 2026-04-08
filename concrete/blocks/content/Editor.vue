@@ -24,7 +24,7 @@
 
     <div
       ref="editableEl"
-      class="min-h-[48px] rounded border border-concrete-green/30 bg-base-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-concrete-green/30"
+      class="ccm-content-block-editor"
     >
       <BaselineEditor v-model="contentHtml" />
     </div>
@@ -37,9 +37,25 @@ import type { BlockEditorMeta } from '../../../build/assets/cms/js/stores/block-
 
 export const blockEditorMeta: BlockEditorMeta = {
   pageContentMode: 'hide',
+  placement: 'page',
   editorContentSource: 'html',
 }
 </script>
+
+<style>
+.ccm-content-block-editor div.tiptap {
+  min-height: 265px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-concrete-green) 30%, transparent);
+  border-radius: 0.5rem;
+  background: var(--color-base-100, #fff);
+}
+
+.ccm-content-block-editor:focus-within div.tiptap {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-concrete-green) 30%, transparent);
+}
+</style>
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
@@ -55,7 +71,7 @@ import {
 import MenuContainer from '../../../build/assets/cms/js/components/Ui/MenuContainer.vue'
 import { useMenuPositioner } from '../../../build/assets/cms/js/utilities/menu'
 import { useConcreteUiStore } from '../../../build/assets/cms/js/stores/concrete-ui'
-import type { BlockRef, UpdateBlockOperation } from '../../../build/assets/cms/js/stores/types/page-operations'
+import type { AddBlockOperation, AddBlockTargetRef, BlockRef, UpdateBlockOperation } from '../../../build/assets/cms/js/stores/types/page-operations'
 
 const props = defineProps<{
   editor: {
@@ -64,11 +80,15 @@ const props = defineProps<{
       content?: string
     }
   }
+  mode?: 'add' | 'edit'
+  blockTypeId?: number
   blockId: string | number
   areaHandle: string
   pageId: string | number
   contentHtml?: string | null
   contentEl?: HTMLElement | null
+  addTarget?: AddBlockTargetRef
+  ignoreContainer?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -87,13 +107,19 @@ const alwaysEnabled = ref(true)
 const menuPos = useMenuPositioner(editableEl, menuEl, alwaysEnabled)
 const menuLeft = computed(() => `${menuPos.x.value}px`)
 const menuTop = computed(() => `${menuPos.y.value}px`)
-const dialogUrl = computed(() => {
+const editorMode = computed(() => props.mode ?? 'edit')
+const submitUrl = computed(() => {
   const params = new URLSearchParams({
     cID: String(props.pageId),
     arHandle: String(props.areaHandle),
-    bID: String(props.blockId),
   })
 
+  if (editorMode.value === 'add') {
+    params.set('btID', String(props.blockTypeId || 0))
+    return `/ccm/system/dialogs/page/add_block/submit?${params.toString()}`
+  }
+
+  params.set('bID', String(props.blockId))
   return `/ccm/system/dialogs/block/edit/submit?${params.toString()}`
 })
 
@@ -106,37 +132,57 @@ function handleSave() {
 
   const body = new FormData()
   body.set('content', contentHtml.value)
+  if (editorMode.value === 'add') {
+    body.set('ccm_token', String((window as any).CCM_SECURITY_TOKEN || ''))
+    if (props.addTarget) {
+      body.set('dragAreaBlockID', String(props.addTarget.afterBlockId || 0))
+    }
+  }
 
   request({
-    url: dialogUrl.value,
+    url: submitUrl.value,
     method: 'POST',
     body,
     skipResponseValidation: true,
     onSuccess: (response) => {
       const normalizedResponse: any = normalizeJsonResponse(response)
 
-      const originalBlock: BlockRef = {
-        bID: props.blockId,
-        arHandle: props.areaHandle,
-        cID: props.pageId,
-      }
-      const updatedBlock: BlockRef = {
-        bID: normalizedResponse?.bID || originalBlock.bID,
-        arHandle: normalizedResponse?.arHandle || originalBlock.arHandle,
-        cID: normalizedResponse?.cID || originalBlock.cID,
-      }
+      if (editorMode.value === 'add' && props.addTarget) {
+        const operation: AddBlockOperation = {
+          id: `block.add.${String(props.blockTypeId || 0)}.${Date.now()}`,
+          type: 'block.add',
+          status: 'queued',
+          blockTypeId: Number(props.blockTypeId || 0),
+          ignoreContainer: Boolean(props.ignoreContainer ?? false),
+          target: props.addTarget,
+          response: normalizedResponse,
+        }
 
-      const operation: UpdateBlockOperation = {
-        id: `block.update.${String(originalBlock.bID)}.${Date.now()}`,
-        type: 'block.update',
-        status: 'queued',
-        originalBlock,
-        updatedBlock,
-        replacementHtml: typeof normalizedResponse?.html === 'string' ? normalizedResponse.html : undefined,
-        response: normalizedResponse,
-      }
+        uiStore.enqueuePageOperation(operation)
+      } else {
+        const originalBlock: BlockRef = {
+          bID: props.blockId,
+          arHandle: props.areaHandle,
+          cID: props.pageId,
+        }
+        const updatedBlock: BlockRef = {
+          bID: normalizedResponse?.bID || originalBlock.bID,
+          arHandle: normalizedResponse?.arHandle || originalBlock.arHandle,
+          cID: normalizedResponse?.cID || originalBlock.cID,
+        }
 
-      uiStore.enqueuePageOperation(operation)
+        const operation: UpdateBlockOperation = {
+          id: `block.update.${String(originalBlock.bID)}.${Date.now()}`,
+          type: 'block.update',
+          status: 'queued',
+          originalBlock,
+          updatedBlock,
+          replacementHtml: typeof normalizedResponse?.html === 'string' ? normalizedResponse.html : undefined,
+          response: normalizedResponse,
+        }
+
+        uiStore.enqueuePageOperation(operation)
+      }
       emit('updated', { response: normalizedResponse })
       emit('closed')
     },

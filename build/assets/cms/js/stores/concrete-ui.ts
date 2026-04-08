@@ -3,6 +3,7 @@ import type { Pinia } from 'pinia'
 import { getConcretePinia } from './pinia'
 import type { PageOperation } from './types/page-operations'
 import type { ToastOperation } from './types/page-operations'
+import type { PendingAddEditorRequest } from './types/page-operations'
 import { refreshHotSpotGeometries } from '../support/dom/hotspot'
 
 type DragPointer = { x: number; y: number } | null
@@ -30,6 +31,7 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       addContentDragPointer: null as DragPointer,
       addContentDraggedItem: null as any,
       addContentDropTarget: null as any,
+      pendingAddEditorRequest: null as PendingAddEditorRequest | null,
       operationsQueue: [] as PageOperation[],
       activeOperationId: null as string | null,
       toastQueue: [] as ToastOperation[],
@@ -91,6 +93,14 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     },
     clearBlockAreaMap(blockId: string) {
       delete this.blockAreaMap[blockId]
+    },
+    setPendingAddEditorRequest(request: PendingAddEditorRequest | null) {
+      this.page.pendingAddEditorRequest = request
+    },
+    clearPendingAddEditorRequest(id?: string) {
+      if (!id || this.page.pendingAddEditorRequest?.id === id) {
+        this.page.pendingAddEditorRequest = null
+      }
     },
     enqueuePageOperation(operation: PageOperation) {
       this.page.operationsQueue.push(operation)

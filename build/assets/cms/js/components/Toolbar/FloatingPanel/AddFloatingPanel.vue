@@ -36,6 +36,7 @@ type BlockType = {
   handle: string
   name: string
   description?: string
+  ignoreContainer?: boolean
   editor?: BlockTypeEditor
   icon?: {
     type: string
@@ -270,6 +271,7 @@ watch(() => props.open, (isOpen) => {
                   :description="blockType.description"
                   :block-type-id="blockType.id"
                   :block-type-handle="blockType.handle"
+                  :ignore-container="blockType.ignoreContainer ?? false"
                   :editor="blockType.editor ?? null"
                 />
               </div>
@@ -297,6 +299,7 @@ watch(() => props.open, (isOpen) => {
                   :expanded="true"
                   :block-type-id="blockType.id"
                   :block-type-handle="blockType.handle"
+                  :ignore-container="blockType.ignoreContainer ?? false"
                   :editor="blockType.editor ?? null"
                 />
               </div>

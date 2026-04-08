@@ -2,7 +2,7 @@
   <Teleport :to="uiStore.menuContainer">
   <div v-if="hasGeometry && isScrollVisible" class="fixed inset-0 pointer-events-none">
       <div
-        class="z-(--index-layer-hotspot) absolute border-3 rounded-lg transition-opacity duration-200 pointer-events-none"
+        class="z-(--index-layer-hotspot) absolute border-3 rounded-sm transition-opacity duration-200 pointer-events-none"
         :style="overlayStyles"
         :class="['opacity-0', isBorderVisible ? 'opacity-100' : '']"
       ></div>

@@ -6,6 +6,10 @@ export type BlockEditorMeta = {
   // - hide: hide it while editing
   // - wrap: reserved for editors that want to render around the existing content
   pageContentMode: 'preserve' | 'hide' | 'wrap'
+  // Describes where the editor actually renders.
+  // - dialog: overlay/modal style editor that doesn't participate in page layout
+  // - page: inline/page-mounted editor that should inherit page layout context
+  placement: 'dialog' | 'page'
   // Controls what view of the page content the editor wants from Block.ce.vue.
   // - none: editor doesn't need page content
   // - html: pass a snapshot of the current content HTML
@@ -30,6 +34,7 @@ type BlockEditorDefinition = {
 const defaultMeta: BlockEditorMeta = {
   // Preserve today's behavior unless an editor explicitly opts into something else.
   pageContentMode: 'preserve',
+  placement: 'dialog',
   editorContentSource: 'none',
 }
 

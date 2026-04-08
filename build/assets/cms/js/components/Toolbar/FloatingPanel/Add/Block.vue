@@ -21,6 +21,10 @@ type AddContentDropTarget = {
   areaHandle?: string
   afterBlockId?: number | string
   targetIndex?: number | string
+  container?: {
+    start?: string
+    end?: string
+  } | null
 }
 
 type AddContentDraggedItem = {
@@ -30,6 +34,7 @@ type AddContentDraggedItem = {
     blockTypeHandle?: string
     title?: string
     description?: string
+    ignoreContainer?: boolean
     editor?: BlockTypeEditor
   }
 }
@@ -41,12 +46,14 @@ const props = withDefaults(defineProps<{
   expanded?: boolean
   blockTypeId?: number
   blockTypeHandle?: string
+  ignoreContainer?: boolean
   editor?: BlockTypeEditor
 }>(), {
   description: '',
   expanded: false,
   blockTypeId: 0,
   blockTypeHandle: '',
+  ignoreContainer: false,
   editor: null,
 })
 
@@ -66,12 +73,6 @@ let dragPreview: HTMLElement | null = null
 let dragPreviewContainer: HTMLElement | null = null
 let dragPanelBounds: DOMRect | null = null
 let hasExitedAddPanel = false
-const activeAddEditor = ref<BlockTypeEditor>(null)
-const activeAddTarget = ref<AddBlockTargetRef | null>(null)
-const activeAddEditorKey = ref(0)
-const activeAddEditorComponent = computed(() => {
-  return blockEditorRegistry.resolveEditorComponent(activeAddEditor.value?.component)
-})
 
 function ensureAddContentPageState() {
   if (typeof pageState.value.addContentDragInProgress === 'undefined') {
@@ -167,6 +168,7 @@ function setAddContentDraggedItem() {
       blockTypeHandle: props.blockTypeHandle ?? '',
       title: props.title,
       description: props.description ?? '',
+      ignoreContainer: props.ignoreContainer ?? false,
       editor: props.editor ?? null,
     },
   }
@@ -199,12 +201,14 @@ function enqueueAddBlockOperation(dropTarget: AddContentDropTarget, draggedItem:
     blockTypeId,
     blockTypeHandle: String(draggedItem?.payload?.blockTypeHandle || props.blockTypeHandle || ''),
     blockTitle: String(draggedItem?.payload?.title || props.title || ''),
+    ignoreContainer: Boolean(draggedItem?.payload?.ignoreContainer ?? props.ignoreContainer ?? false),
     target: {
       areaId: Number(dropTarget.areaId || 0),
       areaHandle,
       pageId,
       afterBlockId: Number(dropTarget.afterBlockId || 0),
       targetIndex: Number(dropTarget.targetIndex || 0),
+      container: dropTarget.container ?? null,
     },
   }
 
@@ -218,18 +222,8 @@ function toAddBlockTarget(dropTarget: AddContentDropTarget): AddBlockTargetRef {
     pageId: Number(dropTarget.pageId || 0),
     afterBlockId: Number(dropTarget.afterBlockId || 0),
     targetIndex: Number(dropTarget.targetIndex || 0),
+    container: dropTarget.container ?? null,
   }
-}
-
-function openAddEditor(dropTarget: AddContentDropTarget, draggedItem: AddContentDraggedItem) {
-  const editor = draggedItem?.payload?.editor
-  if (!isValidBlockTypeEditor(editor)) {
-    return
-  }
-
-  activeAddEditor.value = editor
-  activeAddTarget.value = toAddBlockTarget(dropTarget)
-  activeAddEditorKey.value += 1
 }
 
 function isValidBlockTypeEditor(editor: BlockTypeEditor): editor is NonNullable<BlockTypeEditor> {
@@ -240,17 +234,24 @@ function isValidBlockTypeEditor(editor: BlockTypeEditor): editor is NonNullable<
   )
 }
 
-function handleAddEditorUpdated() {
-  activeAddEditor.value = null
-  activeAddTarget.value = null
+function requestAddEditor(dropTarget: AddContentDropTarget, draggedItem: AddContentDraggedItem) {
+  const editor = draggedItem?.payload?.editor
+  if (!isValidBlockTypeEditor(editor)) {
+    return
+  }
+
+  concreteUiStore.setPendingAddEditorRequest({
+    id: `add-editor.${String(draggedItem?.payload?.blockTypeId || props.blockTypeId || 0)}.${Date.now()}`,
+    blockTypeId: Number(draggedItem?.payload?.blockTypeId || props.blockTypeId || 0),
+    blockTypeHandle: String(draggedItem?.payload?.blockTypeHandle || props.blockTypeHandle || ''),
+    blockTitle: String(draggedItem?.payload?.title || props.title || ''),
+    ignoreContainer: Boolean(draggedItem?.payload?.ignoreContainer ?? props.ignoreContainer ?? false),
+    target: toAddBlockTarget(dropTarget),
+    editor,
+  })
+
   setAddContentDragActive(false)
   floatingPanels.close(addPanelId)
-}
-
-function handleAddEditorClosed() {
-  activeAddEditor.value = null
-  activeAddTarget.value = null
-  setAddContentDragActive(false)
 }
 
 onMounted(() => {
@@ -298,7 +299,6 @@ onMounted(() => {
         const activeDropTarget = (pageState.value.addContentDropTarget || null) as AddContentDropTarget | null
         const draggedItem = (pageState.value.addContentDraggedItem || null) as AddContentDraggedItem | null
         const didFindValidDropZone = Boolean(activeDropTarget?.areaHandle && activeDropTarget?.pageId && draggedItem?.type === 'blockType')
-        let keepAddPanelHidden = false
 
         removeDragPreview()
         if (didFindValidDropZone) {
@@ -307,11 +307,10 @@ onMounted(() => {
             floatingPanels.close(addPanelId)
             enqueueAddBlockOperation({ ...activeDropTarget }, draggedItem)
           } else if (isValidBlockTypeEditor(addEditor) && activeDropTarget && draggedItem) {
-            keepAddPanelHidden = true
-            openAddEditor(activeDropTarget, draggedItem)
+            requestAddEditor(activeDropTarget, draggedItem)
           }
         }
-        setAddContentDragActive(keepAddPanelHidden)
+        setAddContentDragActive(false)
         setAddContentDragInProgress(false)
         clearAddContentDragPointer()
         clearAddContentDraggedItem()
@@ -382,19 +381,4 @@ onBeforeUnmount(() => {
       <div class="line-clamp-2 text-xs font-semibold leading-tight text-slate-800">{{ props.title }}</div>
     </template>
   </button>
-
-  <component
-    :is="activeAddEditorComponent"
-    v-if="activeAddEditor && activeAddTarget && activeAddEditorComponent"
-    :key="activeAddEditorKey"
-    :editor="activeAddEditor"
-    mode="add"
-    :block-type-id="props.blockTypeId || 0"
-    :block-id="0"
-    :area-handle="activeAddTarget.areaHandle"
-    :page-id="activeAddTarget.pageId"
-    :add-target="activeAddTarget"
-    @updated="handleAddEditorUpdated"
-    @closed="handleAddEditorClosed"
-  />
 </template>

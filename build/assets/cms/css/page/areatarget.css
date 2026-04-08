@@ -30,6 +30,16 @@
   opacity: 1;
 }
 
+.concrete-area-block-target.is-hosting-add-editor {
+  height: auto;
+  overflow: visible;
+  margin: 4px 0;
+}
+
+.concrete-area-block-target.is-hosting-add-editor .concrete-area-block-target-pill {
+  display: none;
+}
+
 .concrete-area-block-target-pill {
   position: absolute;
   top: 50%;

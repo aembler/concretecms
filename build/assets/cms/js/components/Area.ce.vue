@@ -16,7 +16,7 @@
       border-behavior="display"
       :badge-placement="badgePlacement"
       :hide-on-scroll="false"
-      :outset="12"
+      :outset="4"
     >
       <template #badge>
         <HotSpotBadge
@@ -35,11 +35,12 @@
         />
       </template>
     </HotSpot>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import HotSpot from './Ui/HotSpot.vue'
 import HotSpotBadge from './Ui/HotSpotBadge.vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
@@ -128,6 +129,35 @@ const activeAddOperation = computed<AddBlockOperation | null>(() => {
   return operation ?? null
 })
 
+async function refreshHotSpotsAfterRender() {
+  await nextTick()
+  requestAnimationFrame(() => {
+    uiStore.refreshPageAreas()
+    requestAnimationFrame(() => {
+      uiStore.refreshPageAreas()
+    })
+  })
+}
+
+watch(
+  () => uiStore.page.pendingAddEditorRequest,
+  (request) => {
+    if (!request) {
+      return
+    }
+
+    void refreshHotSpotsAfterRender()
+  }
+)
+
+watch(
+  () => uiStore.page.pendingAddEditorRequest,
+  (request) => {
+    uiStore.setPageInteractionsEnabled(!request)
+  },
+  { immediate: true }
+)
+
 function requestJson(url: string): Promise<any> {
   return new Promise((resolve) => {
     let didResolve = false
@@ -201,6 +231,7 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       target: operation.target,
       replacementHtml,
       evaluateScripts: true,
+      ignoreContainer: Boolean(operation.ignoreContainer),
     })
     uiStore.refreshPageAreas()
 

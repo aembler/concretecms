@@ -23,7 +23,7 @@
             active-color="var(--color-concrete-green)"
             :hover-opacity="0.2"
             :active-opacity="0.4"
-            :outset="8"
+            :outset="2"
         />
       </div>
       <HotSpot
@@ -32,7 +32,7 @@
           :is-targeted="isBlockHovered || isBlockClicked"
           border-color="var(--color-concrete-block)"
           badge-placement="middle-center"
-          :outset="8"
+          :outset="2"
 
       >
         <template #badge="{ isHovered: isBadgeHovered, badgePlacement }">
@@ -315,18 +315,20 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
       // Remove the custom element host itself on delete. Keeping the host in place
       // leaves stale siblings/targets around because only the inner slot content is hidden.
       const hostElement = document.querySelector(`concrete-block[block-id="${props.blockId}"]`)
-      const nextSibling = hostElement?.nextElementSibling || null
+      const trailingTarget = document.querySelector(
+        `concrete-area-block-target[page-id="${String(props.pageId)}"][area-handle="${String(props.areaHandle)}"][after-block-id="${String(props.blockId)}"]`
+      )
       if (hostElement) {
         hostElement.remove()
       } else {
         isDeleted.value = true
       }
 
-      // PHP renders a target before and after blocks. Once the host is removed those
-      // two targets can become adjacent duplicates, so collapse one of them.
-      const nextIsTarget = nextSibling?.tagName === 'CONCRETE-AREA-BLOCK-TARGET'
-      if (nextIsTarget && nextSibling) {
-        nextSibling.remove()
+      // Remove the trailing add target that belongs to the deleted block. Looking it up
+      // by attributes is more reliable than nextElementSibling now that blocks may be
+      // wrapped in layout containers during live insertion.
+      if (trailingTarget instanceof HTMLElement) {
+        trailingTarget.remove()
       }
       uiStore.refreshPageAreas()
       

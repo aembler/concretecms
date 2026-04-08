@@ -12,6 +12,23 @@ export type AddBlockTargetRef = {
   pageId: string | number
   afterBlockId: string | number
   targetIndex?: string | number
+  container?: {
+    start?: string
+    end?: string
+  } | null
+}
+
+export type PendingAddEditorRequest = {
+  id: string
+  blockTypeId: number
+  blockTypeHandle?: string
+  blockTitle?: string
+  ignoreContainer?: boolean
+  target: AddBlockTargetRef
+  editor: {
+    component: string
+    componentProps?: Record<string, unknown>
+  }
 }
 
 export type DeleteBlockOperation = {
@@ -39,6 +56,7 @@ export type AddBlockOperation = {
   blockTypeId: number
   blockTypeHandle?: string
   blockTitle?: string
+  ignoreContainer?: boolean
   target: AddBlockTargetRef
   response?: any
 }

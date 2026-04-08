@@ -49,6 +49,7 @@ import type { BlockEditorMeta } from '../../../stores/block-editor-registry'
 
 export const blockEditorMeta: BlockEditorMeta = {
   pageContentMode: 'preserve',
+  placement: 'dialog',
   editorContentSource: 'none',
 }
 </script>
@@ -83,6 +84,7 @@ const props = defineProps<{
   contentHtml?: string | null
   contentEl?: HTMLElement | null
   addTarget?: AddBlockTargetRef
+  ignoreContainer?: boolean
 }>()
 
 const open = ref(false)
@@ -216,6 +218,7 @@ function handleSave() {
           type: 'block.add',
           status: 'queued',
           blockTypeId: Number(props.blockTypeId || 0),
+          ignoreContainer: Boolean(props.ignoreContainer ?? false),
           target: props.addTarget,
           response: normalizedResponse,
         }

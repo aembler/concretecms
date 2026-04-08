@@ -415,6 +415,7 @@ class Add extends BackendInterfacePageController
             foreach ($blockTypes as $blockType) {
                 $icon = $blockTypeService->getBlockTypeIcon($blockType);
                 $blockTypeData = $blockTypeTransformer->transform($blockType);
+                $blockTypeData['ignoreContainer'] = (bool) $blockType->ignorePageThemeGridFrameworkContainer();
                 $blockTypeData['editor'] = $this->app->make(EditorFactory::class)
                     ->createForBlock($blockType, EditorFactory::MODE_ADD);
                 $blockTypeData['icon'] = $icon->jsonSerialize();

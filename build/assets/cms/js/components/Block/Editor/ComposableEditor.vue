@@ -9,6 +9,7 @@ import type { BlockEditorMeta } from '../../../stores/block-editor-registry'
 
 export const blockEditorMeta: BlockEditorMeta = {
   pageContentMode: 'preserve',
+  placement: 'page',
   editorContentSource: 'none',
 }
 </script>
