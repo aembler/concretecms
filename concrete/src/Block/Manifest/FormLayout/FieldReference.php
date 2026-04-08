@@ -18,7 +18,7 @@ final class FieldReference implements FormLayoutElementInterface
 
     public function getType(): string
     {
-        return 'field';
+        return 'fieldref';
     }
 
     public function getFieldId(): string

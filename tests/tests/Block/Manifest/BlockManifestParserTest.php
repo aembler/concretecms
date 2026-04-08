@@ -49,11 +49,11 @@ final class BlockManifestParserTest extends TestCase
         </fields>
         <formlayout>
             <tab id="content" name="Content">
-                <field id="headline" />
-                <field id="body" />
+                <fieldref field="headline" />
+                <fieldref field="body" />
             </tab>
             <tab id="design" name="Design">
-                <field id="accent" />
+                <fieldref field="accent" />
             </tab>
         </formlayout>
     </blocktype>
@@ -112,8 +112,8 @@ XML);
         </fields>
         <formlayout>
             <tab id="content" name="Content">
-                <field id="headline" />
-                <field id="headline" />
+                <fieldref field="headline" />
+                <fieldref field="headline" />
             </tab>
         </formlayout>
     </blocktype>
@@ -131,7 +131,7 @@ XML);
         </fields>
         <formlayout>
             <tab id="content" name="Content">
-                <field id="headline" />
+                <fieldref field="headline" />
             </tab>
         </formlayout>
     </blocktype>
@@ -154,7 +154,7 @@ XML);
         </fields>
         <formlayout>
             <tab id="design" name="Design">
-                <field id="design.accent" />
+                <fieldref field="design.accent" />
             </tab>
         </formlayout>
     </blocktype>
@@ -164,5 +164,29 @@ XML);
         $this->assertNotNull($manifest->getField('design.accent'));
         $this->assertNull($manifest->getField('accent'));
         $this->assertSame('design.accent', $manifest->getLayout()[0]->getChildren()[0]->getFieldId());
+    }
+
+    public function testMissingFieldReferenceBecomesRecoverableManifestError(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldref field="missing" />
+                <fieldref field="headline" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $this->assertTrue($manifest->hasErrors());
+        $this->assertSame('unknown_field_reference', $manifest->getErrors()[0]->getCode());
+        $this->assertSame('missing', $manifest->getLayout()[0]->getChildren()[0]->getFieldId());
+        $this->assertSame('headline', $manifest->getLayout()[0]->getChildren()[1]->getFieldId());
     }
 }

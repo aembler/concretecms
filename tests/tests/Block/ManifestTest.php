@@ -37,11 +37,11 @@ final class ManifestTest extends TestCase
         </fields>
         <formlayout>
             <tab id="content" name="Content">
-                <field id="headline" />
-                <field id="body" />
+                <fieldref field="headline" />
+                <fieldref field="body" />
             </tab>
             <tab id="design" name="Design">
-                <field id="accent" />
+                <fieldref field="accent" />
             </tab>
         </formlayout>
     </blocktype>
@@ -50,8 +50,10 @@ XML);
 
         $this->assertSame('sample', $manifest->getHandle());
         $this->assertSame('Sample', $manifest->getName());
-        $this->assertCount(3, $manifest->getFields());
+        $this->assertCount(5, $manifest->getFields());
         $this->assertFalse($manifest->hasErrors());
+        $this->assertNotNull($manifest->getField('core.styles.text_color'));
+        $this->assertNotNull($manifest->getField('core.styles.background_color'));
 
         $layout = $manifest->getLayout();
         $this->assertCount(2, $layout);
@@ -78,10 +80,44 @@ XML);
         );
         $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/styles.xml');
 
-        $this->assertTrue($registry->has('styles.text_color'));
-        $this->assertTrue($registry->has('styles.background_color'));
+        $this->assertTrue($registry->has('core.styles.text_color'));
+        $this->assertTrue($registry->has('core.styles.background_color'));
         $this->assertFalse($registry->has('text_color'));
         $this->assertCount(2, $registry->getFields());
         $this->assertCount(0, $registry->getErrors());
+    }
+
+    public function testParserCanReferenceGlobalFieldsFromFormLayout(): void
+    {
+        $parser = app(BlockManifestParser::class);
+
+        $manifest = $parser->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample" description="Example">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+            <field id="body" type="textarea" label="Body" rows="3" />
+            <field id="accent" type="color" label="Accent" default="#abc123" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldref field="headline" />
+                <fieldref field="body" />
+            </tab>
+            <tab id="design" name="Design">
+                <fieldref field="core.styles.background_color" />
+                <fieldref field="accent" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(2, $layout);
+        $this->assertSame('core.styles.background_color', $layout[1]->getChildren()[0]->getFieldId());
+        $this->assertSame('accent', $layout[1]->getChildren()[1]->getFieldId());
+        $this->assertNotNull($manifest->getField('core.styles.background_color'));
+        $this->assertSame('Background Color', $manifest->getField('core.styles.background_color')->getLabel());
     }
 }

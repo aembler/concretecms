@@ -46,7 +46,7 @@ final class BlockManifestParser
 
     public function parseString(string $xml, string $source = ''): BlockManifest
     {
-        $this->globalFieldRegistry->getFields();
+        $globalFields = $this->globalFieldRegistry->getFields();
         $element = $this->loadXml($xml, $source);
         if ($element->getName() !== 'concrete-bdf') {
             throw new MalformedManifestException('The manifest root element must be <concrete-bdf>.');
@@ -66,9 +66,10 @@ final class BlockManifestParser
         $icon = $this->extractIconMarkup($blockType);
 
         $errors = [];
-        $fields = $this->parseFields($blockType, $errors);
+        $localFields = $this->parseFields($blockType, $errors);
+        $fields = $this->mergeFields($localFields, $globalFields);
         $seenFieldRefs = [];
-        $layout = $this->parseFormLayout($blockType, $fields, $seenFieldRefs);
+        $layout = $this->parseFormLayout($blockType, $fields, $seenFieldRefs, $errors);
 
         return new BlockManifest(
             $handle,
@@ -96,26 +97,28 @@ final class BlockManifestParser
     /**
      * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
      * @param array<string, bool> $seenFieldRefs
+     * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
      *
      * @return list<\Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface>
      */
-    protected function parseFormLayout(SimpleXMLElement $blockType, array $fields, array &$seenFieldRefs): array
+    protected function parseFormLayout(SimpleXMLElement $blockType, array $fields, array &$seenFieldRefs, array &$errors): array
     {
         $formLayoutNodes = $blockType->xpath('./formlayout');
         if (!is_array($formLayoutNodes) || !isset($formLayoutNodes[0]) || !($formLayoutNodes[0] instanceof SimpleXMLElement)) {
             return [];
         }
 
-        return $this->parseLayoutChildren($formLayoutNodes[0], $fields, $seenFieldRefs);
+        return $this->parseLayoutChildren($formLayoutNodes[0], $fields, $seenFieldRefs, $errors);
     }
 
     /**
      * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
      * @param array<string, bool> $seenFieldRefs
+     * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
      *
      * @return list<\Concrete\Core\Block\Manifest\FormLayout\FormLayoutElementInterface>
      */
-    protected function parseLayoutChildren(SimpleXMLElement $parent, array $fields, array &$seenFieldRefs): array
+    protected function parseLayoutChildren(SimpleXMLElement $parent, array $fields, array &$seenFieldRefs, array &$errors): array
     {
         $elements = [];
         foreach ($parent->children() as $child) {
@@ -123,7 +126,7 @@ final class BlockManifestParser
                 continue;
             }
 
-            $elements[] = $this->parseLayoutElement($child, $fields, $seenFieldRefs);
+            $elements[] = $this->parseLayoutElement($child, $fields, $seenFieldRefs, $errors);
         }
 
         return $elements;
@@ -132,24 +135,34 @@ final class BlockManifestParser
     /**
      * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
      * @param array<string, bool> $seenFieldRefs
+     * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
      */
-    protected function parseLayoutElement(SimpleXMLElement $element, array $fields, array &$seenFieldRefs): FormLayoutElementInterface
+    protected function parseLayoutElement(SimpleXMLElement $element, array $fields, array &$seenFieldRefs, array &$errors): FormLayoutElementInterface
     {
         switch ($element->getName()) {
-            case 'field':
-                $fieldId = $this->getRequiredAttribute($element, 'id', '<field>');
-                if (!isset($fields[$fieldId])) {
-                    throw new MalformedManifestException(sprintf('Layout references unknown field "%s".', $fieldId));
-                }
+            case 'fieldref':
+                $fieldId = $this->getRequiredAttribute($element, 'field', '<fieldref>');
                 if (isset($seenFieldRefs[$fieldId])) {
                     throw new MalformedManifestException(sprintf('Field "%s" may only appear once in the form layout.', $fieldId));
                 }
                 $seenFieldRefs[$fieldId] = true;
 
+                if (!isset($fields[$fieldId])) {
+                    $errors[] = new ManifestError(
+                        'unknown_field_reference',
+                        sprintf('Unknown field reference "%s" in form layout.', $fieldId),
+                        [
+                            'fieldId' => $fieldId,
+                        ]
+                    );
+
+                    return new FieldReference($fieldId);
+                }
+
                 return new FieldReference($fieldId);
 
             case 'tab':
-                return $this->parseContainerElement($element, Tab::class, $fields, $seenFieldRefs);
+                return $this->parseContainerElement($element, Tab::class, $fields, $seenFieldRefs, $errors);
         }
 
         throw new MalformedManifestException(sprintf('Unsupported form layout element <%s>.', $element->getName()));
@@ -159,14 +172,35 @@ final class BlockManifestParser
      * @param class-string<\Concrete\Core\Block\Manifest\FormLayout\ContainerElement> $className
      * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $fields
      * @param array<string, bool> $seenFieldRefs
+     * @param list<\Concrete\Core\Block\Manifest\Error\ManifestError> $errors
      */
-    protected function parseContainerElement(SimpleXMLElement $element, string $className, array $fields, array &$seenFieldRefs): ContainerElement
+    protected function parseContainerElement(SimpleXMLElement $element, string $className, array $fields, array &$seenFieldRefs, array &$errors): ContainerElement
     {
         $id = $this->getRequiredAttribute($element, 'id', sprintf('<%s>', $element->getName()));
         $name = trim((string) ($element['name'] ?? $element['label'] ?? $id));
-        $children = $this->parseLayoutChildren($element, $fields, $seenFieldRefs);
+        $children = $this->parseLayoutChildren($element, $fields, $seenFieldRefs, $errors);
 
         return new $className($id, $name, $children);
+    }
+
+    /**
+     * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $localFields
+     * @param array<string, \Concrete\Core\Block\Manifest\FieldDefinition> $globalFields
+     *
+     * @return array<string, \Concrete\Core\Block\Manifest\FieldDefinition>
+     */
+    protected function mergeFields(array $localFields, array $globalFields): array
+    {
+        $merged = $globalFields;
+        foreach ($localFields as $fieldId => $fieldDefinition) {
+            if (isset($merged[$fieldId])) {
+                throw new MalformedManifestException(sprintf('Field id "%s" collides with a globally registered field.', $fieldId));
+            }
+
+            $merged[$fieldId] = $fieldDefinition;
+        }
+
+        return $merged;
     }
 
     protected function loadXml(string $xml, string $source = ''): SimpleXMLElement

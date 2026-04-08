@@ -1,5 +1,5 @@
 <concrete-bdf version="1.0">
-    <fields prefix="styles">
+    <fields prefix="core.styles">
         <field id="text_color" type="color" label="Text Color" />
         <field id="background_color" type="color" label="Background Color" />
     </fields>
