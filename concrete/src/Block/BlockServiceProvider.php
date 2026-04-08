@@ -8,6 +8,7 @@ use Concrete\Core\Block\Manifest\Field\Type\ColorFieldType;
 use Concrete\Core\Block\Manifest\Field\Type\TextareaFieldType;
 use Concrete\Core\Block\Manifest\Field\Type\TextFieldType;
 use Concrete\Core\Block\Manifest\GlobalFieldRegistry;
+use Concrete\Core\Block\Manifest\TabDefinitionParser;
 use Concrete\Core\Cache\Level\RequestCache;
 use Concrete\Core\Foundation\Service\Provider as ServiceProvider;
 
@@ -25,9 +26,11 @@ class BlockServiceProvider extends ServiceProvider
             return $manager;
         });
         $this->app->singleton(FieldDefinitionParser::class);
+        $this->app->singleton(TabDefinitionParser::class);
         $this->app->singleton(GlobalFieldRegistry::class, function () {
             $registry = new GlobalFieldRegistry(
                 $this->app->make(FieldDefinitionParser::class),
+                $this->app->make(TabDefinitionParser::class),
                 $this->app->make(RequestCache::class)
             );
             $registry->addSource(DIR_BASE_CORE . '/config/blocks/styles.xml');

@@ -14,6 +14,8 @@ use Concrete\Core\Block\Manifest\Field\Type\TextareaFieldType;
 use Concrete\Core\Block\Manifest\Field\Type\TextFieldType;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\Tab;
+use Concrete\Core\Block\Manifest\FormLayout\TabReference;
+use Concrete\Core\Block\Manifest\TabDefinitionParser;
 use Concrete\Tests\TestCase;
 
 final class BlockManifestParserTest extends TestCase
@@ -27,8 +29,10 @@ final class BlockManifestParserTest extends TestCase
 
         return new BlockManifestParser(
             new FieldDefinitionParser($manager),
+            new TabDefinitionParser(),
             new GlobalFieldRegistry(
                 new FieldDefinitionParser($manager),
+                new TabDefinitionParser(),
                 app('cache/request')
             )
         );
@@ -188,5 +192,96 @@ XML);
         $this->assertSame('unknown_field_reference', $manifest->getErrors()[0]->getCode());
         $this->assertSame('missing', $manifest->getLayout()[0]->getChildren()[0]->getFieldId());
         $this->assertSame('headline', $manifest->getLayout()[0]->getChildren()[1]->getFieldId());
+    }
+
+    public function testParserCanResolveLocalTabReferencesFromFormLayout(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+            <field id="accent" type="color" label="Accent" />
+        </fields>
+        <tabs>
+            <tab id="sample.design" name="Design">
+                <fieldref field="accent" />
+            </tab>
+        </tabs>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldref field="headline" />
+            </tab>
+            <tabref tab="sample.design" />
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(2, $layout);
+        $this->assertInstanceOf(Tab::class, $layout[1]);
+        $this->assertSame('sample.design', $layout[1]->getId());
+        $this->assertSame('accent', $layout[1]->getChildren()[0]->getFieldId());
+    }
+
+    public function testMissingTabReferenceBecomesRecoverableManifestError(): void
+    {
+        $manifest = $this->getParser()->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+        </fields>
+        <formlayout>
+            <tabref tab="missing.design" />
+            <tab id="content" name="Content">
+                <fieldref field="headline" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $this->assertTrue($manifest->hasErrors());
+        $this->assertSame('unknown_tab_reference', $manifest->getErrors()[0]->getCode());
+        $this->assertInstanceOf(TabReference::class, $manifest->getLayout()[0]);
+        $this->assertSame('missing.design', $manifest->getLayout()[0]->getTabId());
+    }
+
+    public function testDuplicateGlobalTabIdsAreFatal(): void
+    {
+        $manager = new FieldManager();
+        $manager->register(new TextFieldType());
+        $manager->register(new TextareaFieldType());
+        $manager->register(new ColorFieldType());
+
+        $duplicateSource = tempnam(sys_get_temp_dir(), 'manifest-tabs-');
+        $this->assertNotFalse($duplicateSource);
+        file_put_contents($duplicateSource, <<<'XML'
+<concrete-bdf version="1.0">
+    <tabs>
+        <tab id="core.design.colors_only" name="Design Duplicate">
+            <fieldref field="core.styles.text_color" />
+        </tab>
+    </tabs>
+</concrete-bdf>
+XML);
+
+        $registry = new GlobalFieldRegistry(
+            new FieldDefinitionParser($manager),
+            new TabDefinitionParser()
+        );
+        $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/tabs.xml');
+        $registry->addSource($duplicateSource);
+
+        $this->expectException(MalformedManifestException::class);
+        $this->expectExceptionMessage('Duplicate global tab id "core.design.colors_only"');
+
+        try {
+            $registry->getTabs();
+        } finally {
+            @unlink($duplicateSource);
+        }
     }
 }

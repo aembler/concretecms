@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Concrete\Core\Block\Manifest;
 
 use Concrete\Core\Block\Manifest\Exception\MalformedManifestException;
+use Concrete\Core\Block\Manifest\FormLayout\Tab;
 use Concrete\Core\Cache\Cache;
 use SimpleXMLElement;
 
@@ -16,6 +17,11 @@ final class GlobalFieldRegistry
     protected $fieldDefinitionParser;
 
     /**
+     * @var \Concrete\Core\Block\Manifest\TabDefinitionParser
+     */
+    protected $tabDefinitionParser;
+
+    /**
      * @var \Concrete\Core\Cache\Cache|null
      */
     protected $cache;
@@ -25,9 +31,10 @@ final class GlobalFieldRegistry
      */
     protected $sources = [];
 
-    public function __construct(FieldDefinitionParser $fieldDefinitionParser, ?Cache $cache = null)
+    public function __construct(FieldDefinitionParser $fieldDefinitionParser, TabDefinitionParser $tabDefinitionParser, ?Cache $cache = null)
     {
         $this->fieldDefinitionParser = $fieldDefinitionParser;
+        $this->tabDefinitionParser = $tabDefinitionParser;
         $this->cache = $cache;
     }
 
@@ -58,6 +65,16 @@ final class GlobalFieldRegistry
         return $payload['errors'];
     }
 
+    /**
+     * @return array<string, \Concrete\Core\Block\Manifest\FormLayout\Tab>
+     */
+    public function getTabs(): array
+    {
+        $payload = $this->load();
+
+        return $payload['tabs'];
+    }
+
     public function has(string $fieldId): bool
     {
         return isset($this->getFields()[$fieldId]);
@@ -68,9 +85,20 @@ final class GlobalFieldRegistry
         return $this->getFields()[$fieldId] ?? null;
     }
 
+    public function hasTab(string $tabId): bool
+    {
+        return isset($this->getTabs()[$tabId]);
+    }
+
+    public function getTab(string $tabId): ?Tab
+    {
+        return $this->getTabs()[$tabId] ?? null;
+    }
+
     /**
      * @return array{
      *   fields: array<string, \Concrete\Core\Block\Manifest\FieldDefinition>,
+     *   tabs: array<string, \Concrete\Core\Block\Manifest\FormLayout\Tab>,
      *   errors: list<\Concrete\Core\Block\Manifest\Error\ManifestError>
      * }
      */
@@ -79,7 +107,7 @@ final class GlobalFieldRegistry
         if ($this->cache !== null) {
             $item = $this->cache->getItem($this->getCacheKey());
             $payload = $item->get();
-            if (is_array($payload) && isset($payload['fields'], $payload['errors'])) {
+            if (is_array($payload) && isset($payload['fields'], $payload['tabs'], $payload['errors'])) {
                 return $payload;
             }
 
@@ -96,12 +124,14 @@ final class GlobalFieldRegistry
     /**
      * @return array{
      *   fields: array<string, \Concrete\Core\Block\Manifest\FieldDefinition>,
+     *   tabs: array<string, \Concrete\Core\Block\Manifest\FormLayout\Tab>,
      *   errors: list<\Concrete\Core\Block\Manifest\Error\ManifestError>
      * }
      */
     protected function parseSources(): array
     {
         $fields = [];
+        $tabs = [];
         $errors = [];
 
         foreach ($this->sources as $source) {
@@ -127,10 +157,20 @@ final class GlobalFieldRegistry
 
                 $fields[$fieldId] = $fieldDefinition;
             }
+
+            $parsedTabs = $this->tabDefinitionParser->parseTabGroups($element);
+            foreach ($parsedTabs as $tabId => $tabDefinition) {
+                if (isset($tabs[$tabId])) {
+                    throw new MalformedManifestException(sprintf('Duplicate global tab id "%s" found while loading %s.', $tabId, $source));
+                }
+
+                $tabs[$tabId] = $tabDefinition;
+            }
         }
 
         return [
             'fields' => $fields,
+            'tabs' => $tabs,
             'errors' => $errors,
         ];
     }

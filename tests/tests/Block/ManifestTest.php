@@ -10,6 +10,8 @@ use Concrete\Core\Block\Manifest\FieldDefinitionParser;
 use Concrete\Core\Block\Manifest\GlobalFieldRegistry;
 use Concrete\Core\Block\Manifest\FormLayout\FieldReference;
 use Concrete\Core\Block\Manifest\FormLayout\Tab;
+use Concrete\Core\Block\Manifest\FormLayout\TabReference;
+use Concrete\Core\Block\Manifest\TabDefinitionParser;
 use Concrete\Tests\TestCase;
 
 final class ManifestTest extends TestCase
@@ -76,14 +78,20 @@ XML);
     public function testGlobalFieldRegistryLoadsDefaultStylesSource(): void
     {
         $registry = new GlobalFieldRegistry(
-            app(FieldDefinitionParser::class)
+            app(FieldDefinitionParser::class),
+            app(TabDefinitionParser::class)
         );
         $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/styles.xml');
+        $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/tabs.xml');
 
         $this->assertTrue($registry->has('core.styles.text_color'));
         $this->assertTrue($registry->has('core.styles.background_color'));
         $this->assertFalse($registry->has('text_color'));
         $this->assertCount(2, $registry->getFields());
+        $this->assertTrue($registry->hasTab('core.design.colors_only'));
+        $this->assertCount(1, $registry->getTabs());
+        $this->assertSame('core.styles.text_color', $registry->getTab('core.design.colors_only')->getChildren()[0]->getFieldId());
+        $this->assertSame('core.styles.background_color', $registry->getTab('core.design.colors_only')->getChildren()[1]->getFieldId());
         $this->assertCount(0, $registry->getErrors());
     }
 
@@ -119,5 +127,50 @@ XML);
         $this->assertSame('accent', $layout[1]->getChildren()[1]->getFieldId());
         $this->assertNotNull($manifest->getField('core.styles.background_color'));
         $this->assertSame('Background Color', $manifest->getField('core.styles.background_color')->getLabel());
+    }
+
+    public function testParserCanResolveGlobalTabReferencesFromFormLayout(): void
+    {
+        $registry = new GlobalFieldRegistry(
+            app(FieldDefinitionParser::class),
+            app(TabDefinitionParser::class)
+        );
+        $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/styles.xml');
+        $registry->addSource(DIR_BASE . '/tests/fixtures/Block/Manifest/tabs.xml');
+        $parser = new BlockManifestParser(
+            app(FieldDefinitionParser::class),
+            app(TabDefinitionParser::class),
+            $registry
+        );
+
+        $manifest = $parser->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample" description="Example">
+        <fields>
+            <field id="headline" type="text" label="Headline" />
+            <field id="body" type="textarea" label="Body" rows="3" />
+            <field id="accent" type="color" label="Accent" default="#abc123" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldref field="headline" />
+                <fieldref field="body" />
+            </tab>
+            <tabref tab="core.design.colors_only" />
+            <tab id="details" name="Details">
+                <fieldref field="accent" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $layout = $manifest->getLayout();
+        $this->assertCount(3, $layout);
+        $this->assertInstanceOf(Tab::class, $layout[1]);
+        $this->assertSame('core.design.colors_only', $layout[1]->getId());
+        $this->assertSame('core.styles.text_color', $layout[1]->getChildren()[0]->getFieldId());
+        $this->assertSame('core.styles.background_color', $layout[1]->getChildren()[1]->getFieldId());
+        $this->assertSame('accent', $layout[2]->getChildren()[0]->getFieldId());
     }
 }
