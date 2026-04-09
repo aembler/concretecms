@@ -1,3 +1,4 @@
+import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import type { Pinia } from 'pinia'
 import { getConcretePinia } from './pinia'
@@ -43,6 +44,8 @@ function getDefaultOperationsDebug(): boolean {
 
   return Boolean((window as OperationsDebugWindow).__CONCRETE_PAGE_OPS_DEBUG__)
 }
+
+let pageOperationDoneCleanupQueued = false
 
 const useConcreteUiStoreBase = defineStore('concrete-ui', {
   state: () => ({
@@ -215,6 +218,20 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
         return
       }
 
+      if (this.page.operationsQueue.some((operation) => operation.status === 'done')) {
+        if (!pageOperationDoneCleanupQueued) {
+          pageOperationDoneCleanupQueued = true
+          void nextTick(() => {
+            pageOperationDoneCleanupQueued = false
+            this.page.operationsQueue = this.page.operationsQueue.filter((operation) => operation.status !== 'done')
+            if (!this.page.activeOperationId) {
+              this.startNextPageOperation()
+            }
+          })
+        }
+        return
+      }
+
       const nextOperation = this.page.operationsQueue.find((operation) => operation.status === 'queued')
       if (!nextOperation) {
         return
@@ -232,6 +249,8 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
 
       if (status === 'failed') {
         existingOperation.status = 'failed'
+      } else if (status === 'done') {
+        existingOperation.status = 'done'
       } else {
         this.page.operationsQueue = this.page.operationsQueue.filter((operation) => operation.id !== id)
       }
