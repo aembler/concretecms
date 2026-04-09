@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import { computed, inject, type CSSProperties } from 'vue'
 import { HOT_SPOT_BADGE_GEOMETRY_KEY, type HotSpotBadgeGeometry } from '../../support/dom/hotspot'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
 
 type HotSpotBadgeColorProps = {
   backgroundColor: string
@@ -34,6 +35,8 @@ const props = withDefaults(defineProps<{
   appearBehavior: 'targeted',
 })
 
+
+const concreteUiStore = useConcreteUiStore()
 const hotspotGeometry = inject(HOT_SPOT_BADGE_GEOMETRY_KEY, null) as HotSpotBadgeGeometry | null
 const fallbackGeometry = {
   top: 0,
@@ -41,6 +44,8 @@ const fallbackGeometry = {
   bottom: 0,
   width: 0,
 }
+
+const isInteractionsEnabled = computed(() => Boolean(concreteUiStore.page.interactionsEnabled))
 
 const top = computed(() => hotspotGeometry?.top.value ?? fallbackGeometry.top)
 const left = computed(() => hotspotGeometry?.left.value ?? fallbackGeometry.left)
@@ -51,7 +56,7 @@ const height = computed(() => Math.max(0, bottom.value - top.value))
 const badgeOffsetPx = 10; // the offset from the bottom or top when using the offset placements
 const badgeCenterOffsetPx = 10; // the offset used to position badge _just_ above the border.
 const isTargeted = computed(() => Boolean(props.isHovered || props.isActive))
-const isBadgeVisible = computed(() => props.appearBehavior === 'display' || isTargeted.value)
+const isBadgeVisible = computed(() => isInteractionsEnabled.value && (props.appearBehavior === 'display' || isTargeted.value))
 const isNotchTopCenter = computed(() => props.badgePlacement === 'notch-top-center')
 
 function resolveColorState() {

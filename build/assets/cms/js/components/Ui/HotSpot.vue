@@ -21,8 +21,11 @@
 import {computed, provide, ref, useSlots} from 'vue'
 import { HOT_SPOT_BADGE_GEOMETRY_KEY, useHotSpotGeometry } from '../../support/dom/hotspot'
 import { useUiStore } from '@concretecms/backendui'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
 
 const uiStore = useUiStore()
+const concreteUiStore = useConcreteUiStore()
+
 const props = withDefaults(defineProps<{
   element: HTMLElement | null,
   borderColor: string | null,
@@ -42,10 +45,11 @@ const props = withDefaults(defineProps<{
 })
 
 const { isScrollSettled, top, left, bottom, width, height } = useHotSpotGeometry(() => props.element)
+const isInteractionsEnabled = computed(() => Boolean(concreteUiStore.page.interactionsEnabled))
 
 const effectiveBorderBehavior = computed(() => props.borderBehavior || 'hover')
 const isBorderVisible = computed(() =>
-  effectiveBorderBehavior.value === 'display' || props.isTargeted
+    isInteractionsEnabled.value && (effectiveBorderBehavior.value === 'display' || props.isTargeted)
 )
 
 const outsetPx = computed(() => {

@@ -2,3 +2,12 @@
   padding: 1px 0; /* This helps certain block types like horizontal rule */
   position: relative;
 }
+
+html.concrete-edit-mode-focus concrete-block {
+  opacity: 0.4;
+  transition: opacity 160ms ease;
+}
+
+html.concrete-edit-mode-focus .concrete-edit-mode-focus-focused {
+  opacity: 1;
+}

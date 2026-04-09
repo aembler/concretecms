@@ -8,6 +8,33 @@ import { refreshHotSpotGeometries } from '../support/dom/hotspot'
 
 type DragPointer = { x: number; y: number } | null
 type OperationsDebugWindow = Window & { __CONCRETE_PAGE_OPS_DEBUG__?: boolean }
+type FocusedEditingTarget = {
+  blockId?: string | number | null
+  element?: HTMLElement | null
+} | null
+
+const FOCUSED_EDITING_ROOT_CLASS = 'concrete-edit-mode-focus'
+const FOCUSED_EDITING_TARGET_CLASS = 'concrete-edit-mode-focus-focused'
+
+function getFocusedEditingBlockElement(blockId: string | number | null | undefined): HTMLElement | null {
+  if (!blockId || typeof document === 'undefined') {
+    return null
+  }
+
+  return document.querySelector(`concrete-block[block-id="${String(blockId)}"]`)
+}
+
+function resolveFocusedEditingElement(target: FocusedEditingTarget): HTMLElement | null {
+  if (!target) {
+    return null
+  }
+
+  if (target.element instanceof HTMLElement) {
+    return target.element
+  }
+
+  return getFocusedEditingBlockElement(target.blockId)
+}
 
 function getDefaultOperationsDebug(): boolean {
   if (typeof window === 'undefined') {
@@ -37,7 +64,8 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       toastQueue: [] as ToastOperation[],
       activeToastId: null as string | null,
       operationsDebug: getDefaultOperationsDebug(),
-      hoverArea: null as String | null
+      hoverArea: null as String | null,
+      focusedEditingBlockId: null as string | null,
     },
     toastContainer: null as HTMLElement | string | null,
     blockAreaMap: {} as Record<string, string[]>,
@@ -65,7 +93,35 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       this.logPageOperation('debug.toggled', { enabled })
     },
     setPageInteractionsEnabled(enabled: boolean) {
+      if (enabled) {
+        refreshHotSpotGeometries()
+      }
       this.page.interactionsEnabled = enabled
+    },
+    setFocusedEditingTarget(target: FocusedEditingTarget) {
+      const root = typeof document !== 'undefined' ? document.documentElement : null
+      const previousFocusedElement = typeof document !== 'undefined'
+        ? document.querySelector<HTMLElement>(`.${FOCUSED_EDITING_TARGET_CLASS}`)
+        : null
+
+      previousFocusedElement?.classList.remove(FOCUSED_EDITING_TARGET_CLASS)
+
+      const focusedElement = resolveFocusedEditingElement(target)
+      const blockId = target?.blockId ? String(target.blockId) : null
+      this.page.focusedEditingBlockId = blockId
+
+      if (!root || !focusedElement) {
+        root?.classList.remove(FOCUSED_EDITING_ROOT_CLASS)
+        this.setPageInteractionsEnabled(true)
+        return
+      }
+
+      root.classList.add(FOCUSED_EDITING_ROOT_CLASS)
+      focusedElement.classList.add(FOCUSED_EDITING_TARGET_CLASS)
+      this.setPageInteractionsEnabled(false)
+    },
+    clearFocusedEditingTarget() {
+      this.setFocusedEditingTarget(null)
     },
     setDoubleClickedElementId(id: string) {
       this.clickProxy.doubleClickedElementId = id

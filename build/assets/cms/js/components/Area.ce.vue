@@ -149,14 +149,6 @@ watch(
   }
 )
 
-watch(
-  () => uiStore.page.pendingAddEditorRequest,
-  (request) => {
-    uiStore.setPageInteractionsEnabled(!request)
-  },
-  { immediate: true }
-)
-
 function requestJson(url: string): Promise<any> {
   return new Promise((resolve) => {
     let didResolve = false

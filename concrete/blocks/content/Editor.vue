@@ -67,7 +67,6 @@ import MenuContainer from '../../../build/assets/cms/js/components/Ui/MenuContai
 import { useMenuPositioner } from '../../../build/assets/cms/js/utilities/menu'
 import { useConcreteUiStore } from '../../../build/assets/cms/js/stores/concrete-ui'
 import type { AddBlockOperation, AddBlockTargetRef, BlockRef, UpdateBlockOperation } from '../../../build/assets/cms/js/stores/types/page-operations'
-import { refreshHotSpotGeometries } from '../../../build/assets/cms/js/support/dom/hotspot'
 
 const props = defineProps<{
   editor: {
@@ -203,7 +202,6 @@ onMounted(() => {
 
   void nextTick(() => {
     menuPos.update()
-    refreshHotSpotGeometries()
   })
 })
 

@@ -147,6 +147,19 @@ watch(
   { immediate: true }
 )
 
+watch(
+  activeAddEditorRequest,
+  (request) => {
+    if (request) {
+      uiStore.setFocusedEditingTarget({ element: targetRef.value })
+      return
+    }
+
+    uiStore.clearFocusedEditingTarget()
+  },
+  { immediate: true }
+)
+
 function isPointerInsideTarget(
   pointer: { x: number; y: number } | null,
   paddingX = 0,
@@ -238,6 +251,8 @@ onBeforeUnmount(() => {
     clearTimeout(stickyReleaseTimer)
     stickyReleaseTimer = null
   }
+
+  uiStore.clearFocusedEditingTarget()
 })
 
 function clearActiveAddEditorRequest() {
@@ -250,12 +265,12 @@ function clearActiveAddEditorRequest() {
 
 function handleAddEditorUpdated() {
   clearActiveAddEditorRequest()
-  uiStore.setPageInteractionsEnabled(true)
+  uiStore.clearFocusedEditingTarget()
 }
 
 function handleAddEditorClosed() {
   clearActiveAddEditorRequest()
-  uiStore.setPageInteractionsEnabled(true)
+  uiStore.clearFocusedEditingTarget()
 }
 
 </script>

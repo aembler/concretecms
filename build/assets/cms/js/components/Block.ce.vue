@@ -8,7 +8,6 @@
       <div class="concrete-block">
         <div
             ref="contentEl"
-            class="concrete-block__content"
             v-show="shouldShowPageContent"
         >
           <slot />
@@ -245,18 +244,18 @@ function editBlock() {
     return
   }
 
-  uiStore.setPageInteractionsEnabled(false)
+  uiStore.setFocusedEditingTarget({ blockId: props.blockId })
   editMode.value = true
 }
 
 
 function handleUpdated() {
-  uiStore.setPageInteractionsEnabled(true)
+  uiStore.clearFocusedEditingTarget()
   editMode.value = false
 }
 
 function handleEditorClosed() {
-  uiStore.setPageInteractionsEnabled(true)
+  uiStore.clearFocusedEditingTarget()
   editMode.value = false
 }
 
@@ -375,7 +374,7 @@ watch(
 
 onBeforeUnmount(() => {
   if (editMode.value) {
-    uiStore.setPageInteractionsEnabled(true)
+    uiStore.clearFocusedEditingTarget()
   }
 
   uiStore.clearBlockAreaMap(props.blockId)
