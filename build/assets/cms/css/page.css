@@ -1,6 +1,9 @@
 @import "tailwindcss/theme";
 @import "tailwindcss/utilities" source("page/");
 
+/* Add this here instead of in app.css or backend.css in backendui, because nprogress appends to the root of the page */
+@import "nprogress/nprogress.css";
+
 @import "./theme/theme.css";
 @import "./page/variables.css";
 @import "./page/toolbar.css";

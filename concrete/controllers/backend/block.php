@@ -20,7 +20,6 @@ class Block extends BackendInterfaceBlockController
      */
     public function render()
     {
-        sleep(30);
         $loc = Localization::getInstance();
         $loc->setActiveContext(Localization::CONTEXT_SITE);
 
