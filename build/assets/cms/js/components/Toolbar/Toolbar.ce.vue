@@ -6,7 +6,7 @@
   >
     <div ref="teleportTarget"></div>
     <div ref="toastTeleportTarget"></div>
-    <div id="ccm-toolbar" class="z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
+    <div id="ccm-toolbar" class="relative z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
       <div class="navbar mx-auto max-w-screen-2xl px-4 lg:px-6 gap-1">
         <!-- Logo -->
         <span class="text-lg font-bold mr-2">

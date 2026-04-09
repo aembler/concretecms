@@ -1,1 +1,1 @@
-.ccm-content-block-editor div.tiptap{min-height:265px;padding:.5rem .75rem;border:1px solid color-mix(in srgb,var(--color-concrete-green) 30%,transparent);border-radius:.5rem;background:var(--color-base-100, #fff)}.ccm-content-block-editor:focus-within div.tiptap{outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--color-concrete-green) 30%,transparent)}
+.ccm-content-block-editor div.tiptap{min-height:32px}.ccm-content-block-editor:focus-within div.tiptap{outline:none}

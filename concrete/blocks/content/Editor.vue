@@ -44,16 +44,11 @@ export const blockEditorMeta: BlockEditorMeta = {
 
 <style>
 .ccm-content-block-editor div.tiptap {
-  min-height: 265px;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--color-concrete-green) 30%, transparent);
-  border-radius: 0.5rem;
-  background: var(--color-base-100, #fff);
+  min-height: 32px;
 }
 
 .ccm-content-block-editor:focus-within div.tiptap {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-concrete-green) 30%, transparent);
 }
 </style>
 
@@ -72,6 +67,7 @@ import MenuContainer from '../../../build/assets/cms/js/components/Ui/MenuContai
 import { useMenuPositioner } from '../../../build/assets/cms/js/utilities/menu'
 import { useConcreteUiStore } from '../../../build/assets/cms/js/stores/concrete-ui'
 import type { AddBlockOperation, AddBlockTargetRef, BlockRef, UpdateBlockOperation } from '../../../build/assets/cms/js/stores/types/page-operations'
+import { refreshHotSpotGeometries } from '../../../build/assets/cms/js/support/dom/hotspot'
 
 const props = defineProps<{
   editor: {
@@ -207,6 +203,7 @@ onMounted(() => {
 
   void nextTick(() => {
     menuPos.update()
+    refreshHotSpotGeometries()
   })
 })
 

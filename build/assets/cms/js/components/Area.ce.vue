@@ -15,7 +15,6 @@
       border-color="var(--color-concrete-area)"
       border-behavior="display"
       :badge-placement="badgePlacement"
-      :hide-on-scroll="false"
       :outset="4"
     >
       <template #badge>

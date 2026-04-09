@@ -4,16 +4,20 @@ namespace Concrete\Core\Block\BlockType;
 
 use Concrete\Core\Entity\Block\BlockType\BlockType as BlockTypeEntity;
 use Concrete\Core\Filesystem\FileLocator;
-use Concrete\Core\Support\Facade\Application;
 use RuntimeException;
 use SimpleXMLElement;
+use Concrete\Core\Application\Application;
 
 class BlockTypeEntityFactory
 {
+
+    public function __construct(
+        private Application $app
+    ) {}
+
     public function getDirectoryByHandle(string $handle, string $pkgHandle = ''): string
     {
-        $app = Application::getFacadeApplication();
-        $locator = $app->make(FileLocator::class);
+        $locator = $this->app->make(FileLocator::class);
         if ($pkgHandle !== '') {
             $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
         }
@@ -65,9 +69,8 @@ class BlockTypeEntityFactory
         $bt->setBlockTypeHandle($handle);
 
         $class = $bt->getBlockTypeClass();
-        $controller = Application::getFacadeApplication()->build($class);
-        $bt->setBlockTypeName($controller->getBlockTypeName());
-        $bt->setBlockTypeDescription($controller->getBlockTypeDescription());
+        $controller = $this->app->build($class);
+        $bt->loadFromController($controller);
 
         return $bt;
     }
