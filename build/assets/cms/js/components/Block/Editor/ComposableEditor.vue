@@ -27,44 +27,55 @@
           </template>
 
           <template #default>
-            <div v-if="isLoading" class="alert alert-info text-sm">Loading block manifest…</div>
+            <FloatingPanelBody>
+              <div class="space-y-4 p-5">
+                <div v-if="isLoading" class="alert alert-info text-sm">Loading block manifest…</div>
 
-            <div v-else-if="loadError" class="alert alert-error text-sm">{{ loadError }}</div>
+                <div v-else-if="loadError" class="alert alert-error text-sm">{{ loadError }}</div>
 
-            <template v-else-if="manifest">
-              <div class="grid gap-4">
-                <template v-for="element in activeTabChildren" :key="element.key">
-                  <ComposableEditorFieldset
-                    v-if="element.type === 'fieldset'"
-                    :legend="element.legend"
-                  >
-                    <ComposableEditorFieldRenderer
-                      v-for="field in element.fields"
-                      :key="field.id"
-                      :component="field.component"
-                      :field="field.definition"
-                      :model-value="String(values[field.id] ?? '')"
-                      @update:model-value="updateValue(field.id, $event)"
-                    />
-                  </ComposableEditorFieldset>
+                <template v-else-if="manifest">
+                  <div class="grid gap-4">
+                    <template v-for="element in activeTabChildren" :key="element.key">
+                      <ComposableEditorFieldset
+                        v-if="element.type === 'fieldset'"
+                        :legend="element.legend"
+                      >
+                        <ComposableEditorFieldRenderer
+                          v-for="field in element.fields"
+                          :key="field.id"
+                          :component="field.component"
+                          :field="field.definition"
+                          :model-value="String(values[field.id] ?? '')"
+                          @update:model-value="updateValue(field.id, $event)"
+                        />
+                      </ComposableEditorFieldset>
 
-                  <ComposableEditorFieldRenderer
-                    v-else-if="element.type === 'field'"
-                    :component="element.component"
-                    :field="element.definition"
-                    :model-value="String(values[element.id] ?? '')"
-                    @update:model-value="updateValue(element.id, $event)"
-                  />
-                </template>
+                      <ComposableEditorFieldRenderer
+                        v-else-if="element.type === 'field'"
+                        :component="element.component"
+                        :field="element.definition"
+                        :model-value="String(values[element.id] ?? '')"
+                        @update:model-value="updateValue(element.id, $event)"
+                      />
+                    </template>
 
-                <div class="rounded-box bg-neutral text-neutral-content">
-                  <div class="px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-neutral-content/70">
-                    Current editor values
+                    <div class="rounded-box bg-neutral text-neutral-content">
+                      <div class="px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-neutral-content/70">
+                        Current editor values
+                      </div>
+                      <pre class="overflow-auto px-4 pb-4 text-xs leading-6">{{ formattedValues }}</pre>
+                    </div>
                   </div>
-                  <pre class="overflow-auto px-4 pb-4 text-xs leading-6">{{ formattedValues }}</pre>
-                </div>
+                </template>
               </div>
-            </template>
+            </FloatingPanelBody>
+          </template>
+
+          <template #footer>
+            <FloatingPanelFooter class="flex items-center justify-end gap-3">
+              <button type="button" class="btn btn-secondary me-auto" @click="handleCancel">Cancel</button>
+              <button type="button" class="btn btn-primary" @click="handleSave">Save</button>
+            </FloatingPanelFooter>
           </template>
         </FloatingPanel>
       </div>
@@ -84,7 +95,7 @@ export const blockEditorMeta: BlockEditorMeta = {
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { FloatingPanel, FloatingPanelHeader, useUiStore, useAjax } from '@concretecms/backendui'
+import { FloatingPanel, FloatingPanelBody, FloatingPanelFooter, FloatingPanelHeader, useUiStore, useAjax } from '@concretecms/backendui'
 import ComposableEditorFieldRenderer from '../../ComposableEditor/FieldRenderer.vue'
 import ComposableEditorFieldset from '../../ComposableEditor/Fieldset.vue'
 import ComposableEditorTabs from '../../ComposableEditor/Tabs.vue'
@@ -267,6 +278,14 @@ function updateValue(fieldId: string, value: string) {
     ...values.value,
     [fieldId]: value,
   }
+}
+
+function handleCancel() {
+  isOpen.value = false
+}
+
+function handleSave() {
+  window.alert('Save is not wired up yet.')
 }
 
 function hydrateManifest(data: ManifestPayload) {

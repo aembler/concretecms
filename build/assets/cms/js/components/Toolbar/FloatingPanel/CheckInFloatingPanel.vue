@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
+  FloatingPanelBody,
   FloatingPanelHeader,
   useAjax,
   normalizeJsonResponse,
@@ -183,6 +184,7 @@ watch(() => props.open, (isOpen) => {
       </template>
 
       <template #default>
+        <FloatingPanelBody>
         <div class="space-y-3 px-4 py-3">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ panelData.labels.comments }}</legend>
@@ -285,6 +287,7 @@ watch(() => props.open, (isOpen) => {
             </div>
           </div>
         </div>
+        </FloatingPanelBody>
       </template>
     </FloatingPanel>
   </div>

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
+  FloatingPanelBody,
   FloatingPanelContent,
   FloatingPanelHeader,
   FloatingPanelMenu,
@@ -335,35 +336,38 @@ function handleCacheSettingsSaved(payload: { title?: string, message?: string })
       </template>
 
       <template #menu>
-        <FloatingPanelMenu>
-          <div
-              v-for="group in visibleGroups"
-              :key="group.label"
-              class="mb-2"
-          >
-            <FloatingPanelMenuTitle>{{ group.label }}</FloatingPanelMenuTitle>
-            <FloatingPanelMenuItem
-                v-for="item in group.items"
-                :key="item.key"
-                variant="detail"
-                as="a"
-                :href="item.href"
-                :class="item.class"
-                @click="handleMenuItemClick(item.key, $event)"
+        <FloatingPanelBody>
+          <FloatingPanelMenu>
+            <div
+                v-for="group in visibleGroups"
+                :key="group.label"
+                class="mb-2"
             >
-              <template #icon>
-                <component :is="item.icon" class="w-5 h-5" />
-              </template>
-              {{ item.title }}
-              <template #description>
-                {{ item.description }}
-              </template>
-            </FloatingPanelMenuItem>
-          </div>
-        </FloatingPanelMenu>
+              <FloatingPanelMenuTitle>{{ group.label }}</FloatingPanelMenuTitle>
+              <FloatingPanelMenuItem
+                  v-for="item in group.items"
+                  :key="item.key"
+                  variant="detail"
+                  as="a"
+                  :href="item.href"
+                  :class="item.class"
+                  @click="handleMenuItemClick(item.key, $event)"
+              >
+                <template #icon>
+                  <component :is="item.icon" class="w-5 h-5" />
+                </template>
+                {{ item.title }}
+                <template #description>
+                  {{ item.description }}
+                </template>
+              </FloatingPanelMenuItem>
+            </div>
+          </FloatingPanelMenu>
+        </FloatingPanelBody>
       </template>
 
       <template #detail>
+        <FloatingPanelBody>
           <CacheSettingsContent
             v-if="activeContent === 'caching'"
             :loading="cacheSettingsLoading"
@@ -374,6 +378,7 @@ function handleCacheSettingsSaved(payload: { title?: string, message?: string })
         <div v-else class="p-6 text-sm text-slate-500">
           Select a page setting to continue.
         </div>
+        </FloatingPanelBody>
       </template>
     </FloatingPanel>
 

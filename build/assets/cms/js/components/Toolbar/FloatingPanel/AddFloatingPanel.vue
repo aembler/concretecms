@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import {
   FloatingPanel,
+  FloatingPanelBody,
   FloatingPanelHeader,
   FloatingPanelHeaderTabs,
   FloatingPanelMenu,
@@ -253,6 +254,7 @@ watch(() => props.open, (isOpen) => {
       </template>
 
       <template #default>
+      <FloatingPanelBody>
       <template v-if="activeTab === 'blocks'">
         <template v-if="!isExpanded">
           <div class="px-2 pb-3">
@@ -448,6 +450,7 @@ watch(() => props.open, (isOpen) => {
           </div>
         </template>
       </template>
+      </FloatingPanelBody>
       </template>
       </FloatingPanel>
     </div>
