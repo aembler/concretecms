@@ -16,6 +16,178 @@ type FocusedEditingTarget = {
 
 const FOCUSED_EDITING_ROOT_CLASS = 'concrete-edit-mode-focus'
 const FOCUSED_EDITING_TARGET_CLASS = 'concrete-edit-mode-focus-focused'
+const FOCUSED_EDITING_SPOTLIGHT_PADDING = 12
+const FOCUSED_EDITING_SPOTLIGHT_FILL = 'rgba(15, 23, 42, 0.3)'
+const FOCUSED_EDITING_SPOTLIGHT_Z_INDEX = '320'
+
+class FocusedEditingSpotlight {
+  private overlayElement: HTMLDivElement | null = null
+  private svgElement: SVGSVGElement | null = null
+  private pathElement: SVGPathElement | null = null
+  private targetElement: HTMLElement | null = null
+  private resizeObserver: ResizeObserver | null = null
+  private frameId: number | null = null
+
+  attach(target: HTMLElement) {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return
+    }
+
+    this.targetElement = target
+    this.ensureOverlay()
+    this.connectResizeObserver()
+    window.addEventListener('resize', this.handleViewportChange, { passive: true })
+    window.addEventListener('scroll', this.handleViewportChange, { passive: true })
+    this.startTracking()
+  }
+
+  detach() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.handleViewportChange)
+      window.removeEventListener('scroll', this.handleViewportChange)
+    }
+
+    if (this.frameId !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.frameId)
+      this.frameId = null
+    }
+
+    this.disconnectResizeObserver()
+    this.targetElement = null
+    this.pathElement = null
+    this.svgElement = null
+    this.overlayElement?.remove()
+    this.overlayElement = null
+  }
+
+  scheduleUpdate = () => {
+    this.update()
+  }
+
+  private startTracking() {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const tick = () => {
+      this.update()
+      this.frameId = window.requestAnimationFrame(tick)
+    }
+
+    if (this.frameId === null) {
+      tick()
+    }
+  }
+
+  private readonly handleViewportChange = () => {
+    this.scheduleUpdate()
+  }
+
+  private ensureOverlay() {
+    if (this.overlayElement && this.pathElement && this.svgElement) {
+      return
+    }
+
+    const overlayElement = document.createElement('div')
+    overlayElement.className = 'concrete-edit-mode-focus-spotlight'
+    overlayElement.setAttribute('aria-hidden', 'true')
+    overlayElement.style.position = 'fixed'
+    overlayElement.style.inset = '0'
+    overlayElement.style.pointerEvents = 'none'
+    overlayElement.style.zIndex = FOCUSED_EDITING_SPOTLIGHT_Z_INDEX
+
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svgElement.setAttribute('width', '100%')
+    svgElement.setAttribute('height', '100%')
+    svgElement.setAttribute('preserveAspectRatio', 'none')
+    svgElement.style.display = 'block'
+
+    const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    pathElement.setAttribute('fill', FOCUSED_EDITING_SPOTLIGHT_FILL)
+    pathElement.setAttribute('fill-rule', 'evenodd')
+
+    svgElement.appendChild(pathElement)
+    overlayElement.appendChild(svgElement)
+    document.body.appendChild(overlayElement)
+
+    this.overlayElement = overlayElement
+    this.svgElement = svgElement
+    this.pathElement = pathElement
+  }
+
+  private connectResizeObserver() {
+    if (!this.targetElement || !window.ResizeObserver) {
+      return
+    }
+
+    this.disconnectResizeObserver()
+    this.resizeObserver = new ResizeObserver(() => {
+      this.scheduleUpdate()
+    })
+    this.resizeObserver.observe(this.targetElement)
+  }
+
+  private disconnectResizeObserver() {
+    this.resizeObserver?.disconnect()
+    this.resizeObserver = null
+  }
+
+  private update() {
+    if (!this.targetElement || !this.pathElement || !this.svgElement) {
+      return
+    }
+
+    if (!this.targetElement.isConnected) {
+      this.detach()
+      return
+    }
+
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const rect = this.targetElement.getBoundingClientRect()
+    const left = clampSpotlightCoordinate(rect.left - FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportWidth)
+    const top = clampSpotlightCoordinate(rect.top - FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportHeight)
+    const right = clampSpotlightCoordinate(rect.right + FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportWidth)
+    const bottom = clampSpotlightCoordinate(rect.bottom + FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportHeight)
+
+    this.svgElement.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`)
+    this.pathElement.setAttribute('d', createSpotlightPath({
+      viewportWidth,
+      viewportHeight,
+      left,
+      top,
+      right,
+      bottom,
+    }))
+  }
+}
+
+function clampSpotlightCoordinate(value: number, limit: number): number {
+  return Math.max(0, Math.min(limit, Math.round(value)))
+}
+
+function createSpotlightPath({
+  viewportWidth,
+  viewportHeight,
+  left,
+  top,
+  right,
+  bottom,
+}: {
+  viewportWidth: number
+  viewportHeight: number
+  left: number
+  top: number
+  right: number
+  bottom: number
+}) {
+  return [
+    `M0 0H${viewportWidth}V${viewportHeight}H0Z`,
+    `M${left} ${top}H${right}V${bottom}H${left}Z`,
+  ].join(' ')
+}
+
+const focusedEditingSpotlight = new FocusedEditingSpotlight()
 
 function getFocusedEditingBlockElement(blockId: string | number | null | undefined): HTMLElement | null {
   if (!blockId || typeof document === 'undefined') {
@@ -115,12 +287,17 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
 
       if (!root || !focusedElement) {
         root?.classList.remove(FOCUSED_EDITING_ROOT_CLASS)
+        focusedEditingSpotlight.detach()
         this.setPageInteractionsEnabled(true)
         return
       }
 
       root.classList.add(FOCUSED_EDITING_ROOT_CLASS)
       focusedElement.classList.add(FOCUSED_EDITING_TARGET_CLASS)
+      focusedEditingSpotlight.attach(focusedElement)
+      void nextTick(() => {
+        focusedEditingSpotlight.scheduleUpdate()
+      })
       this.setPageInteractionsEnabled(false)
     },
     clearFocusedEditingTarget() {
