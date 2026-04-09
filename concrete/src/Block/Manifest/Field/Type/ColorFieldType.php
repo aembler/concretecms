@@ -16,7 +16,7 @@ final class ColorFieldType extends AbstractFieldType
 
     public function getComponent(): string
     {
-        return 'ManifestFieldColor';
+        return 'ComposableEditorColorField';
     }
 
     public function normalizeDefinition(array $definition): array

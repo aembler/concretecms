@@ -16,7 +16,7 @@ final class TextareaFieldType extends AbstractFieldType
 
     public function getComponent(): string
     {
-        return 'ManifestFieldTextarea';
+        return 'ComposableEditorTextareaField';
     }
 
     public function normalizeDefinition(array $definition): array

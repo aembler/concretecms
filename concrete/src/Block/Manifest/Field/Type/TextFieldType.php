@@ -16,7 +16,7 @@ final class TextFieldType extends AbstractFieldType
 
     public function getComponent(): string
     {
-        return 'ManifestFieldText';
+        return 'ComposableEditorTextField';
     }
 
     public function normalizeDefinition(array $definition): array
