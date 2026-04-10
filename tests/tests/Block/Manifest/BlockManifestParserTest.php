@@ -43,7 +43,7 @@ final class BlockManifestParserTest extends TestCase
     {
         $manifest = $this->getParser()->parseString(<<<XML
 <concrete-bdf version="1.0">
-    <blocktype handle="sample" name="Sample" description="Example" package="">
+    <blocktype handle="sample" name="Sample" description="Example" set="basics" package="">
         <icon>
             <svg viewBox="0 0 10 10"><rect width="10" height="10" /></svg>
         </icon>
@@ -68,6 +68,7 @@ XML);
         $this->assertSame('sample', $manifest->getHandle());
         $this->assertSame('Sample', $manifest->getName());
         $this->assertSame('Example', $manifest->getDescription());
+        $this->assertSame('basics', $manifest->getSet());
         $this->assertCount(3, $manifest->getFields());
         $this->assertFalse($manifest->hasErrors());
         $this->assertStringContainsString('<svg', $manifest->getIcon());

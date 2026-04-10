@@ -224,8 +224,15 @@ class BlockType
         $em->persist($bt);
         $em->flush();
 
+        $defaultSetHandle = null;
         if ($bta !== null && $bta->getBlockTypeDefaultSet()) {
-            $set = Set::getByHandle($bta->getBlockTypeDefaultSet());
+            $defaultSetHandle = $bta->getBlockTypeDefaultSet();
+        } else {
+            $defaultSetHandle = $factory->getDefaultSetFromDirectory($directory);
+        }
+
+        if ($defaultSetHandle) {
+            $set = Set::getByHandle($defaultSetHandle);
             if ($set !== null) {
                 $set->addBlockType($bt);
             }

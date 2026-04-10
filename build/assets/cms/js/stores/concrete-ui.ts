@@ -17,7 +17,7 @@ type FocusedEditingTarget = {
 const FOCUSED_EDITING_ROOT_CLASS = 'concrete-edit-mode-focus'
 const FOCUSED_EDITING_TARGET_CLASS = 'concrete-edit-mode-focus-focused'
 const FOCUSED_EDITING_SPOTLIGHT_PADDING = 12
-const FOCUSED_EDITING_SPOTLIGHT_FILL = 'rgba(15, 23, 42, 0.3)'
+const FOCUSED_EDITING_SPOTLIGHT_FILL = 'rgba(0, 0, 0, 0.4)';
 const FOCUSED_EDITING_SPOTLIGHT_Z_INDEX = '320'
 
 class FocusedEditingSpotlight {

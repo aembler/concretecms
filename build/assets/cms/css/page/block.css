@@ -3,6 +3,7 @@
   position: relative;
 }
 
+/*
 html.concrete-edit-mode-focus concrete-block {
   opacity: 0.4;
   transition: opacity 160ms ease;
@@ -11,3 +12,4 @@ html.concrete-edit-mode-focus concrete-block {
 html.concrete-edit-mode-focus .concrete-edit-mode-focus-focused {
   opacity: 1;
 }
+*/

@@ -32,7 +32,7 @@ final class ManifestTest extends TestCase
 
         $manifest = $parser->parseString(<<<XML
 <concrete-bdf version="1.0">
-    <blocktype handle="sample" name="Sample" description="Example">
+    <blocktype handle="sample" name="Sample" description="Example" set="basics">
         <fields>
             <field id="headline" type="text" label="Headline" />
             <field id="body" type="textarea" label="Body" rows="3" />
@@ -53,6 +53,7 @@ XML);
 
         $this->assertSame('sample', $manifest->getHandle());
         $this->assertSame('Sample', $manifest->getName());
+        $this->assertSame('basics', $manifest->getSet());
         $this->assertCount(5, $manifest->getFields());
         $this->assertFalse($manifest->hasErrors());
         $this->assertNotNull($manifest->getField('core.styles.text_color'));

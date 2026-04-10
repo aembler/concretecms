@@ -71,6 +71,7 @@ final class BlockManifestParser
         $handle = $this->getRequiredAttribute($blockType, 'handle', '<blocktype>');
         $name = $this->getRequiredAttribute($blockType, 'name', '<blocktype>');
         $description = trim((string) ($blockType['description'] ?? ''));
+        $set = trim((string) ($blockType['set'] ?? ''));
         $package = trim((string) ($blockType['package'] ?? ''));
         $icon = $this->extractIconMarkup($blockType);
 
@@ -86,6 +87,7 @@ final class BlockManifestParser
             $handle,
             $name,
             $description,
+            $set,
             $package,
             $schemaVersion,
             $icon,

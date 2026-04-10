@@ -27,6 +27,11 @@ final class BlockManifest implements \JsonSerializable
     /**
      * @var string
      */
+    protected $set;
+
+    /**
+     * @var string
+     */
     protected $package;
 
     /**
@@ -63,6 +68,7 @@ final class BlockManifest implements \JsonSerializable
         string $handle,
         string $name,
         string $description,
+        string $set,
         string $package,
         string $schemaVersion,
         string $icon,
@@ -73,6 +79,7 @@ final class BlockManifest implements \JsonSerializable
         $this->handle = $handle;
         $this->name = $name;
         $this->description = $description;
+        $this->set = $set;
         $this->package = $package;
         $this->schemaVersion = $schemaVersion;
         $this->icon = $icon;
@@ -94,6 +101,11 @@ final class BlockManifest implements \JsonSerializable
     public function getDescription(): string
     {
         return $this->description;
+    }
+
+    public function getSet(): string
+    {
+        return $this->set;
     }
 
     public function getPackage(): string
@@ -150,6 +162,7 @@ final class BlockManifest implements \JsonSerializable
      *   handle: string,
      *   name: string,
      *   description: string,
+     *   set: string,
      *   package: string,
      *   schemaVersion: string,
      *   icon: string,
@@ -164,6 +177,7 @@ final class BlockManifest implements \JsonSerializable
             'handle' => $this->handle,
             'name' => $this->name,
             'description' => $this->description,
+            'set' => $this->set,
             'package' => $this->package,
             'schemaVersion' => $this->schemaVersion,
             'icon' => $this->icon,

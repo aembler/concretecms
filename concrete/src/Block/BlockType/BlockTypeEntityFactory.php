@@ -108,4 +108,25 @@ class BlockTypeEntityFactory
 
         return $bt;
     }
+
+    public function getDefaultSetFromDirectory(string $directory): ?string
+    {
+        if (!is_dir($directory)) {
+            throw new RuntimeException(sprintf('The block type directory "%s" does not exist.', $directory));
+        }
+
+        $manifestFile = $directory . '/' . FILENAME_BLOCK_MANIFEST;
+        if (!is_file($manifestFile)) {
+            return null;
+        }
+
+        $xml = simplexml_load_file($manifestFile);
+        if (!$xml instanceof SimpleXMLElement || !isset($xml->blocktype)) {
+            return null;
+        }
+
+        $set = trim((string) ($xml->blocktype['set'] ?? ''));
+
+        return $set !== '' ? $set : null;
+    }
 }
