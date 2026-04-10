@@ -7,6 +7,7 @@
           v-model:expanded="isExpanded"
           width="min(92vw, 32rem)"
           height="calc(100vh - 8.5rem)"
+          @after-leave="handleAfterLeave"
         >
           <template #header>
             <FloatingPanelHeader
@@ -94,7 +95,7 @@ export const blockEditorMeta: BlockEditorMeta = {
 </script>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { inject, computed, onMounted, ref, watch } from 'vue'
 import { FloatingPanel, FloatingPanelBody, FloatingPanelFooter, FloatingPanelHeader, useUiStore, useAjax } from '@concretecms/backendui'
 import ComposableEditorFieldRenderer from '../../ComposableEditor/FieldRenderer.vue'
 import ComposableEditorFieldset from '../../ComposableEditor/Fieldset.vue'
@@ -303,11 +304,9 @@ function hydrateManifest(data: ManifestPayload) {
   values.value = nextValues
 }
 
-watch(isOpen, (nextValue) => {
-  if (!nextValue) {
-    emit('closed')
-  }
-})
+function handleAfterLeave() {
+  emit('closed')
+}
 
 onMounted(() => {
   request({
