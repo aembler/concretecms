@@ -67,13 +67,7 @@
     <component
         :is="currentEditorComponent"
         v-if="currentEditorComponent"
-        :block-type-id="parseBlockType?.id"
-        :editor="parseEditor"
-        :block-id="blockId"
-        :area-handle="areaHandle"
-        :page-id="pageId"
-        :content-html="contentHtml"
-        :content-el="contentEl"
+        :context="currentEditorContext"
         @updated="handleUpdated"
         @closed="handleEditorClosed"
     />
@@ -99,6 +93,7 @@ import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonPropRef } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { DeleteBlockOperation } from '../stores/types/page-operations'
+import type { EditBlockEditorContext } from '../stores/types/block-editors'
 import { useBlockEditorRegistry } from '../stores/block-editor-registry'
 import { useToast } from '../utilities/toast'
 import HotSpotBadge from "./Ui/HotSpotBadge.vue";
@@ -262,6 +257,24 @@ function handleEditorClosed() {
 const currentEditorComponent = computed(() => {
   const editorComponentName = parseEditor.value?.component
   return blockEditorRegistry.resolveEditorComponent(editorComponentName)
+})
+const currentEditorContext = computed<EditBlockEditorContext | null>(() => {
+  if (!parseEditor.value) {
+    return null
+  }
+
+  return {
+    mode: 'edit',
+    editor: parseEditor.value,
+    pageId: props.pageId,
+    areaHandle: props.areaHandle ?? '',
+    blockTypeId: parseBlockType.value?.id,
+    operation: {
+      blockId: props.blockId,
+      contentHtml: contentHtml.value,
+      contentEl: contentEl.value,
+    },
+  }
 })
 
 const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {

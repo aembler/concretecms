@@ -102,6 +102,7 @@ import ComposableEditorTabs from '../../ComposableEditor/Tabs.vue'
 import ComposableEditorColorField from '../../ComposableEditor/Field/ComposableEditorColorField.vue'
 import ComposableEditorTextField from '../../ComposableEditor/Field/ComposableEditorTextField.vue'
 import ComposableEditorTextareaField from '../../ComposableEditor/Field/ComposableEditorTextareaField.vue'
+import type { BlockEditorContext } from '../../../stores/types/block-editors'
 
 type ManifestFieldDefinition = {
   id: string
@@ -163,12 +164,7 @@ type RenderableLayoutElement =
     }
 
 const props = defineProps<{
-  blockTypeId: number
-  blockId?: string | number
-  areaHandle?: string
-  pageId?: string | number
-  contentHtml?: string | null
-  contentEl?: HTMLElement | null
+  context: BlockEditorContext
 }>()
 
 const emit = defineEmits<{
@@ -244,6 +240,13 @@ const activeTabChildren = computed<RenderableLayoutElement[]>(() => {
 })
 
 const formattedValues = computed(() => JSON.stringify(values.value, null, 2))
+const manifestBlockTypeId = computed(() => {
+  if (props.context.mode === 'add') {
+    return Number(props.context.operation.blockTypeId || 0)
+  }
+
+  return Number(props.context.blockTypeId || 0)
+})
 
 function resolveRenderableField(fieldId: string): RenderableField | null {
   const definition = manifest.value?.fields?.[fieldId]
@@ -308,7 +311,7 @@ watch(isOpen, (nextValue) => {
 
 onMounted(() => {
   request({
-    url: CCM_DISPATCHER_FILENAME + `/ccm/block_types/manifest/${props.blockTypeId}`,
+    url: CCM_DISPATCHER_FILENAME + `/ccm/block_types/manifest/${manifestBlockTypeId.value}`,
     method: 'GET',
     onSuccess: (data) => {
       hydrateManifest(data as ManifestPayload)

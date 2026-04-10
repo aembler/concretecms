@@ -61,62 +61,41 @@ import {
   DialogHeader,
   DialogTitle,
   LazyDialog,
-  normalizeJsonResponse,
-  useAjax
 } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../../stores/concrete-ui'
-import type { AddBlockOperation, AddBlockTargetRef, BlockRef, UpdateBlockOperation } from '../../../stores/types/page-operations'
+import { useBlockEditorSession } from './useBlockEditorSession'
+import type { BlockEditorContext } from '../../../stores/types/block-editors'
 
 const props = defineProps<{
-  editor: {
-    component: string
-    componentProps: {
-      dialogTitle: string
-      dialogWidth: string | number
-      dialogHeight: string | number
-    }
-  }
-  mode?: 'add' | 'edit'
-  blockTypeId?: number
-  blockId: string | number
-  areaHandle: string
-  pageId: string | number
-  contentHtml?: string | null
-  contentEl?: HTMLElement | null
-  addTarget?: AddBlockTargetRef
-  ignoreContainer?: boolean
+  context: BlockEditorContext
 }>()
 
 const open = ref(false)
 const helpTooltipText = ref('')
 const helpTooltipOpen = ref(false)
-const isSubmitting = ref(false)
 const closeEmitTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const pendingUpdatedResponse = ref<any | null>(null)
 const DIALOG_CLOSE_TRANSITION_MS = 240
-const { request } = useAjax()
 const lazyDialogRef = ref<any>(null)
-const uiStore = useConcreteUiStore()
+const { isSubmitting, submit } = useBlockEditorSession(computed(() => props.context))
 
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any }): void
   (e: 'closed'): void
 }>()
 
-const dialogTitle = computed(() => props.editor.componentProps.dialogTitle)
-const dialogWidth = computed(() => props.editor.componentProps.dialogWidth)
-const dialogHeight = computed(() => props.editor.componentProps.dialogHeight)
-const editorMode = computed(() => props.mode ?? 'edit')
+const dialogTitle = computed(() => String(props.context.editor.componentProps?.dialogTitle || 'Block Editor'))
+const dialogWidth = computed(() => props.context.editor.componentProps?.dialogWidth ?? 'min(92vw, 56rem)')
+const dialogHeight = computed(() => props.context.editor.componentProps?.dialogHeight ?? 'min(88vh, 48rem)')
 const dialogUrl = computed(() => {
   const params = new URLSearchParams({
-    cID: String(props.pageId),
-    arHandle: String(props.areaHandle),
+    cID: String(props.context.pageId),
+    arHandle: String(props.context.areaHandle),
   })
-  if (editorMode.value === 'add') {
-    params.set('btID', String(props.blockTypeId || 0))
+  if (props.context.mode === 'add') {
+    params.set('btID', String(props.context.operation.blockTypeId || 0))
     return `/ccm/system/dialogs/page/add_block?${params.toString()}`
   }
-  params.set('bID', String(props.blockId))
+  params.set('bID', String(props.context.operation.blockId))
   return `/ccm/system/dialogs/block/edit?${params.toString()}`
 })
 
@@ -180,80 +159,31 @@ function hasResponseErrors(response: any): boolean {
 }
 
 function handleSave() {
-  if (isSubmitting.value) {
-    return
-  }
-
   const form = findPrimaryForm()
   if (!form) {
     return
   }
 
   const formData = new FormData(form)
-  if (editorMode.value === 'add' && props.addTarget) {
-    formData.set('dragAreaBlockID', String(props.addTarget.afterBlockId || 0))
-  }
   const url = form.getAttribute('action') || dialogUrl.value
   const method = normalizeMethod(form.getAttribute('method') || 'POST')
   if (!url) {
     return
   }
 
-  isSubmitting.value = true
-  request({
+  submit({
     url,
     method,
     body: formData,
     skipResponseValidation: true,
-    onSuccess: (response) => {
-      const normalizedResponse: any = normalizeJsonResponse(response)
-
-      if (hasResponseErrors(normalizedResponse)) {
-        return
-      }
-
-      if (editorMode.value === 'add' && props.addTarget) {
-        const operation: AddBlockOperation = {
-          id: `block.add.${String(props.blockTypeId || 0)}.${Date.now()}`,
-          type: 'block.add',
-          status: 'queued',
-          blockTypeId: Number(props.blockTypeId || 0),
-          ignoreContainer: Boolean(props.ignoreContainer ?? false),
-          target: props.addTarget,
-          response: normalizedResponse,
-        }
-        uiStore.enqueuePageOperation(operation)
-      } else {
-        const originalBlock: BlockRef = {
-          bID: props.blockId,
-          arHandle: props.areaHandle,
-          cID: props.pageId,
-        }
-        const updatedBlock: BlockRef = {
-          bID: normalizedResponse?.bID || originalBlock.bID,
-          arHandle: normalizedResponse?.arHandle || originalBlock.arHandle,
-          cID: normalizedResponse?.cID || originalBlock.cID,
-        }
-
-        const operation: UpdateBlockOperation = {
-          id: `block.update.${String(originalBlock.bID)}.${Date.now()}`,
-          type: 'block.update',
-          status: 'queued',
-          originalBlock,
-          updatedBlock,
-          replacementHtml: typeof normalizedResponse?.html === 'string' ? normalizedResponse.html : undefined,
-          response: normalizedResponse,
-        }
-
-        uiStore.enqueuePageOperation(operation)
-      }
-      pendingUpdatedResponse.value = normalizedResponse
+  }, {
+    closeBehavior: 'manual',
+    responseHasErrors: hasResponseErrors,
+    onSuccess: ({ response }) => {
+      pendingUpdatedResponse.value = response
       open.value = false
       helpTooltipOpen.value = false
     },
-    onComplete: () => {
-      isSubmitting.value = false
-    }
   })
 }
 

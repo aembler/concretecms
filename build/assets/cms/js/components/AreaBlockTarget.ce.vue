@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useConcreteUiStore } from '../stores/concrete-ui'
 import type { PendingAddEditorRequest } from '../stores/types/page-operations'
+import type { AddBlockEditorContext } from '../stores/types/block-editors'
 import { useBlockEditorRegistry } from '../stores/block-editor-registry'
 import ContainerShell from './Ui/ContainerShell.vue'
 
@@ -92,6 +93,25 @@ const activeAddEditorRequest = computed<PendingAddEditorRequest | null>(() => {
 })
 const activeAddEditorComponent = computed(() => {
   return blockEditorRegistry.resolveEditorComponent(activeAddEditorRequest.value?.editor?.component)
+})
+const activeAddEditorContext = computed<AddBlockEditorContext | null>(() => {
+  const request = activeAddEditorRequest.value
+  if (!request?.editor) {
+    return null
+  }
+
+  return {
+    mode: 'add',
+    editor: request.editor,
+    pageId: request.target.pageId,
+    areaHandle: request.target.areaHandle,
+    blockTypeId: request.blockTypeId,
+    operation: {
+      blockTypeId: request.blockTypeId,
+      addTarget: request.target,
+      ignoreContainer: request.ignoreContainer ?? false,
+    },
+  }
 })
 const activeAddEditorMeta = ref({
   pageContentMode: 'preserve' as const,
@@ -303,14 +323,7 @@ function handleAddEditorClosed() {
       <component
         :is="activeAddEditorComponent"
         :key="activeAddEditorRequest.id"
-        :editor="activeAddEditorRequest.editor"
-        mode="add"
-        :block-type-id="activeAddEditorRequest.blockTypeId"
-        :block-id="0"
-        :area-handle="activeAddEditorRequest.target.areaHandle"
-        :page-id="activeAddEditorRequest.target.pageId"
-        :add-target="activeAddEditorRequest.target"
-        :ignore-container="activeAddEditorRequest.ignoreContainer ?? false"
+        :context="activeAddEditorContext"
         @updated="handleAddEditorUpdated"
         @closed="handleAddEditorClosed"
       />
@@ -320,14 +333,7 @@ function handleAddEditorClosed() {
       :is="activeAddEditorComponent"
       v-else-if="activeAddEditorRequest && activeAddEditorComponent"
       :key="activeAddEditorRequest.id"
-      :editor="activeAddEditorRequest.editor"
-      mode="add"
-      :block-type-id="activeAddEditorRequest.blockTypeId"
-      :block-id="0"
-      :area-handle="activeAddEditorRequest.target.areaHandle"
-      :page-id="activeAddEditorRequest.target.pageId"
-      :add-target="activeAddEditorRequest.target"
-      :ignore-container="activeAddEditorRequest.ignoreContainer ?? false"
+      :context="activeAddEditorContext"
       @updated="handleAddEditorUpdated"
       @closed="handleAddEditorClosed"
     />
