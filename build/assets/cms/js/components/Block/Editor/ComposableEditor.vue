@@ -74,8 +74,8 @@
 
           <template #footer>
             <FloatingPanelFooter class="flex items-center justify-end gap-3">
-              <button type="button" class="btn btn-secondary me-auto" @click="handleCancel">Cancel</button>
-              <button type="button" class="btn btn-primary" @click="handleSave">Save</button>
+              <button type="button" class="btn btn-secondary me-auto" :disabled="isSubmitting" @click="handleCancel">Cancel</button>
+              <button type="button" class="btn btn-primary" :disabled="isSubmitting || isLoading || Boolean(loadError)" @click="handleSave">Save</button>
             </FloatingPanelFooter>
           </template>
         </FloatingPanel>
@@ -95,7 +95,7 @@ export const blockEditorMeta: BlockEditorMeta = {
 </script>
 
 <script setup lang="ts">
-import { inject, computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { FloatingPanel, FloatingPanelBody, FloatingPanelFooter, FloatingPanelHeader, useUiStore, useAjax } from '@concretecms/backendui'
 import ComposableEditorFieldRenderer from '../../ComposableEditor/FieldRenderer.vue'
 import ComposableEditorFieldset from '../../ComposableEditor/Fieldset.vue'
@@ -103,6 +103,7 @@ import ComposableEditorTabs from '../../ComposableEditor/Tabs.vue'
 import ComposableEditorColorField from '../../ComposableEditor/Field/ComposableEditorColorField.vue'
 import ComposableEditorTextField from '../../ComposableEditor/Field/ComposableEditorTextField.vue'
 import ComposableEditorTextareaField from '../../ComposableEditor/Field/ComposableEditorTextareaField.vue'
+import { useBlockEditorSession } from './useBlockEditorSession'
 import type { BlockEditorContext } from '../../../stores/types/block-editors'
 
 type ManifestFieldDefinition = {
@@ -169,6 +170,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  (e: 'updated', payload: { response: any }): void
   (e: 'closed'): void
 }>()
 
@@ -182,6 +184,15 @@ const activeTabId = ref<string | null>(null)
 const values = ref<Record<string, string>>({})
 const isOpen = ref(true)
 const isExpanded = ref(false)
+const { isSubmitting, submit, submitUrl } = useBlockEditorSession(
+  computed(() => props.context),
+  {
+    onUpdated: (payload) => {
+      emit('updated', payload)
+      isOpen.value = false
+    },
+  }
+)
 
 const portalTarget = computed(() => uiStore.menuContainer ?? null)
 
@@ -289,7 +300,19 @@ function handleCancel() {
 }
 
 function handleSave() {
-  window.alert('Save is not wired up yet.')
+  if (!manifest.value) {
+    return
+  }
+
+  const body = new FormData()
+  for (const [fieldId, value] of Object.entries(values.value)) {
+    body.set(fieldId, value)
+  }
+
+  submit({
+    url: submitUrl.value,
+    body,
+  })
 }
 
 function hydrateManifest(data: ManifestPayload) {
