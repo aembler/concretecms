@@ -1569,13 +1569,9 @@ EOT
             ) {
             $this->instance->__construct();
         } else {
-            $bt = $this->getBlockTypeObject();
-            $class = $bt->getBlockTypeClass($this->getBlockVersion());
-
-            $this->instance = $app->make($class, ['obj' => $this]);
+            $controllerFactory = $app->make(ControllerFactory::class);
+            $this->instance = $controllerFactory->createFromBlock($this);
         }
-        $this->instance->setBlockObject($this);
-        $this->instance->setAreaObject($this->getBlockAreaObject());
 
         return $this->instance;
     }
@@ -1641,11 +1637,9 @@ EOT
 
         $this->refreshBlockOutputCache();
 
-        $btID = $this->getBlockTypeID();
-        $bt = BlockType::getByID($btID);
-        $class = $bt->getBlockTypeClass($this->getBlockVersion());
-        $app = Facade::getFacadeApplication();
-        $bc = $app->make($class, ['obj' => $this]);
+
+        $controllerFactory = app(ControllerFactory::class);
+        $bc = $controllerFactory->createFromBlock($this);
         $bc->save($data);
     }
 
@@ -1757,12 +1751,8 @@ EOT
         /** @var Date $dh */
         $dh = $app->make('helper/date');
 
-        $bt = BlockType::getByID($this->getBlockTypeID());
-        $blockTypeClass = $bt->getBlockTypeClass($this->getBlockVersion());
-        if (!$blockTypeClass) {
-            return false;
-        }
-        $bc = $app->make($blockTypeClass, ['obj' => $this]);
+        $controllerFactory = app(ControllerFactory::class);
+        $bc = $controllerFactory->createFromBlock($this);
 
         $bDate = $dh->getOverridableNow();
         $connection->insert('Blocks', [
@@ -1998,13 +1988,9 @@ EOT
             $v = [$bID];
 
             // so, first we delete the block's sub content
-            $bt = BlockType::getByID($this->getBlockTypeID());
-            if ($bt && method_exists($bt, 'getBlockTypeClass')) {
-                $class = $bt->getBlockTypeClass($this->getBlockVersion());
-                $app = Facade::getFacadeApplication();
-                $bc = $app->make($class, ['obj' => $this]);
-                $bc->delete();
-            }
+            $controllerFactory = app(ControllerFactory::class);
+            $bc = $controllerFactory->createFromBlock($this);
+            $bc->delete();
 
             // now that the block's subcontent delete() method has been run, we delete the block from the Blocks table
             $db->executeStatement('delete from Blocks where bID = ?', $v);

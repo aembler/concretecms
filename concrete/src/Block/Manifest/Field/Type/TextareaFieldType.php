@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Concrete\Core\Block\Manifest\Field\Type;
 
 use Concrete\Core\Block\Manifest\Field\AbstractFieldType;
+use Concrete\Core\Block\Manifest\FieldDefinition;
 use Concrete\Core\Http\Request;
 
 final class TextareaFieldType extends AbstractFieldType
@@ -28,6 +29,11 @@ final class TextareaFieldType extends AbstractFieldType
         }
 
         return $definition;
+    }
+
+    public function extractValueFromRequest(array $requestArgs, FieldDefinition $field, ?Request $request = null): string
+    {
+        return (string) $this->extractScalarValueFromRequest($requestArgs, $field);
     }
 
     public function serializeValue($submittedValue, array $definition, ?Request $request = null): string

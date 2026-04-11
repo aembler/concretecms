@@ -142,7 +142,10 @@ abstract class AbstractView
     {
         if (is_object($this->controller)) {
             $sets = $this->controller->getSets();
-            $helpers = $this->controller->getHelperObjects();
+            $helpers = [];
+            if (method_exists($this->controller, 'getHelperObjects')) {
+                $helpers = $this->controller->getHelperObjects();
+            }
             $return = array_merge($this->scopeItems, $sets, $helpers);
         } else {
             $return = $this->scopeItems;

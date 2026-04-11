@@ -6,6 +6,7 @@ use Concrete\Core\Application\ApplicationAwareTrait;
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Block\Manifest\BlockManifestParser;
+use Concrete\Core\Block\Manifest\Serializer\Serializer;
 use Concrete\Core\Entity\Block\BlockType\BlockType;
 use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
 use Concrete\Core\Filesystem\FileLocator;
@@ -46,7 +47,14 @@ class ControllerFactory implements ApplicationAwareInterface
             FILENAME_BLOCK_MANIFEST
         );
         if ($record->exists()) {
-            return $this->app->make(ManifestBlockController::class, ['manifest' => $this->manifestParser->parseFile($record->file)]);
+            $manifest = $this->manifestParser->parseFile($record->file);
+            $serializer = $this->app->make(Serializer::class, ['manifest' => $manifest]);
+
+            return $this->app->make(ManifestBlockController::class, [
+                'manifest' => $manifest,
+                'serializer' => $serializer,
+                'obj' => $object,
+            ]);
         } else {
             throw new \Exception(t('Unable to locate manifest.'));
         }
@@ -59,7 +67,11 @@ class ControllerFactory implements ApplicationAwareInterface
             $block->getBlockTypeHandle(), $block->getPackageHandle(), $block->getBlockVersion()
         );
         if ($controller) {
-            return $this->app->make($controller, ['obj' => $block]);
+            $instance = $this->app->make($controller, ['obj' => $block]);
+            // I don't know why we need this.
+            $instance->setBlockObject($block);
+            $instance->setAreaObject($block->getBlockAreaObject());
+            return $instance;
         }
         return $this->getManifestBlockController($block);
     }

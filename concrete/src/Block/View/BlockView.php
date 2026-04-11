@@ -65,7 +65,9 @@ class BlockView extends AbstractView
         if (!isset($this->controller)) {
             if (isset($this->block)) {
                 $this->controller = $this->block->getInstance();
-                $this->controller->setBlockObject($this->block);
+
+                // Commenting this out for V10 - do we still need this?!
+                //$this->controller->setBlockObject($this->block);
             } else {
                 $this->controller = $this->blockType->getController();
             }
@@ -118,7 +120,8 @@ class BlockView extends AbstractView
     public function start($state)
     {
         if (is_object($this->area)) {
-            $this->controller->setAreaObject($this->area);
+            // Commenting this out for v10 do we need this?!?!?
+            //$this->controller->setAreaObject($this->area);
         }
         /*
          * Legacy shit
@@ -209,7 +212,9 @@ class BlockView extends AbstractView
 
                     $this->setViewTemplate($bvt->getTemplate());
                 }
-                $page = $this->controller->getCollectionObject();
+                // Commented out for v10
+                // $page = $this->controller->getCollectionObject();
+                $page = Page::getCurrentPage();
                 if ($page) {
                     $pageViewInstance = View::getInstance();
                     $theme = $pageViewInstance->getThemeObject();
@@ -256,7 +261,9 @@ class BlockView extends AbstractView
     {
         if (in_array($this->viewPerformed, ['scrapbook', 'view'])) {
             $this->controller->runAction('on_page_view', [$this]);
-            $this->controller->outputAutoHeaderItems();
+            if (method_exists($this->controller, 'outputAutoHeaderItems')) {
+                $this->controller->outputAutoHeaderItems();
+            }
         }
     }
 
@@ -303,8 +310,10 @@ class BlockView extends AbstractView
             include $this->blockViewHeaderFile;
         }
 
-        $this->controller->registerViewAssets($this->outputContent);
-        
+        if (method_exists($this->controller, 'registerViewAssets')) {
+            $this->controller->registerViewAssets($this->outputContent);
+        }
+
         $this->onBeforeGetContents();
         $this->fireOnBlockOutputEvent();
         echo $this->outputContent;

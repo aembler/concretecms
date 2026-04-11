@@ -3,6 +3,7 @@ namespace Concrete\Core\Page\Controller;
 
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockController;
+use Concrete\Core\Block\Controller\ControllerInterface;
 use Concrete\Core\Controller\Controller;
 use Concrete\Core\Foundation\Environment;
 use Concrete\Core\Html\Service\Html;
@@ -343,7 +344,7 @@ class PageController extends Controller
      * @param BlockController $controller
      * @return void
      */
-    public function setBlockController(Block $block, BlockController $controller)
+    public function setBlockController(Block $block, ControllerInterface|BlockController $controller)
     {
         $this->blocks[$block->getBlockID()] = $controller;
     }
@@ -353,7 +354,7 @@ class PageController extends Controller
      * @param Block $block
      * @return BlockController|null
      */
-    public function getBlockController(Block $block): ?BlockController
+    public function getBlockController(Block $block): ControllerInterface|BlockController
     {
         $bID = $block->getBlockID();
 
