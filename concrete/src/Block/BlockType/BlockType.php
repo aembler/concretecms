@@ -7,6 +7,8 @@ use Concrete\Core\Application\UserInterface\Icon\IconInterface;
 use Concrete\Core\Application\UserInterface\Icon\ImageFileIcon;
 use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
 use Concrete\Core\Backup\ContentImporter;
+use Concrete\Core\Block\BlockController;
+use Concrete\Core\Block\Controller\ControllerFactory;
 use Concrete\Core\Block\ProvidesIconInterface;
 use Concrete\Core\Cache\Level\RequestCache;
 use Concrete\Core\Database\Connection\Connection;
@@ -129,8 +131,8 @@ class BlockType
             $em = $app->make(EntityManagerInterface::class);
             $repo = $em->getRepository(BlockTypeEntity::class);
             $result = $repo->findOneBy(['btHandle' => $btHandle]);
-            if ($result !== null) {
-                $result->loadController();
+            if ($result instanceof BlockTypeEntity) {
+                $result->controller = app(ControllerFactory::class)->createFromBlockType($result);
             }
         }
 
@@ -162,8 +164,8 @@ class BlockType
         if ($btID !== 0) {
             $em = $app->make(EntityManagerInterface::class);
             $result = $em->find(BlockTypeEntity::class, $btID);
-            if ($result !== null) {
-                $result->loadController();
+            if ($result instanceof BlockTypeEntity) {
+                $result->controller = app(ControllerFactory::class)->createFromBlockType($result);
             }
         }
 
@@ -189,14 +191,12 @@ class BlockType
         $em = $app->make(EntityManagerInterface::class);
         $pkgHandle = (string) (is_object($pkg) ? $pkg->getPackageHandle() : $pkg);
         $factory = $app->make(BlockTypeEntityFactory::class);
-        $directory = $factory->getDirectoryByHandle($btHandle, $pkgHandle);
-        $hasController = $factory->directoryHasController($directory);
-        $bta = null;
+        $controllerFactory = $app->make(ControllerFactory::class);
 
-        if ($hasController) {
-            $class = static::getBlockTypeMappedClass($btHandle, $pkgHandle, 1);
-            $bta = $app->build($class);
-
+        $bt = $factory->createFromBlockTypeHandle($btHandle, $pkgHandle);
+        $controller = $controllerFactory->createFromBlockType($bt);
+        if ($controller instanceof BlockController) {
+            // Legacy support
             $locator = $app->make(FileLocator::class);
             if ($pkgHandle !== '') {
                 $locator->addLocation(new FileLocator\PackageLocation($pkgHandle));
@@ -205,14 +205,13 @@ class BlockType
             $path = dirname($locator->getRecord($dbPath)->getFile());
 
             // Attempt to run the subclass methods (install schema from db.xml, etc.)
-            $bta->install($path, $importMode);
+            $controller->install($path, $importMode);
         }
 
         // Prevent the database records being stored in wrong language
         $loc = $app->make(Localization::class);
         $loc->pushActiveContext(Localization::CONTEXT_SYSTEM);
         try {
-            $bt = $factory->createFromDirectory($directory);
             if (is_object($pkg)) {
                 $bt->setPackageID($pkg->getPackageID());
             }
@@ -224,13 +223,8 @@ class BlockType
         $em->persist($bt);
         $em->flush();
 
-        $defaultSetHandle = null;
-        if ($bta !== null && $bta->getBlockTypeDefaultSet()) {
-            $defaultSetHandle = $bta->getBlockTypeDefaultSet();
-        } else {
-            $defaultSetHandle = $factory->getDefaultSetFromDirectory($directory);
-        }
 
+        $defaultSetHandle = $controller->getBlockTypeDefaultSet();
         if ($defaultSetHandle) {
             $set = Set::getByHandle($defaultSetHandle);
             if ($set !== null) {

@@ -5,6 +5,7 @@ namespace Concrete\Core\Block;
 use Concrete\Core\Area\Area;
 use Concrete\Core\Backup\ContentExporter;
 use Concrete\Core\Block\BlockType\BlockType;
+use Concrete\Core\Block\Controller\ControllerFactory;
 use Concrete\Core\Block\Events\BlockDuplicate;
 use Concrete\Core\Block\View\BlockView;
 use Concrete\Core\Database\Connection\Connection;
@@ -251,14 +252,7 @@ class Block extends ConcreteObject implements ObjectInterface
         if ($row !== false) {
             $b->setPropertiesFromArray($row);
 
-            $bt = BlockType::getByID($b->getBlockTypeID());
-            $class = $bt->getBlockTypeClass($b->getBlockVersion());
-            if ($class == false) {
-                // we can't find the class file, so we return
-                return false;
-            }
-
-            $b->instance = $app->make($class, ['obj' => $b]);
+            $b->instance = app(ControllerFactory::class)->createFromBlock($b);
 
             if ($c != null || $a != null) {
                 $identifier = '/block/' . $bID . ':' . $cID . ':' . $cvID . ':' . $arHandle;

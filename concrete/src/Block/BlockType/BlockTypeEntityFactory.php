@@ -15,7 +15,13 @@ class BlockTypeEntityFactory
         private Application $app
     ) {}
 
-    public function getDirectoryByHandle(string $handle, string $pkgHandle = ''): string
+    public function createFromBlockTypeHandle(string $btHandle, string $pkgHandle): BlockTypeEntity
+    {
+        $directory = $this->getDirectoryByHandle($btHandle, $pkgHandle);
+        return $this->createFromDirectory($directory);
+    }
+
+    private function getDirectoryByHandle(string $handle, string $pkgHandle = ''): string
     {
         $locator = $this->app->make(FileLocator::class);
         if ($pkgHandle !== '') {
@@ -32,17 +38,8 @@ class BlockTypeEntityFactory
         throw new RuntimeException(sprintf('Unable to locate a block type directory for handle "%s".', $handle));
     }
 
-    public function directoryHasController(string $directory): bool
-    {
-        return is_file($directory . '/' . FILENAME_BLOCK_CONTROLLER);
-    }
-
     public function createFromDirectory(string $directory): BlockTypeEntity
     {
-        if (!is_dir($directory)) {
-            throw new RuntimeException(sprintf('The block type directory "%s" does not exist.', $directory));
-        }
-
         $handle = basename($directory);
         $manifestFile = $directory . '/' . FILENAME_BLOCK_MANIFEST;
         $controllerFile = $directory . '/' . FILENAME_BLOCK_CONTROLLER;
@@ -63,7 +60,7 @@ class BlockTypeEntityFactory
         ));
     }
 
-    protected function createFromController(string $handle): BlockTypeEntity
+    private function createFromController(string $handle): BlockTypeEntity
     {
         $bt = new BlockTypeEntity();
         $bt->setBlockTypeHandle($handle);
@@ -75,7 +72,7 @@ class BlockTypeEntityFactory
         return $bt;
     }
 
-    protected function createFromManifestFile(string $expectedHandle, string $manifestFile): BlockTypeEntity
+    private function createFromManifestFile(string $expectedHandle, string $manifestFile): BlockTypeEntity
     {
         $xml = simplexml_load_file($manifestFile);
         if (!$xml instanceof SimpleXMLElement) {
@@ -107,26 +104,5 @@ class BlockTypeEntityFactory
         $bt->setBlockTypeDescription((string) $blockType['description']);
 
         return $bt;
-    }
-
-    public function getDefaultSetFromDirectory(string $directory): ?string
-    {
-        if (!is_dir($directory)) {
-            throw new RuntimeException(sprintf('The block type directory "%s" does not exist.', $directory));
-        }
-
-        $manifestFile = $directory . '/' . FILENAME_BLOCK_MANIFEST;
-        if (!is_file($manifestFile)) {
-            return null;
-        }
-
-        $xml = simplexml_load_file($manifestFile);
-        if (!$xml instanceof SimpleXMLElement || !isset($xml->blocktype)) {
-            return null;
-        }
-
-        $set = trim((string) ($xml->blocktype['set'] ?? ''));
-
-        return $set !== '' ? $set : null;
     }
 }

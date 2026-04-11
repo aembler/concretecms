@@ -80,9 +80,6 @@ class AddBlock extends BackendInterfacePageController
         }
         $this->areaPermissions = new Permissions($this->areaToModify);
         $cnt = $this->blockType->getController();
-        if (!is_a($cnt, '\Concrete\Core\Block\BlockController')) {
-            throw new Exception(t('Unable to load the controller for this block type. Perhaps it has been moved or removed.'));
-        }
         $this->blockTypeController = $cnt;
         if (isset($_REQUEST['arCustomTemplates']) && is_array($_REQUEST['arCustomTemplates'])) {
             foreach ($_REQUEST['arCustomTemplates'] as $btHandle => $template) {

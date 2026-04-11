@@ -5,6 +5,7 @@ use Concrete\Core\Block\Block;
 use BlockTypeSet;
 use Concrete\Block\CoreStackDisplay\Controller;
 use Concrete\Core\Block\BlockType\BlockTypeList;
+use Concrete\Core\Block\Controller\ControllerFactory;
 use Concrete\Core\Block\View\BlockView;
 use Concrete\Core\Database\Schema\Schema;
 use Concrete\Core\Filesystem\TemplateFile;
@@ -712,27 +713,11 @@ EOT
             if (is_object($a)) {
                 $nb->setBlockAreaObject($a);
             }
-            $class = $this->getBlockTypeClass($blockVersion);
-            $bc = $app->make($class, ['obj' => $nb]);
+
+            $bc = app(ControllerFactory::class)->createFromBlock($nb);
             $bc->save($data);
 
             return Block::getByID($bIDnew);
         }
-    }
-
-    /**
-     * Loads controller.
-     */
-    public function loadController(?int $version = null)
-    {
-        $class = $this->getBlockTypeClass($version);
-        if (!$class) {
-            $this->controller = null;
-
-            return;
-        }
-
-        /** @var Controller controller */
-        $this->controller = Facade::getFacadeApplication()->make($class, ['obj' => $this]);
     }
 }

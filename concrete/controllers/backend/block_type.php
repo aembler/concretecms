@@ -3,6 +3,7 @@ namespace Concrete\Controller\Backend;
 
 use Concrete\Controller\Backend\UserInterface as BackendUserInterface;
 use Concrete\Core\Block\BlockType\BlockTypeEntityFactory;
+use Concrete\Core\Block\Controller\ManifestBlockController;
 use Concrete\Core\Block\Manifest\BlockManifestParser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -17,13 +18,11 @@ class BlockType
     {
         $blockType = \Concrete\Core\Block\BlockType\BlockType::getByID($blockTypeId);
         if ($blockType) {
-            $directory = app(BlockTypeEntityFactory::class)->getDirectoryByHandle(
-                (string) $blockType->getBlockTypeHandle(),
-                (string) $blockType->getPackageHandle()
-            );
-            $manifest = app(BlockManifestParser::class)->parseFile($directory . '/' . FILENAME_BLOCK_MANIFEST);
-
-            return new JsonResponse($manifest);
+            $controller = $blockType->getController();
+            if (!($controller instanceof ManifestBlockController)) {
+                throw new \UserMessageException(t('This block type does not use a manifest.'));
+            }
+            return new JsonResponse($controller->manifest);
         } else {
             throw new \UserMessageException(t('Block type does not exist.'));
         }
