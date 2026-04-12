@@ -6,6 +6,7 @@ namespace Concrete\Core\Block\Manifest\Field\Type;
 
 use Concrete\Core\Block\Manifest\Field\AbstractFieldType;
 use Concrete\Core\Block\Manifest\FieldDefinition;
+use Concrete\Core\Block\Manifest\View\ColorFieldViewValue;
 use Concrete\Core\Http\Request;
 
 final class ColorFieldType extends AbstractFieldType
@@ -40,5 +41,10 @@ final class ColorFieldType extends AbstractFieldType
     public function serializeValue($submittedValue, array $definition, ?Request $request = null): string
     {
         return strtoupper((string) $submittedValue);
+    }
+
+    public function createViewValue($storedValue, FieldDefinition $field): ColorFieldViewValue
+    {
+        return new ColorFieldViewValue($field, strtoupper((string) $storedValue));
     }
 }

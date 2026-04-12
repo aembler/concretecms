@@ -5,21 +5,20 @@ use Concrete\Core\Error\ErrorList\ErrorList;
 
 interface ControllerInterface
 {
-
-    public function on_start(): void;
-
-    public function on_before_render(): void;
-
-    public function getSets(): array;
-
     public function ignorePageThemeGridFrameworkContainer(): bool;
 
-    public function runAction($method, $parameters): void;
-
+    /**
+     * @param string $action
+     * @param array<mixed> $parameters
+     *
+     * @return mixed
+     */
     public function validate(array $requestArgs): ErrorList;
 
     public function getBlockTypeDefaultSet(): ?string;
 
     public function save(array $requestArgs): void;
+
+    public function duplicate(int $newBlockId): void;
 
 }

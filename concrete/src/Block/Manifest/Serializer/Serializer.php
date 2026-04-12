@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Concrete\Core\Block\Manifest\Serializer;
 
 use Concrete\Core\Block\Manifest\BlockManifest;
+use Concrete\Core\Block\Manifest\Field\EnvelopeSectionResolver;
 use Concrete\Core\Block\Manifest\FieldDefinition;
 use JsonException;
 use Psr\Log\LoggerInterface;
@@ -12,37 +13,29 @@ use Psr\Log\LoggerInterface;
 class Serializer
 {
     public function __construct(
-        protected BlockManifest $manifest,
         protected LoggerInterface $logger,
     ) {
     }
 
-    public function serializeFromRequest(array $requestArgs): string
+    /**
+     * @return array{version: int, fields: array<string, mixed>, meta: array<string, mixed>}
+     */
+    public static function emptyEnvelope(): array
     {
-        $payload = [
+        return [
             'version' => 1,
             'fields' => [],
-            'design' => [],
             'meta' => [],
         ];
+    }
 
-        foreach ($this->manifest->getFields() as $field) {
-            if (!$field instanceof FieldDefinition) {
-                continue;
-            }
+    public function serializeFromRequest(BlockManifest $manifest, array $requestArgs): string
+    {
+        $payload = self::emptyEnvelope();
+
+        foreach ($manifest->getFields() as $field) {
 
             $fieldType = $field->getFieldType();
-            if ($fieldType === null) {
-                $this->logger->notice(
-                    'Skipping manifest field "{fieldId}" during serialization because its type "{fieldType}" is not registered.',
-                    [
-                        'fieldId' => $field->getId(),
-                        'fieldType' => $field->getType(),
-                        'blockType' => $this->manifest->getHandle(),
-                    ]
-                );
-                continue;
-            }
 
             $submittedValue = $fieldType->extractValueFromRequest($requestArgs, $field);
             $serializedValue = $fieldType->serializeValue($submittedValue, $field->getDefinition());
@@ -60,17 +53,6 @@ class Serializer
 
     protected function resolveFieldEnvelopeSection(FieldDefinition $field): string
     {
-        return $this->isDesignField($field) ? 'design' : 'fields';
-    }
-
-    protected function isDesignField(FieldDefinition $field): bool
-    {
-        $fieldId = $field->getId();
-
-        if (str_starts_with($fieldId, 'core.styles.') || str_starts_with($fieldId, 'styles.')) {
-            return true;
-        }
-
-        return false;
+        return EnvelopeSectionResolver::resolve($field);
     }
 }

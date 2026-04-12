@@ -25,9 +25,23 @@ interface FieldInterface extends ComponentInterface
     public function extractValueFromRequest(array $requestArgs, FieldDefinition $field, ?Request $request = null);
 
     /**
+     * @param array<string, mixed> $payload
+     *
+     * @return mixed
+     */
+    public function extractValueFromStorage(array $payload, FieldDefinition $field);
+
+    /**
      * @param mixed $submittedValue
      *
      * @return mixed
      */
     public function serializeValue($submittedValue, array $definition, ?Request $request = null);
+
+    /**
+     * @param mixed $storedValue
+     *
+     * @return mixed
+     */
+    public function createViewValue($storedValue, FieldDefinition $field);
 }

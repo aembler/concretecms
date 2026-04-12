@@ -44,9 +44,9 @@ final class SerializerTest extends TestCase
 XML);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $serializer = new Serializer($manifest, $logger);
+        $serializer = new Serializer($logger);
 
-        $json = $serializer->serializeFromRequest([
+        $json = $serializer->serializeFromRequest($manifest, [
             'text' => 'Headline',
             'body' => 'Longer body copy',
             'accent' => '#ef00aa',
@@ -104,8 +104,8 @@ XML);
                 })
             );
 
-        $serializer = new Serializer($manifest, $logger);
-        $json = $serializer->serializeFromRequest([
+        $serializer = new Serializer($logger);
+        $json = $serializer->serializeFromRequest($manifest, [
             'headline' => 'Known value',
             'mystery' => 'Should be ignored',
         ]);
@@ -183,11 +183,123 @@ XML);
             $manifest,
             $serializer,
             $entityManager,
+            $logger,
             $block
         );
 
         $controller->save([
             'text' => 'Saved text',
         ]);
+    }
+
+    public function testManifestBlockControllerOnBeforeRenderHydratesFieldAndDesignValues(): void
+    {
+        $manifest = app(BlockManifestParser::class)->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample" description="Example">
+        <fields>
+            <field id="text" type="text" label="Text" default="Hello" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldref field="text" />
+                <fieldref field="core.styles.text_color" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $serializer = new Serializer($manifest, $logger);
+
+        $record = new CollectionVersionBlockData();
+        $record->setData('{"version":1,"fields":{"text":"Saved text"},"design":{"core.styles.text_color":"#ABCDEF"},"meta":[]}');
+
+        /** @var CollectionVersionBlockDataRepository&MockObject $repository */
+        $repository = $this->createMock(CollectionVersionBlockDataRepository::class);
+        $repository
+            ->expects($this->once())
+            ->method('findOneByBlock')
+            ->willReturn($record);
+
+        /** @var EntityManagerInterface&MockObject $entityManager */
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(CollectionVersionBlockData::class)
+            ->willReturn($repository);
+
+        $block = $this->createConfiguredMock(Block::class, [
+            'getBlockID' => 123,
+        ]);
+
+        $controller = new ManifestBlockController(
+            $manifest,
+            $serializer,
+            $entityManager,
+            $logger,
+            $block
+        );
+
+        $controller->on_before_render();
+        $sets = $controller->getSets();
+
+        $this->assertSame('Saved text', (string) $sets['fields']['text']);
+        $this->assertSame('#ABCDEF', $sets['design']['core.styles.text_color']->getHex());
+        $this->assertSame('#ABCDEF', $sets['manifestData']['design']['core.styles.text_color']);
+    }
+
+    public function testManifestBlockControllerOnBeforeRenderFallsBackToDefaultsWithoutStoredData(): void
+    {
+        $manifest = app(BlockManifestParser::class)->parseString(<<<XML
+<concrete-bdf version="1.0">
+    <blocktype handle="sample" name="Sample" description="Example">
+        <fields>
+            <field id="text" type="text" label="Text" default="Hello world" />
+        </fields>
+        <formlayout>
+            <tab id="content" name="Content">
+                <fieldref field="text" />
+            </tab>
+        </formlayout>
+    </blocktype>
+</concrete-bdf>
+XML);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $serializer = new Serializer($manifest, $logger);
+
+        /** @var CollectionVersionBlockDataRepository&MockObject $repository */
+        $repository = $this->createMock(CollectionVersionBlockDataRepository::class);
+        $repository
+            ->expects($this->once())
+            ->method('findOneByBlock')
+            ->willReturn(null);
+
+        /** @var EntityManagerInterface&MockObject $entityManager */
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(CollectionVersionBlockData::class)
+            ->willReturn($repository);
+
+        $block = $this->createConfiguredMock(Block::class, [
+            'getBlockID' => 123,
+        ]);
+
+        $controller = new ManifestBlockController(
+            $manifest,
+            $serializer,
+            $entityManager,
+            $logger,
+            $block
+        );
+
+        $controller->on_before_render();
+
+        $this->assertSame('Hello world', (string) $controller->getSets()['fields']['text']);
     }
 }

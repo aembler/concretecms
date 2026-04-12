@@ -48,11 +48,11 @@ class ControllerFactory implements ApplicationAwareInterface
         );
         if ($record->exists()) {
             $manifest = $this->manifestParser->parseFile($record->file);
-            $serializer = $this->app->make(Serializer::class, ['manifest' => $manifest]);
-
+            $serializer = $this->app->make(Serializer::class);
             return $this->app->make(ManifestBlockController::class, [
                 'manifest' => $manifest,
                 'serializer' => $serializer,
+                'logger' => $this->app->make('log'),
                 'obj' => $object,
             ]);
         } else {
