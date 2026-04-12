@@ -1,5 +1,6 @@
-{% set textColor = fields['core.styles.text_color'] is defined ? fields['core.styles.text_color'].getHex() : '' %}
+{% set textColor = fields['core.styles.text_color'] %}
+{% set text = fields['text'] %}
 
-<div{% if textColor != '' %} style="color: {{ textColor }}"{% endif %}>
-    {{ fields.text is defined ? fields.text : 'Hello World!!' }}
+<div{% if textColor != '' %} style="color: {{ textColor.getHex }}"{% endif %}>
+    {{ fields.text }}
 </div>
