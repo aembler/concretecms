@@ -18,25 +18,21 @@ abstract class Page extends \Concrete\Controller\Backend\UserInterface
      */
     protected $permissions;
 
-    public function on_start()
+    static function getPage(int $cID): ConcretePage
     {
-        $request = $this->request;
-        $cID = $request->query->get('cID');
-        if (!$cID) {
-            $cID = $request->request->get('cID');
-        }
-        if ($cID) {
-            $page = ConcretePage::getByID($cID);
-        } else {
-            $page = null;
-        }
+        $page = ConcretePage::getByID($cID);
         if (!is_object($page) || $page->getError() == COLLECTION_NOT_FOUND) {
             throw new UserMessageException(t('Unable to find the specified page.'));
         }
         if ($page->isError()) {
             throw new \Exception(t('Access Denied'));
         }
-        $this->setPageObject($page);
+        return $page;
+    }
+    public function on_start()
+    {
+        $request = $this->request;
+        $this->setPageObject(self::getPage($request->get('cID')));
         $request->setCurrentPage($this->page);
     }
 

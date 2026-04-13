@@ -2,7 +2,7 @@
   <LazyDialog
     ref="lazyDialogRef"
     v-model:open="open"
-    :src="dialogUrl"
+    :src="requestUrl"
     :dialog-title="dialogTitle"
     :dialog-width="dialogWidth"
     :dialog-height="dialogHeight"
@@ -76,7 +76,7 @@ const closeEmitTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const pendingUpdatedResponse = ref<any | null>(null)
 const DIALOG_CLOSE_TRANSITION_MS = 240
 const lazyDialogRef = ref<any>(null)
-const { isSubmitting, submit } = useBlockEditorSession(computed(() => props.context))
+const { isSubmitting, submit, requestUrl, submitUrl} = useBlockEditorSession(computed(() => props.context))
 
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any }): void
@@ -86,18 +86,6 @@ const emit = defineEmits<{
 const dialogTitle = computed(() => String(props.context.editor.componentProps?.dialogTitle || 'Block Editor'))
 const dialogWidth = computed(() => props.context.editor.componentProps?.dialogWidth ?? 'min(92vw, 56rem)')
 const dialogHeight = computed(() => props.context.editor.componentProps?.dialogHeight ?? 'min(88vh, 48rem)')
-const dialogUrl = computed(() => {
-  const params = new URLSearchParams({
-    cID: String(props.context.pageId),
-    arHandle: String(props.context.areaHandle),
-  })
-  if (props.context.mode === 'add') {
-    params.set('btID', String(props.context.operation.blockTypeId || 0))
-    return `/ccm/system/dialogs/page/add_block?${params.toString()}`
-  }
-  params.set('bID', String(props.context.operation.blockId))
-  return `/ccm/system/dialogs/block/edit?${params.toString()}`
-})
 
 function transformDialogHtml(rawHtml: string): string {
   const parser = document.createElement('div')
@@ -165,7 +153,7 @@ function handleSave() {
   }
 
   const formData = new FormData(form)
-  const url = form.getAttribute('action') || dialogUrl.value
+  const url = form.getAttribute('action') || submitUrl.value
   const method = normalizeMethod(form.getAttribute('method') || 'POST')
   if (!url) {
     return

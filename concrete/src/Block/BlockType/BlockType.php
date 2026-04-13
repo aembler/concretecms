@@ -9,6 +9,7 @@ use Concrete\Core\Application\UserInterface\Icon\InlineSvgIcon;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Block\Controller\ControllerFactory;
+use Concrete\Core\Block\Manifest\Locator;
 use Concrete\Core\Block\ProvidesIconInterface;
 use Concrete\Core\Cache\Level\RequestCache;
 use Concrete\Core\Database\Connection\Connection;
@@ -44,19 +45,9 @@ class BlockType
     protected function getManifestIconSvg(BlockTypeEntity $blockType): ?string
     {
         $app = Application::getFacadeApplication();
-        $locator = $app->make(FileLocator::class);
-        $packageHandle = (string) $blockType->getPackageHandle();
-        if ($packageHandle !== '') {
-            $locator->addLocation(new FileLocator\PackageLocation($packageHandle));
-        }
+        $locator = $app->make(Locator::class);
+        $record = $locator->getRecord($blockType);
 
-        $manifestPath = static::getBlockTypeRelativePath(
-            $blockType->getBlockTypeHandle(),
-            FILENAME_BLOCK_MANIFEST,
-            $packageHandle,
-            $blockType->getBlockTypeActiveVersion()
-        );
-        $record = $locator->getRecord($manifestPath);
         if ($record === null || !$record->exists()) {
             return null;
         }

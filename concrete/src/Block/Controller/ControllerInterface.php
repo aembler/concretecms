@@ -21,4 +21,6 @@ interface ControllerInterface
 
     public function duplicate(int $newBlockId): void;
 
+    public function delete(): void;
+
 }

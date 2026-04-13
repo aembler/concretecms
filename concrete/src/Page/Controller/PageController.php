@@ -354,7 +354,7 @@ class PageController extends Controller
      * @param Block $block
      * @return BlockController|null
      */
-    public function getBlockController(Block $block): ControllerInterface|BlockController
+    public function getBlockController(Block $block): ControllerInterface|BlockController|null
     {
         $bID = $block->getBlockID();
 

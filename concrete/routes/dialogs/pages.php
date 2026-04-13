@@ -1,6 +1,7 @@
 <?php
 
 defined('C5_EXECUTE') or die('Access Denied.');
+use Concrete\Core\Block\Controller\ManifestBlockController;
 
 /**
  * @var Concrete\Core\Application\Application $app
@@ -21,6 +22,7 @@ $router->all('/versions/delete', 'Versions::delete');
 $router->all('/versions/approve', 'Versions::approve');
 $router->all('/versions/unapprove', 'Versions::unapprove');
 $router->all('/add_block', 'AddBlock::view');
+$router->all('/add_manifest_block', '\Concrete\Core\Block\Controller\ManifestBlockController::add');
 $router->all('/add_block/submit', 'AddBlock::submit');
 $router->all('/add_block_list', 'AddBlockList::view');
 $router->all('/add_external', 'AddExternal::view');

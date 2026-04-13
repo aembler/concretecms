@@ -116,60 +116,50 @@ class AddBlock extends BackendInterfacePageController
     {
         $pc = new PageEditResponse($this->error);
         $pc->setPage($this->page);
-        if (is_object($this->blockType) && !$this->blockType->hasAddTemplate()) {
-            $token = $this->app->make('token');
-            if (!$token->validate()) {
-                $this->error->add($token->getErrorMessage());
-            }
-        } else {
-            $this->validateAction();
-        }
-        if (!$this->error->has()) {
-            $data = $_POST;
-            $bt = $this->blockType;
-            $u = $this->app->make(User::class);
-            $data['uID'] = $u->getUserID();
+        $data = $_POST;
+        $bt = $this->blockType;
+        $u = $this->app->make(User::class);
+        $data['uID'] = $u->getUserID();
 
-            $e = $this->blockTypeController->validate($data);
-            if ((!is_object($e)) || (($e instanceof \Concrete\Core\Error\ErrorList\ErrorList) && (!$e->has()))) {
-                if (!$bt->includeAll()) {
-                    $nvc = $this->pageToModify->getVersionToModify();
-                    $nb = $nvc->addBlock($bt, $this->areaToModify, $data);
-                } else {
-                    // if we apply to all, then we don't worry about a new version of the page
-                    $nb = $this->pageToModify->addBlock($bt, $this->areaToModify, $data);
-                }
-
-                $event = new BlockAdd($nb, $this->pageToModify);
-                Events::dispatch('on_block_add', $event);
-
-                if ($this->area->isGlobalArea() && $nvc instanceof Collection) {
-                    $xvc = $this->page->getVersionToModify(); // we need to create a new version of THIS page as well.
-                    $xvc->relateVersionEdits($nvc);
-                }
-
-                $db = null;
-                // now we check to see if there's a block in this area that we are adding it after.
-                if ($_REQUEST['dragAreaBlockID'] > 0 && Loader::helper('validation/numbers')->integer(
-                                                              $_REQUEST['dragAreaBlockID'])
-                ) {
-                    $db = Block::getByID($_REQUEST['dragAreaBlockID'], $this->pageToModify, $this->areaToModify);
-                    if (is_object($db) && !$db->isError()) {
-                        $nb->moveBlockToDisplayOrderPosition($db);
-                    }
-                }
-                if (!is_object($db)) {
-                    $nb->moveBlockToDisplayOrderPosition(false);
-                }
-
-                $pc->setAdditionalDataAttribute('btID', $nb->getBlockTypeID());
-                $pc->setAdditionalDataAttribute('bID', $nb->getBlockID());
-                $pc->setAdditionalDataAttribute('arHandle', $this->area->getAreaHandle());
-
-                $pc->setAdditionalDataAttribute('aID', $this->area->getAreaID());
+        $e = $this->blockTypeController->validate($data);
+        if ((!is_object($e)) || (($e instanceof \Concrete\Core\Error\ErrorList\ErrorList) && (!$e->has()))) {
+            if (!$bt->includeAll()) {
+                $nvc = $this->pageToModify->getVersionToModify();
+                $nb = $nvc->addBlock($bt, $this->areaToModify, $data);
             } else {
-                $pc->setError($e);
+                // if we apply to all, then we don't worry about a new version of the page
+                $nb = $this->pageToModify->addBlock($bt, $this->areaToModify, $data);
             }
+
+            $event = new BlockAdd($nb, $this->pageToModify);
+            Events::dispatch('on_block_add', $event);
+
+            if ($this->area->isGlobalArea() && $nvc instanceof Collection) {
+                $xvc = $this->page->getVersionToModify(); // we need to create a new version of THIS page as well.
+                $xvc->relateVersionEdits($nvc);
+            }
+
+            $db = null;
+            // now we check to see if there's a block in this area that we are adding it after.
+            if ($_REQUEST['dragAreaBlockID'] > 0 && Loader::helper('validation/numbers')->integer(
+                                                          $_REQUEST['dragAreaBlockID'])
+            ) {
+                $db = Block::getByID($_REQUEST['dragAreaBlockID'], $this->pageToModify, $this->areaToModify);
+                if (is_object($db) && !$db->isError()) {
+                    $nb->moveBlockToDisplayOrderPosition($db);
+                }
+            }
+            if (!is_object($db)) {
+                $nb->moveBlockToDisplayOrderPosition(false);
+            }
+
+            $pc->setAdditionalDataAttribute('btID', $nb->getBlockTypeID());
+            $pc->setAdditionalDataAttribute('bID', $nb->getBlockID());
+            $pc->setAdditionalDataAttribute('arHandle', $this->area->getAreaHandle());
+
+            $pc->setAdditionalDataAttribute('aID', $this->area->getAreaID());
+        } else {
+            $pc->setError($e);
         }
         $pc->outputJSON();
     }

@@ -4,6 +4,7 @@ namespace Concrete\Core\Block\BlockType\Editor;
 
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
+use Concrete\Core\Block\Manifest\Locator;
 use Concrete\Core\Block\ProvidesEditorInterface;
 use Concrete\Core\Entity\Block\BlockType\BlockType;
 use Concrete\Core\Filesystem\FileLocator;
@@ -25,19 +26,8 @@ class EditorFactory
 
         // Support for new composable block types:
         /** @var FileLocator $locator */
-        $locator = Application::getFacadeApplication()->make(FileLocator::class);
-        $packageHandle = (string) $object->getPackageHandle();
-        if ($packageHandle !== '') {
-            $locator->addPackageLocation($packageHandle);
-        }
-        $record = $locator->getRecord(
-            BlockTypeService::getBlockTypeRelativePath(
-                $object->getBlockTypeHandle(),
-                FILENAME_BLOCK_MANIFEST,
-                $packageHandle,
-                $blockType->getBlockTypeActiveVersion()
-            )
-        );
+        $locator = Application::getFacadeApplication()->make(Locator::class);
+        $record = $locator->getRecord($blockType);
         if ($record && $record->exists()) {
             return new ComposableEditor();
         }

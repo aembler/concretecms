@@ -6,6 +6,7 @@ use Concrete\Core\Application\ApplicationAwareTrait;
 use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Block\Manifest\BlockManifestParser;
+use Concrete\Core\Block\Manifest\Locator;
 use Concrete\Core\Block\Manifest\Serializer\Serializer;
 use Concrete\Core\Entity\Block\BlockType\BlockType;
 use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
@@ -33,28 +34,10 @@ class ControllerFactory implements ApplicationAwareInterface
 
     private function getManifestBlockController(BlockType|Block $object): ManifestBlockController
     {
-        // Manifest block type support
-        $locator = $this->app->make(FileLocator::class);
-        if ($object->getPackageHandle() !== '') {
-            $locator->addLocation(new FileLocator\PackageLocation($object->getPackageHandle()));
-        }
-
-        $record = $locator->getRecord(
-            DIRNAME_BLOCKS .
-            DIRECTORY_SEPARATOR .
-            $object->getBlockTypeHandle() .
-            DIRECTORY_SEPARATOR .
-            FILENAME_BLOCK_MANIFEST
-        );
+        $locator = $this->app->make(Locator::class);
+        $record = $locator->getRecord($object);
         if ($record->exists()) {
-            $manifest = $this->manifestParser->parseFile($record->file);
-            $serializer = $this->app->make(Serializer::class);
-            return $this->app->make(ManifestBlockController::class, [
-                'manifest' => $manifest,
-                'serializer' => $serializer,
-                'logger' => $this->app->make('log'),
-                'obj' => $object,
-            ]);
+            return $this->app->make(ManifestBlockController::class, ['object' => $object]);
         } else {
             throw new \Exception(t('Unable to locate manifest.'));
         }

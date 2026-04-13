@@ -260,6 +260,22 @@ const manifestBlockTypeId = computed(() => {
   return Number(props.context.blockTypeId || 0)
 })
 
+const requestUrl = computed(() => {
+  const ctx = props.context
+  const params = new URLSearchParams({
+    cID: String(ctx.pageId),
+    arHandle: String(ctx.areaHandle),
+  })
+
+  if (ctx.mode === 'add') {
+    params.set('btID', String(ctx.operation.blockTypeId || 0))
+    return `/ccm/system/dialogs/page/add_manifest_block?${params.toString()}`
+  }
+
+  params.set('bID', String(ctx.operation.blockId))
+  return `/ccm/system/dialogs/block/edit_manifest_block?${params.toString()}`
+})
+
 function resolveRenderableField(fieldId: string): RenderableField | null {
   const definition = manifest.value?.fields?.[fieldId]
   if (!definition) {
@@ -333,7 +349,7 @@ function handleAfterLeave() {
 
 onMounted(() => {
   request({
-    url: CCM_DISPATCHER_FILENAME + `/ccm/block_types/manifest/${manifestBlockTypeId.value}`,
+    url: requestUrl.value,
     method: 'GET',
     onSuccess: (data) => {
       hydrateManifest(data as ManifestPayload)

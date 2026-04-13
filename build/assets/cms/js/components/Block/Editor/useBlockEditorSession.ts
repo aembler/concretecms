@@ -60,7 +60,8 @@ export function useBlockEditorSession(
 
   const resolvedContext = computed(() => unref(context))
   const isAddMode = computed(() => resolvedContext.value.mode === 'add')
-  const submitUrl = computed(() => {
+
+  const requestUrl = computed(() => {
     const ctx = resolvedContext.value
     const params = new URLSearchParams({
       cID: String(ctx.pageId),
@@ -69,11 +70,17 @@ export function useBlockEditorSession(
 
     if (ctx.mode === 'add') {
       params.set('btID', String(ctx.operation.blockTypeId || 0))
-      return `/ccm/system/dialogs/page/add_block/submit?${params.toString()}`
+      return `/ccm/system/dialogs/page/add_block?${params.toString()}`
     }
 
     params.set('bID', String(ctx.operation.blockId))
-    return `/ccm/system/dialogs/block/edit/submit?${params.toString()}`
+    return `/ccm/system/dialogs/block/edit?${params.toString()}`
+  })
+
+  const submitUrl = computed(() => {
+    const url = new URL(requestUrl.value, window.location.origin)
+    url.pathname = `${url.pathname.replace(/\/$/, '')}/submit`
+    return `${url.pathname}${url.search}`
   })
 
   function resetPendingOperationState() {
@@ -217,6 +224,7 @@ export function useBlockEditorSession(
   return {
     isSubmitting,
     isAddMode,
+    requestUrl,
     submitUrl,
     submit,
   }
