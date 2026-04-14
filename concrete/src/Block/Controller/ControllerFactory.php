@@ -7,10 +7,8 @@ use Concrete\Core\Block\Block;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Block\Manifest\BlockManifestParser;
 use Concrete\Core\Block\Manifest\Locator;
-use Concrete\Core\Block\Manifest\Serializer\Serializer;
 use Concrete\Core\Entity\Block\BlockType\BlockType;
 use Concrete\Core\Block\BlockType\BlockType as BlockTypeService;
-use Concrete\Core\Filesystem\FileLocator;
 
 class ControllerFactory implements ApplicationAwareInterface
 {

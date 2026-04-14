@@ -34,27 +34,15 @@ abstract class AbstractFieldType implements FieldInterface
         return $this->extractScalarValueFromRequest($requestArgs, $field);
     }
 
-    public function extractValueFromStorage(array $payload, FieldDefinition $field)
+    public function extractValueFromStorage(array $data, FieldDefinition $field)
     {
-        $section = EnvelopeSectionResolver::resolve($field);
         $fieldId = $field->getId();
-        if (isset($payload[$section]) && is_array($payload[$section]) && array_key_exists($fieldId, $payload[$section])) {
-            return $payload[$section][$fieldId];
+        if (array_key_exists($fieldId, $data)) {
+            return $data[$fieldId];
         }
 
         $definition = $field->getDefinition();
-
         return $definition['default'] ?? null;
-    }
-
-    /**
-     * @param mixed $submittedValue
-     *
-     * @return mixed
-     */
-    public function serializeValue($submittedValue, array $definition, ?Request $request = null)
-    {
-        return $submittedValue;
     }
 
     public function createViewValue($storedValue, FieldDefinition $field): FieldViewValue

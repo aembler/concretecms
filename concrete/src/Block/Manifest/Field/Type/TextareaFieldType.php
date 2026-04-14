@@ -35,9 +35,4 @@ final class TextareaFieldType extends AbstractFieldType
     {
         return (string) $this->extractScalarValueFromRequest($requestArgs, $field);
     }
-
-    public function serializeValue($submittedValue, array $definition, ?Request $request = null): string
-    {
-        return (string) $submittedValue;
-    }
 }

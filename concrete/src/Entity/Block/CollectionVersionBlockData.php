@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Concrete\Core\Entity\Block;
 
 use Doctrine\ORM\Mapping as ORM;
+use Concrete\Core\Block\Manifest\Value\StorageValue;
 
 /**
  * @ORM\Entity(repositoryClass="\Concrete\Core\Entity\Block\CollectionVersionBlockDataRepository")
@@ -43,11 +44,9 @@ class CollectionVersionBlockData
     protected $bID;
 
     /**
-     * @ORM\Column(type="text", options={"default": ""})
-     *
-     * @var string
+     * @ORM\Column(type="json")
      */
-    protected $data = '';
+    protected $data = null;
 
     public function getCollectionId(): int
     {
@@ -79,12 +78,12 @@ class CollectionVersionBlockData
         $this->bID = $blockId;
     }
 
-    public function getData(): string
+    public function getData(): array
     {
-        return (string) $this->data;
+        return $this->data;
     }
 
-    public function setData(string $data): void
+    public function setData(StorageValue $data): void
     {
         $this->data = $data;
     }

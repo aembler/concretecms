@@ -1,6 +1,6 @@
-{% set textColor = fields['core.styles.text_color'] %}
-{% set text = fields['text'] %}
+{% set textColor = values['core.styles.text_color'] %}
+{% set text = values['text'] %}
 
 <div{% if textColor != '' %} style="color: {{ textColor.getHex }}"{% endif %}>
-    {{ fields.text }}
+    {{ values.text }}
 </div>

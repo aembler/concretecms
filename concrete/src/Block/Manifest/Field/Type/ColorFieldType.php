@@ -38,11 +38,6 @@ final class ColorFieldType extends AbstractFieldType
         return strtoupper((string) $this->extractScalarValueFromRequest($requestArgs, $field));
     }
 
-    public function serializeValue($submittedValue, array $definition, ?Request $request = null): string
-    {
-        return strtoupper((string) $submittedValue);
-    }
-
     public function createViewValue($storedValue, FieldDefinition $field): ColorFieldViewValue
     {
         return new ColorFieldViewValue($field, strtoupper((string) $storedValue));
