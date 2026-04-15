@@ -68,6 +68,15 @@ class ManifestBlockController extends AbstractController implements ControllerIn
         $record = $this->locator->getRecord($this->object);
         return $this->manifestParser->parseFile($record->file);
     }
+
+    private function getEmptyEditorData(BlockManifest $manifest): array
+    {
+        return [
+            'meta' => [],
+            'values' => [],
+            'schemaVersion' => $manifest->getSchemaVersion(),
+        ];
+    }
     public function duplicate(int $newBlockId): void
     {
         $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
@@ -127,7 +136,7 @@ class ManifestBlockController extends AbstractController implements ControllerIn
 
         /** @var CollectionVersionBlockDataRepository $repository */
         $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
-        $record = $repository->findOneByBlock($this->obj);
+        $record = $repository->findOneByBlock($this->object);
         if ($record === null) {
             $page = $this->object->getBlockCollectionObject();
             $version = $page->getVersionObject();
@@ -156,8 +165,12 @@ class ManifestBlockController extends AbstractController implements ControllerIn
         }
         $record = $this->locator->getRecord($blockType);
         $manifest = $this->manifestParser->parseFile($record->file);
-        return new JsonResponse(['manifest' => $manifest]);
+        return new JsonResponse([
+            'manifest' => $manifest,
+            'data' => $this->getEmptyEditorData($manifest),
+        ]);
     }
+
     public function edit(): JsonResponse
     {
         $bID = $this->request->query->get('bID');
@@ -193,7 +206,10 @@ class ManifestBlockController extends AbstractController implements ControllerIn
             ]);
         }
 
-        return new JsonResponse([]);
+        return new JsonResponse([
+            'manifest' => $manifest,
+            'data' => $this->getEmptyEditorData($manifest),
+        ]);
     }
 
 }

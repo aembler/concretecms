@@ -144,6 +144,17 @@ type ManifestPayload = {
   layout: Array<TabElement>
 }
 
+type ManifestEditorDataPayload = {
+  meta: Array<unknown>
+  values: Record<string, unknown>
+  schemaVersion: string
+}
+
+type ManifestEditorPayload = {
+  manifest: ManifestPayload
+  data: ManifestEditorDataPayload
+}
+
 type RenderableField = {
   id: string
   definition: ManifestFieldDefinition
@@ -181,7 +192,7 @@ const manifest = ref<ManifestPayload | null>(null)
 const isLoading = ref(true)
 const loadError = ref<string | null>(null)
 const activeTabId = ref<string | null>(null)
-const values = ref<Record<string, string>>({})
+const values = ref<Record<string, unknown>>({})
 const isOpen = ref(true)
 const isExpanded = ref(false)
 const { isSubmitting, submit, submitUrl } = useBlockEditorSession(
@@ -288,16 +299,12 @@ function resolveRenderableField(fieldId: string): RenderableField | null {
   }
 }
 
-function getInitialFieldValue(field: ManifestFieldDefinition): string {
+function getInitialFieldValue(field: ManifestFieldDefinition): unknown {
   const defaultValue = field.definition?.default
-  if (typeof defaultValue === 'string') {
-    return defaultValue
-  }
-
-  return ''
+  return defaultValue ?? ''
 }
 
-function updateValue(fieldId: string, value: string) {
+function updateValue(fieldId: string, value: unknown) {
   values.value = {
     ...values.value,
     [fieldId]: value,
@@ -315,7 +322,7 @@ function handleSave() {
 
   const body = new FormData()
   for (const [fieldId, value] of Object.entries(values.value)) {
-    body.set(fieldId, value)
+    body.set(fieldId, String(value ?? ''))
   }
 
   submit({
@@ -324,13 +331,18 @@ function handleSave() {
   })
 }
 
-function hydrateManifest(data: ManifestPayload) {
-  manifest.value = data
-  activeTabId.value = data.layout[0]?.id ?? null
+function hydrateEditorState(payload: ManifestEditorPayload) {
+  const nextManifest = payload.manifest
+  manifest.value = nextManifest
+  activeTabId.value = nextManifest.layout[0]?.id ?? null
 
-  const nextValues: Record<string, string> = {}
-  for (const field of Object.values(data.fields ?? {})) {
+  const nextValues: Record<string, unknown> = {}
+  for (const field of Object.values(nextManifest.fields ?? {})) {
     nextValues[field.id] = getInitialFieldValue(field)
+  }
+
+  for (const [fieldId, value] of Object.entries(payload.data.values)) {
+    nextValues[fieldId] = value
   }
 
   values.value = nextValues
@@ -345,7 +357,7 @@ onMounted(() => {
     url: requestUrl.value,
     method: 'GET',
     onSuccess: (data) => {
-      hydrateManifest(data.manifest as ManifestPayload)
+      hydrateEditorState(data as ManifestEditorPayload)
       loadError.value = null
     },
     onError: () => {
