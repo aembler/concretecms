@@ -252,13 +252,6 @@ const activeTabChildren = computed<RenderableLayoutElement[]>(() => {
 })
 
 const formattedValues = computed(() => JSON.stringify(values.value, null, 2))
-const manifestBlockTypeId = computed(() => {
-  if (props.context.mode === 'add') {
-    return Number(props.context.operation.blockTypeId || 0)
-  }
-
-  return Number(props.context.blockTypeId || 0)
-})
 
 const requestUrl = computed(() => {
   const ctx = props.context
@@ -352,7 +345,7 @@ onMounted(() => {
     url: requestUrl.value,
     method: 'GET',
     onSuccess: (data) => {
-      hydrateManifest(data as ManifestPayload)
+      hydrateManifest(data.manifest as ManifestPayload)
       loadError.value = null
     },
     onError: () => {

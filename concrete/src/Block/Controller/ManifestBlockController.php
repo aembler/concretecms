@@ -156,7 +156,7 @@ class ManifestBlockController extends AbstractController implements ControllerIn
         }
         $record = $this->locator->getRecord($blockType);
         $manifest = $this->manifestParser->parseFile($record->file);
-        return new JsonResponse($manifest);
+        return new JsonResponse(['manifest' => $manifest]);
     }
     public function edit(): JsonResponse
     {
