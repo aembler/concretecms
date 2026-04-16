@@ -10,9 +10,9 @@ use Concrete\Core\Block\Manifest\BlockManifestParser;
 use Concrete\Core\Block\Manifest\Locator;
 use Concrete\Core\Block\Manifest\Value\ValueFactory;
 use Concrete\Core\Controller\AbstractController;
+use Concrete\Core\Entity\Block\BlockData;
+use Concrete\Core\Entity\Block\BlockDataRepository;
 use Concrete\Core\Entity\Block\BlockType\BlockType as BlockTypeEntity;
-use Concrete\Core\Entity\Block\CollectionVersionBlockData;
-use Concrete\Core\Entity\Block\CollectionVersionBlockDataRepository;
 use Concrete\Core\Error\ErrorList\ErrorList;
 use Concrete\Core\Error\UserMessageException;
 use Concrete\Core\Logging\Channels;
@@ -79,14 +79,14 @@ class ManifestBlockController extends AbstractController implements ControllerIn
     }
     public function duplicate(int $newBlockId): void
     {
-        $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
+        $repository = $this->entityManager->getRepository(BlockData::class);
         $record = $repository->findOneByBlock($this->object);
         if ($record) {
             /**
-             * @var $newRecord CollectionVersionBlockData
+             * @var $newRecord BlockData
              */
             $newRecord = clone $record;
-            $newRecord->setBlockId($newBlockId);
+            $newRecord->bID = $newBlockId;
             $this->entityManager->persist($newRecord);
             $this->entityManager->flush();
         }
@@ -94,7 +94,7 @@ class ManifestBlockController extends AbstractController implements ControllerIn
 
     public function delete(): void
     {
-        $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
+        $repository = $this->entityManager->getRepository(BlockData::class);
         $record = $repository->findOneByBlock($this->object);
         if ($record) {
             $this->entityManager->remove($record);
@@ -104,11 +104,11 @@ class ManifestBlockController extends AbstractController implements ControllerIn
 
     public function view()
     {
-        $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
+        $repository = $this->entityManager->getRepository(BlockData::class);
         $record = $repository->findOneByBlock($this->object);
         $manifest = $this->getManifest();
-        if ($record instanceof CollectionVersionBlockData) {
-            $value = $this->valueFactory->createViewValue($manifest, (array) $record->getData()['values']);
+        if ($record instanceof BlockData) {
+            $value = $this->valueFactory->createViewValue($manifest, (array) $record->data['values']);
         }
 
         $this->set('manifest', $manifest);
@@ -134,19 +134,14 @@ class ManifestBlockController extends AbstractController implements ControllerIn
         $manifest = $this->getManifest();
         $value = $this->valueFactory->createStorageValueFromArray($manifest, $requestArgs);
 
-        /** @var CollectionVersionBlockDataRepository $repository */
-        $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
+        /** @var BlockDataRepository $repository */
+        $repository = $this->entityManager->getRepository(BlockData::class);
         $record = $repository->findOneByBlock($this->object);
         if ($record === null) {
-            $page = $this->object->getBlockCollectionObject();
-            $version = $page->getVersionObject();
-            $record = new CollectionVersionBlockData();
-            $record->setBlockId((int) $this->object->getBlockID());
-            $record->setCollectionId((int) $page->getCollectionID());
-            $record->setCollectionVersionId((int) $version->getVersionID());
+            $record = new BlockData($this->object->getBlockID(), $value);
+        } else {
+            $record->data = $value;
         }
-
-        $record->setData($value);
         $this->entityManager->persist($record);
         $this->entityManager->flush();
     }
@@ -196,12 +191,12 @@ class ManifestBlockController extends AbstractController implements ControllerIn
         }
 
         $this->object = $b;
-        $repository = $this->entityManager->getRepository(CollectionVersionBlockData::class);
+        $repository = $this->entityManager->getRepository(BlockData::class);
         $record = $repository->findOneByBlock($this->object);
         $manifest = $this->getManifest();
-        if ($record instanceof CollectionVersionBlockData) {
+        if ($record instanceof BlockData) {
             return new JsonResponse([
-                'data' => $record->getData(),
+                'data' => $record->data,
                 'manifest' => $manifest,
             ]);
         }
