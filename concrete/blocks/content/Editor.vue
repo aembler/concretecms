@@ -3,7 +3,7 @@
     <MenuContainer>
       <div
         ref="menuEl"
-        class="absolute z-50 -translate-x-1/2 pointer-events-auto"
+        class="absolute z-(--index-layer-inline-menu) -translate-x-1/2 pointer-events-auto"
         :style="{ left: menuLeft, top: menuTop }"
       >
         <BaselineToolbar toolbar-mode="inline">

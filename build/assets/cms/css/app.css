@@ -12,12 +12,14 @@
     --index-layer-hotspot-badge: 305;
     --index-layer-page-menu: 310;
 
+    --index-layer-edit-backdrop: 350;
+    --index-layer-inline-menu: 360;
+    
     --index-layer-toolbar-wrapper: 400;
     --index-layer-panel-backdrop: 400;
     --index-layer-panel: 415;
     --index-layer-toolbar-dropdown: 415;
     --index-layer-toolbar: 420;
-
 
     --index-layer-dialog-backdrop: 500;
     --index-layer-dialog: 510;

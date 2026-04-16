@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import type { Pinia } from 'pinia'
+import { useUiStore } from '@concretecms/backendui'
 import { getConcretePinia } from './pinia'
 import type { PageOperation } from './types/page-operations'
 import type { ToastOperation } from './types/page-operations'
@@ -17,8 +18,9 @@ type FocusedEditingTarget = {
 const FOCUSED_EDITING_ROOT_CLASS = 'concrete-edit-mode-focus'
 const FOCUSED_EDITING_TARGET_CLASS = 'concrete-edit-mode-focus-focused'
 const FOCUSED_EDITING_SPOTLIGHT_PADDING = 12
+const FOCUSED_EDITING_SPOTLIGHT_RADIUS = 6
 const FOCUSED_EDITING_SPOTLIGHT_FILL = 'rgba(0, 0, 0, 0.4)';
-const FOCUSED_EDITING_SPOTLIGHT_Z_INDEX = '320'
+const FOCUSED_EDITING_SPOTLIGHT_TRANSITION_MS = 500
 
 class FocusedEditingSpotlight {
   private overlayElement: HTMLDivElement | null = null
@@ -27,6 +29,8 @@ class FocusedEditingSpotlight {
   private targetElement: HTMLElement | null = null
   private resizeObserver: ResizeObserver | null = null
   private frameId: number | null = null
+  private showFrameId: number | null = null
+  private teardownTimeoutId: number | null = null
 
   attach(target: HTMLElement) {
     if (typeof document === 'undefined' || typeof window === 'undefined') {
@@ -39,6 +43,7 @@ class FocusedEditingSpotlight {
     window.addEventListener('resize', this.handleViewportChange, { passive: true })
     window.addEventListener('scroll', this.handleViewportChange, { passive: true })
     this.startTracking()
+    this.showOverlay()
   }
 
   detach() {
@@ -54,10 +59,7 @@ class FocusedEditingSpotlight {
 
     this.disconnectResizeObserver()
     this.targetElement = null
-    this.pathElement = null
-    this.svgElement = null
-    this.overlayElement?.remove()
-    this.overlayElement = null
+    this.hideOverlay()
   }
 
   scheduleUpdate = () => {
@@ -89,12 +91,11 @@ class FocusedEditingSpotlight {
     }
 
     const overlayElement = document.createElement('div')
-    overlayElement.className = 'concrete-edit-mode-focus-spotlight'
+    overlayElement.className = 'concrete-edit-mode-focus-spotlight transition-opacity z-(--index-layer-edit-backdrop) duration-500 ease-out opacity-0'
     overlayElement.setAttribute('aria-hidden', 'true')
     overlayElement.style.position = 'fixed'
     overlayElement.style.inset = '0'
     overlayElement.style.pointerEvents = 'none'
-    overlayElement.style.zIndex = FOCUSED_EDITING_SPOTLIGHT_Z_INDEX
 
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svgElement.setAttribute('width', '100%')
@@ -108,11 +109,82 @@ class FocusedEditingSpotlight {
 
     svgElement.appendChild(pathElement)
     overlayElement.appendChild(svgElement)
-    document.body.appendChild(overlayElement)
+    resolveUiMountContainer().appendChild(overlayElement)
 
     this.overlayElement = overlayElement
     this.svgElement = svgElement
     this.pathElement = pathElement
+  }
+
+  private showOverlay() {
+    if (!this.overlayElement || typeof window === 'undefined') {
+      return
+    }
+
+    if (this.showFrameId !== null) {
+      window.cancelAnimationFrame(this.showFrameId)
+      this.showFrameId = null
+    }
+
+    if (this.teardownTimeoutId !== null) {
+      window.clearTimeout(this.teardownTimeoutId)
+      this.teardownTimeoutId = null
+    }
+
+    this.overlayElement.classList.remove('opacity-100')
+    this.overlayElement.classList.add('opacity-0')
+
+    this.showFrameId = window.requestAnimationFrame(() => {
+      this.showFrameId = window.requestAnimationFrame(() => {
+        this.showFrameId = null
+
+        if (!this.overlayElement) {
+          return
+        }
+
+        this.overlayElement.classList.remove('opacity-0')
+        this.overlayElement.classList.add('opacity-100')
+      })
+    })
+  }
+
+  private hideOverlay() {
+    if (!this.overlayElement || typeof window === 'undefined') {
+      this.destroyOverlay()
+      return
+    }
+
+    if (this.showFrameId !== null) {
+      window.cancelAnimationFrame(this.showFrameId)
+      this.showFrameId = null
+    }
+
+    if (this.teardownTimeoutId !== null) {
+      window.clearTimeout(this.teardownTimeoutId)
+    }
+
+    this.overlayElement.classList.remove('opacity-100')
+    this.overlayElement.classList.add('opacity-0')
+    this.teardownTimeoutId = window.setTimeout(() => {
+      this.destroyOverlay()
+    }, FOCUSED_EDITING_SPOTLIGHT_TRANSITION_MS)
+  }
+
+  private destroyOverlay() {
+    if (this.showFrameId !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.showFrameId)
+      this.showFrameId = null
+    }
+
+    if (this.teardownTimeoutId !== null && typeof window !== 'undefined') {
+      window.clearTimeout(this.teardownTimeoutId)
+      this.teardownTimeoutId = null
+    }
+
+    this.pathElement = null
+    this.svgElement = null
+    this.overlayElement?.remove()
+    this.overlayElement = null
   }
 
   private connectResizeObserver() {
@@ -183,8 +255,49 @@ function createSpotlightPath({
 }) {
   return [
     `M0 0H${viewportWidth}V${viewportHeight}H0Z`,
-    `M${left} ${top}H${right}V${bottom}H${left}Z`,
+    createRoundedRectPath({
+      left,
+      top,
+      right,
+      bottom,
+      radius: FOCUSED_EDITING_SPOTLIGHT_RADIUS,
+    }),
   ].join(' ')
+}
+
+function createRoundedRectPath({
+  left,
+  top,
+  right,
+  bottom,
+  radius,
+}: {
+  left: number
+  top: number
+  right: number
+  bottom: number
+  radius: number
+}) {
+  const width = Math.max(0, right - left)
+  const height = Math.max(0, bottom - top)
+  const clampedRadius = Math.max(0, Math.min(radius, width / 2, height / 2))
+
+  if (clampedRadius === 0) {
+    return `M${left} ${top}H${right}V${bottom}H${left}Z`
+  }
+
+  return [
+    `M${left + clampedRadius} ${top}`,
+    `H${right - clampedRadius}`,
+    `A${clampedRadius} ${clampedRadius} 0 0 1 ${right} ${top + clampedRadius}`,
+    `V${bottom - clampedRadius}`,
+    `A${clampedRadius} ${clampedRadius} 0 0 1 ${right - clampedRadius} ${bottom}`,
+    `H${left + clampedRadius}`,
+    `A${clampedRadius} ${clampedRadius} 0 0 1 ${left} ${bottom - clampedRadius}`,
+    `V${top + clampedRadius}`,
+    `A${clampedRadius} ${clampedRadius} 0 0 1 ${left + clampedRadius} ${top}`,
+    'Z',
+  ].join('')
 }
 
 const focusedEditingSpotlight = new FocusedEditingSpotlight()
@@ -450,6 +563,25 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     },
   },
 })
+
+function resolveUiMountContainer(): HTMLElement {
+  if (typeof document === 'undefined') {
+    throw new Error('Cannot resolve UI mount container without a document')
+  }
+
+  const uiStore = useUiStore()
+  const menuContainer = uiStore.menuContainer
+
+  if (menuContainer instanceof HTMLElement) {
+    return menuContainer
+  }
+
+  if (typeof menuContainer === 'string' && menuContainer.trim().length > 0) {
+    return document.querySelector<HTMLElement>(menuContainer) ?? document.body
+  }
+
+  return document.body
+}
 
 export function useConcreteUiStore(pinia?: Pinia) {
   const sharedPinia = pinia ?? getConcretePinia()
