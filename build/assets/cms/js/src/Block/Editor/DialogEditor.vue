@@ -63,7 +63,7 @@ import {
   LazyDialog,
 } from '@concretecms/backendui'
 import { useBlockEditorSession } from './useBlockEditorSession'
-import type { BlockEditorContext } from '../../../stores/types/block-editors'
+import type { BlockEditorContext } from './types'
 
 const props = defineProps<{
   context: BlockEditorContext

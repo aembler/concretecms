@@ -91,9 +91,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@concretecms/backendui'
-import HelpButton from '../../../../cms/js/components/Toolbar/Button/HelpButton.vue'
-import Search from '../../../../cms/js/components/Toolbar/Search/Search.vue'
-import UserMenuButton from '../../../../cms/js/components/Toolbar/Button/UserMenuButton.vue'
+import HelpButton from '../../../../cms/js/src/Toolbar/Button/HelpButton.vue'
+import Search from '../../../../cms/js/src/Toolbar/Search/Search.vue'
+import UserMenuButton from '../../../../cms/js/src/Toolbar/Button/UserMenuButton.vue'
 
 const props = defineProps({
   addonsUrl: {

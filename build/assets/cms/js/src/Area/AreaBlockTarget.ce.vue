@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
-import { useConcreteUiStore } from '../stores/concrete-ui'
-import type { PendingAddEditorRequest } from '../stores/types/page-operations'
-import type { AddBlockEditorContext } from '../stores/types/block-editors'
-import { useBlockEditorRegistry } from '../stores/block-editor-registry'
-import ContainerShell from './Ui/ContainerShell.vue'
+import { useConcreteUiStore } from '../../stores/concrete-ui'
+import type { PendingAddEditorRequest } from '../Block/types'
+import type { AddBlockEditorContext } from '../Block/Editor/types'
+import { useBlockEditorRegistry } from '../Block/Editor/registry'
+import ContainerShell from './ContainerShell.vue'
 
 const props = withDefaults(defineProps<{
   areaId?: number | string

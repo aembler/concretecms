@@ -3,9 +3,9 @@ import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../../../stores/concrete-ui'
-import type { AddBlockOperation, AddBlockTargetRef } from '../../../../stores/types/page-operations'
-import type { BlockTypeEditor } from '../../../../stores/types/block-editors'
-import { useBlockEditorRegistry } from '../../../../stores/block-editor-registry'
+import type { AddBlockOperation, AddBlockTargetRef } from '../../../Block/types'
+import type { BlockTypeEditor } from '../../../Block/Editor/types'
+import { useBlockEditorRegistry } from '../../../Block/Editor/registry'
 
 type PanelIcon = {
   type: string

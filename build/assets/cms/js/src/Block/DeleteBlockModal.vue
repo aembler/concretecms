@@ -50,7 +50,7 @@ import {
   DialogTitle,
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
-import type { DeleteBlockOperation } from '../../stores/types/page-operations'
+import type { DeleteBlockOperation } from './types'
 
 const props = withDefaults(defineProps<{
   open: boolean

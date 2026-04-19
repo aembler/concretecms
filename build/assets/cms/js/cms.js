@@ -12,15 +12,15 @@ $(function() {
 
 // cms.js
 import { defineCustomElement, createApp } from 'vue'
-import ConcreteApp from './components/App.ce.vue'
-import ConcreteArea from './components/Area.ce.vue'
-import ConcreteBlock from './components/Block.ce.vue'
-import ConcreteContainer from './components/Container.ce.vue'
-import ConcreteAreaBlockTarget from './components/AreaBlockTarget.ce.vue'
+import ConcreteApp from './src/App/App.ce.vue'
+import ConcreteArea from './src/Area/Area.ce.vue'
+import ConcreteBlock from './src/Block/Block.ce.vue'
+import ConcreteContainer from './src/Container/Container.ce.vue'
+import ConcreteAreaBlockTarget from './src/Area/AreaBlockTarget.ce.vue'
 
 import rawCss from '../css/app.css?inline'
 import postcss from 'postcss'
-import { createConcretePinia } from './stores/pinia'
+import { createConcretePinia } from './src/Store/pinia'
 import { ConcreteAssetLoader } from './support/LegacyAssetLoader'
 
 // Extract only @property rules

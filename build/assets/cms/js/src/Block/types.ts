@@ -1,4 +1,4 @@
-export type PageOperationStatus = 'queued' | 'running' | 'done' | 'failed'
+import {OperationStatus} from "../App/types"
 
 export type BlockRef = {
   bID: string | number
@@ -34,7 +34,7 @@ export type PendingAddEditorRequest = {
 export type DeleteBlockOperation = {
   id: string
   type: 'block.delete'
-  status: PageOperationStatus
+  status: OperationStatus
   pageBlock: BlockRef
   deleteAll: boolean
 }
@@ -42,7 +42,7 @@ export type DeleteBlockOperation = {
 export type UpdateBlockOperation = {
   id: string
   type: 'block.update'
-  status: PageOperationStatus
+  status: OperationStatus
   originalBlock: BlockRef
   updatedBlock: BlockRef
   replacementHtml?: string
@@ -52,7 +52,7 @@ export type UpdateBlockOperation = {
 export type AddBlockOperation = {
   id: string
   type: 'block.add'
-  status: PageOperationStatus
+  status: OperationStatus
   blockTypeId: number
   blockTypeHandle?: string
   blockTitle?: string
@@ -61,16 +61,4 @@ export type AddBlockOperation = {
   response?: any
 }
 
-export type ToastVariant = 'success' | 'error' | 'info' | 'warning'
-
-export type ToastOperation = {
-  id: string
-  type: 'toast.show'
-  status: PageOperationStatus
-  title: string
-  message: string
-  variant?: ToastVariant
-  duration?: number
-}
-
-export type PageOperation = DeleteBlockOperation | UpdateBlockOperation | AddBlockOperation
+export type BlockOperation = DeleteBlockOperation | UpdateBlockOperation | AddBlockOperation

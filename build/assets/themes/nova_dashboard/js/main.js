@@ -1,6 +1,6 @@
 import { createApp, defineCustomElement } from 'vue'
 
-import { createConcretePinia } from '../../../cms/js/stores/pinia'
+import { createConcretePinia } from '../../../cms/js/src/Store/pinia'
 import ConcreteBackendForm from './components/Backend/ConcreteBackendForm.ce.vue'
 import ConcreteBackendFormActions from './components/Backend/ConcreteBackendFormActions.ce.vue'
 import Header from './components/Header.vue'

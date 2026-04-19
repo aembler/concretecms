@@ -31,9 +31,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useConcreteUiStore } from '../stores/concrete-ui'
-import HotSpot from "./Ui/HotSpot.vue";
-import HotSpotBadge from "./Ui/HotSpotBadge.vue";
+import { useConcreteUiStore } from '../../stores/concrete-ui'
+import HotSpot from "../Ui/HotSpot.vue";
+import HotSpotBadge from "../Ui/HotSpotBadge.vue";
 
 const props = withDefaults(defineProps<{
   containerBlockId?: number | string,

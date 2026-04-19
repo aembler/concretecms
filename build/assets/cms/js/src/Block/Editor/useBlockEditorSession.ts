@@ -1,8 +1,8 @@
 import { computed, ref, unref, watch, type MaybeRefOrGetter } from 'vue'
 import { normalizeJsonResponse, useAjax } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../../stores/concrete-ui'
-import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../../../stores/types/page-operations'
-import type { BlockEditorContext } from '../../../stores/types/block-editors'
+import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../types'
+import type { BlockEditorContext } from './types'
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 

@@ -1,4 +1,4 @@
-import type { AddBlockTargetRef, BlockRef } from '../../stores/types/page-operations'
+import type { AddBlockTargetRef, BlockRef } from '../../src/Block/types'
 
 type ScriptDescriptor = {
   src: string | null

@@ -1,5 +1,5 @@
 import { useConcreteUiStore } from '../stores/concrete-ui'
-import type { ToastOperation, ToastVariant } from '../stores/types/page-operations'
+import type { ToastOperation, ToastVariant } from '../src/Toast/types'
 
 type ToastOptions = {
   title?: string

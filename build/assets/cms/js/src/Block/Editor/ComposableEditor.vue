@@ -104,7 +104,7 @@ import ComposableEditorColorField from '../../ComposableEditor/Field/ComposableE
 import ComposableEditorTextField from '../../ComposableEditor/Field/ComposableEditorTextField.vue'
 import ComposableEditorTextareaField from '../../ComposableEditor/Field/ComposableEditorTextareaField.vue'
 import { useBlockEditorSession } from './useBlockEditorSession'
-import type { BlockEditorContext } from '../../../stores/types/block-editors'
+import type { BlockEditorContext } from './types'
 
 type ManifestFieldDefinition = {
   id: string

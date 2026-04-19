@@ -2,303 +2,14 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import type { Pinia } from 'pinia'
 import { useUiStore } from '@concretecms/backendui'
-import { getConcretePinia } from './pinia'
-import type { PageOperation } from './types/page-operations'
-import type { ToastOperation } from './types/page-operations'
-import type { PendingAddEditorRequest } from './types/page-operations'
+import { getConcretePinia } from '../src/Store/pinia'
+import type { BlockOperation } from '../src/Block/types'
+import type { ToastOperation } from '../src/Toast/types'
+import type { PendingAddEditorRequest } from '../src/Block/types'
 import { refreshHotSpotGeometries } from '../support/dom/hotspot'
+import { FOCUSED_EDITING_TARGET_CLASS, FocusedEditingTarget, FOCUSED_EDITING_ROOT_CLASS, FocusedEditingSpotlight} from "../src/HotSpot/FocusedEditingSpotlight";
 
 type DragPointer = { x: number; y: number } | null
-type OperationsDebugWindow = Window & { __CONCRETE_PAGE_OPS_DEBUG__?: boolean }
-type FocusedEditingTarget = {
-  blockId?: string | number | null
-  element?: HTMLElement | null
-} | null
-
-const FOCUSED_EDITING_ROOT_CLASS = 'concrete-edit-mode-focus'
-const FOCUSED_EDITING_TARGET_CLASS = 'concrete-edit-mode-focus-focused'
-const FOCUSED_EDITING_SPOTLIGHT_PADDING = 12
-const FOCUSED_EDITING_SPOTLIGHT_RADIUS = 6
-const FOCUSED_EDITING_SPOTLIGHT_FILL = 'rgba(0, 0, 0, 0.4)';
-const FOCUSED_EDITING_SPOTLIGHT_TRANSITION_MS = 500
-
-class FocusedEditingSpotlight {
-  private overlayElement: HTMLDivElement | null = null
-  private svgElement: SVGSVGElement | null = null
-  private pathElement: SVGPathElement | null = null
-  private targetElement: HTMLElement | null = null
-  private resizeObserver: ResizeObserver | null = null
-  private frameId: number | null = null
-  private showFrameId: number | null = null
-  private teardownTimeoutId: number | null = null
-
-  attach(target: HTMLElement) {
-    if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return
-    }
-
-    this.targetElement = target
-    this.ensureOverlay()
-    this.connectResizeObserver()
-    window.addEventListener('resize', this.handleViewportChange, { passive: true })
-    window.addEventListener('scroll', this.handleViewportChange, { passive: true })
-    this.startTracking()
-    this.showOverlay()
-  }
-
-  detach() {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this.handleViewportChange)
-      window.removeEventListener('scroll', this.handleViewportChange)
-    }
-
-    if (this.frameId !== null && typeof window !== 'undefined') {
-      window.cancelAnimationFrame(this.frameId)
-      this.frameId = null
-    }
-
-    this.disconnectResizeObserver()
-    this.targetElement = null
-    this.hideOverlay()
-  }
-
-  scheduleUpdate = () => {
-    this.update()
-  }
-
-  private startTracking() {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const tick = () => {
-      this.update()
-      this.frameId = window.requestAnimationFrame(tick)
-    }
-
-    if (this.frameId === null) {
-      tick()
-    }
-  }
-
-  private readonly handleViewportChange = () => {
-    this.scheduleUpdate()
-  }
-
-  private ensureOverlay() {
-    if (this.overlayElement && this.pathElement && this.svgElement) {
-      return
-    }
-
-    const overlayElement = document.createElement('div')
-    overlayElement.className = 'concrete-edit-mode-focus-spotlight transition-opacity z-(--index-layer-edit-backdrop) duration-500 ease-out opacity-0'
-    overlayElement.setAttribute('aria-hidden', 'true')
-    overlayElement.style.position = 'fixed'
-    overlayElement.style.inset = '0'
-    overlayElement.style.pointerEvents = 'none'
-
-    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svgElement.setAttribute('width', '100%')
-    svgElement.setAttribute('height', '100%')
-    svgElement.setAttribute('preserveAspectRatio', 'none')
-    svgElement.style.display = 'block'
-
-    const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-    pathElement.setAttribute('fill', FOCUSED_EDITING_SPOTLIGHT_FILL)
-    pathElement.setAttribute('fill-rule', 'evenodd')
-
-    svgElement.appendChild(pathElement)
-    overlayElement.appendChild(svgElement)
-    resolveUiMountContainer().appendChild(overlayElement)
-
-    this.overlayElement = overlayElement
-    this.svgElement = svgElement
-    this.pathElement = pathElement
-  }
-
-  private showOverlay() {
-    if (!this.overlayElement || typeof window === 'undefined') {
-      return
-    }
-
-    if (this.showFrameId !== null) {
-      window.cancelAnimationFrame(this.showFrameId)
-      this.showFrameId = null
-    }
-
-    if (this.teardownTimeoutId !== null) {
-      window.clearTimeout(this.teardownTimeoutId)
-      this.teardownTimeoutId = null
-    }
-
-    this.overlayElement.classList.remove('opacity-100')
-    this.overlayElement.classList.add('opacity-0')
-
-    this.showFrameId = window.requestAnimationFrame(() => {
-      this.showFrameId = window.requestAnimationFrame(() => {
-        this.showFrameId = null
-
-        if (!this.overlayElement) {
-          return
-        }
-
-        this.overlayElement.classList.remove('opacity-0')
-        this.overlayElement.classList.add('opacity-100')
-      })
-    })
-  }
-
-  private hideOverlay() {
-    if (!this.overlayElement || typeof window === 'undefined') {
-      this.destroyOverlay()
-      return
-    }
-
-    if (this.showFrameId !== null) {
-      window.cancelAnimationFrame(this.showFrameId)
-      this.showFrameId = null
-    }
-
-    if (this.teardownTimeoutId !== null) {
-      window.clearTimeout(this.teardownTimeoutId)
-    }
-
-    this.overlayElement.classList.remove('opacity-100')
-    this.overlayElement.classList.add('opacity-0')
-    this.teardownTimeoutId = window.setTimeout(() => {
-      this.destroyOverlay()
-    }, FOCUSED_EDITING_SPOTLIGHT_TRANSITION_MS)
-  }
-
-  private destroyOverlay() {
-    if (this.showFrameId !== null && typeof window !== 'undefined') {
-      window.cancelAnimationFrame(this.showFrameId)
-      this.showFrameId = null
-    }
-
-    if (this.teardownTimeoutId !== null && typeof window !== 'undefined') {
-      window.clearTimeout(this.teardownTimeoutId)
-      this.teardownTimeoutId = null
-    }
-
-    this.pathElement = null
-    this.svgElement = null
-    this.overlayElement?.remove()
-    this.overlayElement = null
-  }
-
-  private connectResizeObserver() {
-    if (!this.targetElement || !window.ResizeObserver) {
-      return
-    }
-
-    this.disconnectResizeObserver()
-    this.resizeObserver = new ResizeObserver(() => {
-      this.scheduleUpdate()
-    })
-    this.resizeObserver.observe(this.targetElement)
-  }
-
-  private disconnectResizeObserver() {
-    this.resizeObserver?.disconnect()
-    this.resizeObserver = null
-  }
-
-  private update() {
-    if (!this.targetElement || !this.pathElement || !this.svgElement) {
-      return
-    }
-
-    if (!this.targetElement.isConnected) {
-      this.detach()
-      return
-    }
-
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-    const rect = this.targetElement.getBoundingClientRect()
-    const left = clampSpotlightCoordinate(rect.left - FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportWidth)
-    const top = clampSpotlightCoordinate(rect.top - FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportHeight)
-    const right = clampSpotlightCoordinate(rect.right + FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportWidth)
-    const bottom = clampSpotlightCoordinate(rect.bottom + FOCUSED_EDITING_SPOTLIGHT_PADDING, viewportHeight)
-
-    this.svgElement.setAttribute('viewBox', `0 0 ${viewportWidth} ${viewportHeight}`)
-    this.pathElement.setAttribute('d', createSpotlightPath({
-      viewportWidth,
-      viewportHeight,
-      left,
-      top,
-      right,
-      bottom,
-    }))
-  }
-}
-
-function clampSpotlightCoordinate(value: number, limit: number): number {
-  return Math.max(0, Math.min(limit, Math.round(value)))
-}
-
-function createSpotlightPath({
-  viewportWidth,
-  viewportHeight,
-  left,
-  top,
-  right,
-  bottom,
-}: {
-  viewportWidth: number
-  viewportHeight: number
-  left: number
-  top: number
-  right: number
-  bottom: number
-}) {
-  return [
-    `M0 0H${viewportWidth}V${viewportHeight}H0Z`,
-    createRoundedRectPath({
-      left,
-      top,
-      right,
-      bottom,
-      radius: FOCUSED_EDITING_SPOTLIGHT_RADIUS,
-    }),
-  ].join(' ')
-}
-
-function createRoundedRectPath({
-  left,
-  top,
-  right,
-  bottom,
-  radius,
-}: {
-  left: number
-  top: number
-  right: number
-  bottom: number
-  radius: number
-}) {
-  const width = Math.max(0, right - left)
-  const height = Math.max(0, bottom - top)
-  const clampedRadius = Math.max(0, Math.min(radius, width / 2, height / 2))
-
-  if (clampedRadius === 0) {
-    return `M${left} ${top}H${right}V${bottom}H${left}Z`
-  }
-
-  return [
-    `M${left + clampedRadius} ${top}`,
-    `H${right - clampedRadius}`,
-    `A${clampedRadius} ${clampedRadius} 0 0 1 ${right} ${top + clampedRadius}`,
-    `V${bottom - clampedRadius}`,
-    `A${clampedRadius} ${clampedRadius} 0 0 1 ${right - clampedRadius} ${bottom}`,
-    `H${left + clampedRadius}`,
-    `A${clampedRadius} ${clampedRadius} 0 0 1 ${left} ${bottom - clampedRadius}`,
-    `V${top + clampedRadius}`,
-    `A${clampedRadius} ${clampedRadius} 0 0 1 ${left + clampedRadius} ${top}`,
-    'Z',
-  ].join('')
-}
 
 const focusedEditingSpotlight = new FocusedEditingSpotlight()
 
@@ -322,13 +33,6 @@ function resolveFocusedEditingElement(target: FocusedEditingTarget): HTMLElement
   return getFocusedEditingBlockElement(target.blockId)
 }
 
-function getDefaultOperationsDebug(): boolean {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  return Boolean((window as OperationsDebugWindow).__CONCRETE_PAGE_OPS_DEBUG__)
-}
 
 let pageOperationDoneCleanupQueued = false
 
@@ -347,11 +51,10 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       addContentDraggedItem: null as any,
       addContentDropTarget: null as any,
       pendingAddEditorRequest: null as PendingAddEditorRequest | null,
-      operationsQueue: [] as PageOperation[],
+      operationsQueue: [] as BlockOperation[],
       activeOperationId: null as string | null,
       toastQueue: [] as ToastOperation[],
       activeToastId: null as string | null,
-      operationsDebug: getDefaultOperationsDebug(),
       hoverArea: null as String | null,
       focusedEditingBlockId: null as string | null,
     },
@@ -369,17 +72,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     },
   }),
   actions: {
-    logPageOperation(event: string, payload: unknown = null) {
-      if (!this.page.operationsDebug) {
-        return
-      }
-
-      console.debug('[ConcreteUiStore:PageOperations]', event, payload)
-    },
-    setPageOperationsDebug(enabled: boolean) {
-      this.page.operationsDebug = enabled
-      this.logPageOperation('debug.toggled', { enabled })
-    },
     setPageInteractionsEnabled(enabled: boolean) {
       if (enabled) {
         refreshHotSpotGeometries()
@@ -407,7 +99,7 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
 
       root.classList.add(FOCUSED_EDITING_ROOT_CLASS)
       focusedElement.classList.add(FOCUSED_EDITING_TARGET_CLASS)
-      focusedEditingSpotlight.attach(focusedElement)
+      focusedEditingSpotlight.attach(resolveUiMountContainer(), focusedElement)
       void nextTick(() => {
         focusedEditingSpotlight.scheduleUpdate()
       })
@@ -453,12 +145,10 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     },
     enqueuePageOperation(operation: PageOperation) {
       this.page.operationsQueue.push(operation)
-      this.logPageOperation('enqueue', operation)
       this.startNextPageOperation()
     },
     enqueueToastOperation(operation: ToastOperation) {
       this.page.toastQueue.push(operation)
-      this.logPageOperation('toast.enqueue', operation)
       this.startNextToastOperation()
     },
     startNextToastOperation() {
@@ -473,7 +163,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
 
       nextOperation.status = 'running'
       this.page.activeToastId = nextOperation.id
-      this.logPageOperation('toast.start', nextOperation)
     },
     finishToastOperation(id: string, status: 'done' | 'failed' | 'removed') {
       const existingOperation = this.page.toastQueue.find((operation) => operation.id === id)
@@ -490,8 +179,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       if (this.page.activeToastId === id) {
         this.page.activeToastId = null
       }
-
-      this.logPageOperation(`toast.finish.${status}`, existingOperation)
       this.startNextToastOperation()
     },
     completeToastOperation(id: string) {
@@ -529,7 +216,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
 
       nextOperation.status = 'running'
       this.page.activeOperationId = nextOperation.id
-      this.logPageOperation('start', nextOperation)
     },
     finishPageOperation(id: string, status: 'done' | 'failed' | 'removed') {
       const existingOperation = this.page.operationsQueue.find((operation) => operation.id === id)
@@ -548,8 +234,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       if (this.page.activeOperationId === id) {
         this.page.activeOperationId = null
       }
-
-      this.logPageOperation(`finish.${status}`, existingOperation)
       this.startNextPageOperation()
     },
     completePageOperation(id: string) {

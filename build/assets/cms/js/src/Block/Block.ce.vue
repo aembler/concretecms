@@ -86,17 +86,17 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue"
-import Menu from "./Block/Menu.vue";
-import HotSpot from "./Ui/HotSpot.vue";
-import HotSpotOverlay from "./Ui/HotSpotOverlay.vue";
-import DeleteBlockModal from "./Block/DeleteBlockModal.vue";
+import Menu from "../Block/Menu.vue";
+import HotSpot from "../Ui/HotSpot.vue";
+import HotSpotOverlay from "../Ui/HotSpotOverlay.vue";
+import DeleteBlockModal from "../Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonPropRef } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../stores/concrete-ui'
-import type { DeleteBlockOperation } from '../stores/types/page-operations'
-import type { EditBlockEditorContext } from '../stores/types/block-editors'
-import { useBlockEditorRegistry } from '../stores/block-editor-registry'
-import { useToast } from '../utilities/toast'
-import HotSpotBadge from "./Ui/HotSpotBadge.vue";
+import { useConcreteUiStore } from '../../stores/concrete-ui'
+import type { DeleteBlockOperation } from './types'
+import type { EditBlockEditorContext } from './Editor/types'
+import { useBlockEditorRegistry } from './Editor/registry'
+import { useToast } from '../../utilities/toast'
+import HotSpotBadge from "../Ui/HotSpotBadge.vue";
 
 const rootEl = ref<HTMLElement | null>()
 const contentEl = ref<HTMLElement | null>()
