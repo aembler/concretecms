@@ -1,5 +1,5 @@
 <template>
-  <Teleport :to="concreteUi.toastContainer ?? 'body'">
+  <Teleport :to="toast.toastContainer ?? 'body'">
     <ToastProvider :duration="activeToast?.duration ?? 3000" swipe-direction="right">
       <Toast
         v-if="activeToast"
@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import { useToast } from "../../utilities/toast";
 import {
   Toast,
   ToastClose,
@@ -31,16 +31,16 @@ import {
   ToastViewport,
 } from '@concretecms/backendui'
 
-const concreteUi = useConcreteUiStore()
+const toast = useToast()
 const open = ref(false)
 
 const activeToast = computed(() => {
-  const activeId = concreteUi.page.activeToastId
+  const activeId = toast.activeToastId
   if (!activeId) {
     return null
   }
 
-  const operation = concreteUi.page.toastQueue.find((item) => item.id === activeId)
+  const operation = toast.queue.find((item) => item.id === activeId)
   if (!operation) {
     return null
   }
@@ -60,7 +60,7 @@ const toastVariant = computed(() => {
 function handleOpenUpdate(nextOpen: boolean) {
   open.value = nextOpen
   if (!nextOpen && activeToast.value) {
-    concreteUi.completeToastOperation(activeToast.value.id)
+    toast.finishToast(activeToast.value.id, 'done')
   }
 }
 
@@ -73,22 +73,22 @@ watch(
 )
 
 watch(
-  () => [concreteUi.page.toastQueue.length, concreteUi.page.activeToastId] as const,
+  () => [toast.queue.length, toast.activeToastId] as const,
   () => {
-    if (concreteUi.page.activeToastId && !activeToast.value) {
-      concreteUi.page.activeToastId = null
+    if (toast.activeToastId && !activeToast.value) {
+      toast.activeToastId = null
     }
 
-    if (!concreteUi.page.activeToastId) {
-      concreteUi.startNextToastOperation()
+    if (!toast.activeToastId) {
+      toast.startNextToast()
     }
   },
   { immediate: true }
 )
 
 onMounted(() => {
-  if (!concreteUi.page.activeToastId) {
-    concreteUi.startNextToastOperation()
+  if (!toast.activeToastId) {
+    toast.startNextToast()
   }
 })
 </script>

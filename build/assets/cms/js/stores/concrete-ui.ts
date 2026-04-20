@@ -4,7 +4,6 @@ import type { Pinia } from 'pinia'
 import { useUiStore } from '@concretecms/backendui'
 import { getConcretePinia } from '../src/Store/pinia'
 import type { BlockOperation } from '../src/Block/types'
-import type { ToastOperation } from '../src/Toast/types'
 import type { PendingAddEditorRequest } from '../src/Block/types'
 import { refreshHotSpotGeometries } from '../support/dom/hotspot'
 import { FOCUSED_EDITING_TARGET_CLASS, FocusedEditingTarget, FOCUSED_EDITING_ROOT_CLASS, FocusedEditingSpotlight} from "../src/HotSpot/FocusedEditingSpotlight";
@@ -53,12 +52,9 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
       pendingAddEditorRequest: null as PendingAddEditorRequest | null,
       operationsQueue: [] as BlockOperation[],
       activeOperationId: null as string | null,
-      toastQueue: [] as ToastOperation[],
-      activeToastId: null as string | null,
       hoverArea: null as String | null,
       focusedEditingBlockId: null as string | null,
     },
-    toastContainer: null as HTMLElement | string | null,
     blockAreaMap: {} as Record<string, string[]>,
     clickProxy: {
       activeElementId: null as string | null,
@@ -146,49 +142,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     enqueuePageOperation(operation: PageOperation) {
       this.page.operationsQueue.push(operation)
       this.startNextPageOperation()
-    },
-    enqueueToastOperation(operation: ToastOperation) {
-      this.page.toastQueue.push(operation)
-      this.startNextToastOperation()
-    },
-    startNextToastOperation() {
-      if (this.page.activeToastId) {
-        return
-      }
-
-      const nextOperation = this.page.toastQueue.find((operation) => operation.status === 'queued')
-      if (!nextOperation) {
-        return
-      }
-
-      nextOperation.status = 'running'
-      this.page.activeToastId = nextOperation.id
-    },
-    finishToastOperation(id: string, status: 'done' | 'failed' | 'removed') {
-      const existingOperation = this.page.toastQueue.find((operation) => operation.id === id)
-      if (!existingOperation) {
-        return
-      }
-
-      if (status === 'failed') {
-        existingOperation.status = 'failed'
-      } else {
-        this.page.toastQueue = this.page.toastQueue.filter((operation) => operation.id !== id)
-      }
-
-      if (this.page.activeToastId === id) {
-        this.page.activeToastId = null
-      }
-      this.startNextToastOperation()
-    },
-    completeToastOperation(id: string) {
-      this.finishToastOperation(id, 'done')
-    },
-    failToastOperation(id: string) {
-      this.finishToastOperation(id, 'failed')
-    },
-    removeToastOperation(id: string) {
-      this.finishToastOperation(id, 'removed')
     },
     startNextPageOperation() {
       if (this.page.activeOperationId) {

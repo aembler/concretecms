@@ -155,7 +155,7 @@ import { computed, ref, onMounted, useTemplateRef, watch } from 'vue'
 import Search from './Search/Search.vue'
 import HelpButton from "./Button/HelpButton.vue";
 import UserMenuButton from "./Button/UserMenuButton.vue";
-import ToastContainer from '../Ui/ToastContainer.vue'
+import ToastContainer from '../Toast/ToastContainer.vue'
 import PageFloatingPanel from './FloatingPanel/PageFloatingPanel.vue'
 import AddFloatingPanel from './FloatingPanel/AddFloatingPanel.vue'
 import CheckInFloatingPanel from './FloatingPanel/CheckInFloatingPanel.vue'
@@ -166,6 +166,8 @@ import {
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 const ui = useUiStore()
+import { useToast} from "../../utilities/toast";
+const toast = useToast()
 const concreteUi = useConcreteUiStore()
 const floatingPanels = useFloatingPanelsStore()
 
@@ -247,7 +249,7 @@ onMounted(() => {
   }
 
   ui.menuContainer = teleportTarget.value ?? 'body'
-  concreteUi.toastContainer = toastTeleportTarget.value ?? 'body'
+  toast.toastContainer = toastTeleportTarget.value ?? 'body'
   document.querySelector('html').classList.add('ccm-toolbar-visible')
 
 })
