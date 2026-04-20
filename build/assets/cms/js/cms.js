@@ -21,7 +21,7 @@ import ConcreteAreaBlockTarget from './src/Area/AreaBlockTarget.ce.vue'
 import rawCss from '../css/app.css?inline'
 import postcss from 'postcss'
 import { createConcretePinia } from './src/Store/pinia'
-import { ConcreteAssetLoader } from './support/LegacyAssetLoader'
+import { ConcreteAssetLoader } from './src/Compatibility/ConcreteAssetLoader'
 
 // Extract only @property rules
 function extractPropertyRules(css) {

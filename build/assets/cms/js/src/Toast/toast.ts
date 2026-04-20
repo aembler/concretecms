@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import type { Pinia } from 'pinia'
-import { getConcretePinia } from '../src/Store/pinia'
-import type { ToastOperation, ToastVariant } from '../src/Toast/types'
+import { getConcretePinia } from '../Store/pinia'
+import {
+  current as currentQueueItem,
+  enqueue as enqueueQueueItem,
+  finish as finishQueueItem,
+  type QueueState,
+} from '../Queue/queue'
 
 type ToastOptions = {
   title?: string
@@ -10,11 +15,18 @@ type ToastOptions = {
   duration?: number
 }
 
-type ToastState = {
-  queue: ToastOperation[]
-  activeToastId: string | null
-  toastContainer: HTMLElement | string | null
+import type { Operation } from '../Queue/queue'
+
+type ToastVariant = 'success' | 'error' | 'info' | 'warning'
+interface ToastOperation extends Operation {
+  type: 'toast.show'
+  title: string
+  message: string
+  variant?: ToastVariant
+  duration?: number
 }
+
+type ToastState = QueueState<ToastOperation>
 
 function createToastOperation(options: ToastOptions): ToastOperation {
   return {
@@ -31,69 +43,24 @@ function createToastOperation(options: ToastOptions): ToastOperation {
 const useToastStoreBase = defineStore('concrete-ui-toast', {
   state: (): ToastState => ({
     queue: [],
-    activeToastId: null,
-    toastContainer: null,
+    currentId: null,
   }),
 
   getters: {
     activeToast(state): ToastOperation | null {
-      if (!state.activeToastId) {
-        return null
-      }
-
-      return state.queue.find((operation) => operation.id === state.activeToastId) ?? null
+      return currentQueueItem(state)
     },
   },
 
   actions: {
     show(options: ToastOptions) {
-      this.queue.push(createToastOperation(options))
-      this.startNextToast()
-    },
-
-    startNextToast() {
-      if (this.activeToastId) {
-        return
-      }
-
-      const nextToast = this.queue.find((operation) => operation.status === 'queued')
-      if (!nextToast) {
-        return
-      }
-
-      nextToast.status = 'running'
-      this.activeToastId = nextToast.id
-    },
-
-    finishToast(id: string, status: 'done' | 'failed' | 'removed') {
-      const existingToast = this.queue.find((operation) => operation.id === id)
-      if (!existingToast) {
-        return
-      }
-
-      if (status === 'failed') {
-        existingToast.status = 'failed'
-      } else {
-        this.queue = this.queue.filter((operation) => operation.id !== id)
-      }
-
-      if (this.activeToastId === id) {
-        this.activeToastId = null
-      }
-
-      this.startNextToast()
+      const operation = createToastOperation(options)
+      enqueueQueueItem(this, operation)
+      return operation
     },
 
     completeToast(id: string) {
-      this.finishToast(id, 'done')
-    },
-
-    failToast(id: string) {
-      this.finishToast(id, 'failed')
-    },
-
-    removeToast(id: string) {
-      this.finishToast(id, 'removed')
+      return finishQueueItem(this, id, 'done', { removeOnDone: true })
     },
 
     success(title: string, message: string, duration?: number) {

@@ -82,8 +82,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@concretecms/backendui';
-import MenuContainer from "../Ui/MenuContainer.vue";
-import { useMenuPositioner } from "../../utilities/menu";
+import MenuContainer from "../Menu/MenuContainer.vue";
+import { useMenuPositioner } from "../Menu/positioner";
 
 const emit = defineEmits(['edit', 'delete'])
 

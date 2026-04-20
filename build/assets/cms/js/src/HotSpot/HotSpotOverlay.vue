@@ -15,7 +15,7 @@ defineOptions({
 })
 
 import { computed, ref, useAttrs } from 'vue'
-import { useHotSpotGeometry } from '../../support/dom/hotspot'
+import { useHotSpotGeometry } from './hotspot'
 import { useUiStore } from '@concretecms/backendui'
 
 // Forward unknown attributes to the overlay DOM node so callers can pass

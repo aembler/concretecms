@@ -166,7 +166,7 @@ import {
 } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 const ui = useUiStore()
-import { useToast} from "../../utilities/toast";
+import { useToast } from "../Toast/toast";
 const toast = useToast()
 const concreteUi = useConcreteUiStore()
 const floatingPanels = useFloatingPanelsStore()
@@ -249,7 +249,6 @@ onMounted(() => {
   }
 
   ui.menuContainer = teleportTarget.value ?? 'body'
-  toast.toastContainer = toastTeleportTarget.value ?? 'body'
   document.querySelector('html').classList.add('ccm-toolbar-visible')
 
 })

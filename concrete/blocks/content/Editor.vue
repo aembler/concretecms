@@ -61,9 +61,9 @@ import {
   InlineToolbarGroup,
   InlineToolbarSeparator,
 } from '@concretecms/backendui'
-import MenuContainer from '../../../build/assets/cms/js/src/Ui/MenuContainer.vue'
+import MenuContainer from '../../../build/assets/cms/js/src/Menu/MenuContainer.vue'
 import { useBlockEditorSession } from '../../../build/assets/cms/js/src/Block/Editor/useBlockEditorSession'
-import { useMenuPositioner } from '../../../build/assets/cms/js/utilities/menu'
+import { useMenuPositioner } from '../../../build/assets/cms/js/src/Menu/positioner'
 import type { BlockEditorContext } from '../../../build/assets/cms/js/src/Block/Editor/types'
 
 const props = defineProps<{

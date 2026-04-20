@@ -87,16 +87,16 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import Menu from "../Block/Menu.vue";
-import HotSpot from "../Ui/HotSpot.vue";
-import HotSpotOverlay from "../Ui/HotSpotOverlay.vue";
+import HotSpot from "../HotSpot/HotSpot.vue";
+import HotSpotOverlay from "../HotSpot/HotSpotOverlay.vue";
 import DeleteBlockModal from "../Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonPropRef } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 import type { DeleteBlockOperation } from './types'
 import type { EditBlockEditorContext } from './Editor/types'
 import { useBlockEditorRegistry } from './Editor/registry'
-import { useToast } from '../../utilities/toast'
-import HotSpotBadge from "../Ui/HotSpotBadge.vue";
+import { useToast } from "../Toast/toast";
+import HotSpotBadge from "../HotSpot/HotSpotBadge.vue";
 
 const rootEl = ref<HTMLElement | null>()
 const contentEl = ref<HTMLElement | null>()

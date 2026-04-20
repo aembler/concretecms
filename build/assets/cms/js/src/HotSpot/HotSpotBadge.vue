@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { computed, inject, type CSSProperties } from 'vue'
-import { HOT_SPOT_BADGE_GEOMETRY_KEY, type HotSpotBadgeGeometry } from '../../support/dom/hotspot'
+import { HOT_SPOT_BADGE_GEOMETRY_KEY, type HotSpotBadgeGeometry } from './hotspot'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 
 type HotSpotBadgeColorProps = {

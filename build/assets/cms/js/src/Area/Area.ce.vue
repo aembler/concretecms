@@ -40,12 +40,12 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import HotSpot from '../Ui/HotSpot.vue'
-import HotSpotBadge from '../Ui/HotSpotBadge.vue'
+import HotSpot from '../HotSpot/HotSpot.vue'
+import HotSpotBadge from '../HotSpot/HotSpotBadge.vue'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../Block/types'
-import { BlockRenderer } from '../../support/dom/BlockRenderer'
-import { useToast } from '../../utilities/toast'
+import { BlockRenderer } from '../Block/BlockRenderer'
+import { useToast } from "../Toast/toast";
 import {
   normalizeJsonResponse,
   useAjax,

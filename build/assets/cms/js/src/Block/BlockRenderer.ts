@@ -1,4 +1,4 @@
-import type { AddBlockTargetRef, BlockRef } from '../../src/Block/types'
+import type { AddBlockTargetRef, BlockRef } from './types'
 
 type ScriptDescriptor = {
   src: string | null

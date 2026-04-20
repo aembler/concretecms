@@ -1,8 +1,11 @@
 /**
- * Legacy compatibility utility for classic blocks.
+ * Compatibility shim for legacy code that still calls `window.ConcreteAssetLoader`.
  *
- * Modern block and interface code should not rely on runtime CSS/JS injection.
- * Prefer static imports and build-time bundling for new development.
+ * This runtime no longer performs dynamic CSS/JS asset injection. The methods on
+ * this class are retained only to preserve older interfaces and reduce repeated
+ * console noise while those callers are migrated.
+ *
+ * New code should not use this API.
  */
 export class ConcreteAssetLoader {
   private static warnedMethods = new Set<string>()
@@ -24,6 +27,7 @@ export class ConcreteAssetLoader {
     this.logUnsupported('loadOther', contentOrSelector)
   }
 
+  // Warn once per method so legacy callers remain visible without flooding the console.
   private static logUnsupported(method: string, payload?: string): void {
     if (this.warnedMethods.has(method)) {
       return

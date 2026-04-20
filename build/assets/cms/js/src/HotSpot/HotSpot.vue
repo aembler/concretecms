@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import {computed, provide, ref, useSlots} from 'vue'
-import { HOT_SPOT_BADGE_GEOMETRY_KEY, useHotSpotGeometry } from '../../support/dom/hotspot'
+import { HOT_SPOT_BADGE_GEOMETRY_KEY, useHotSpotGeometry } from './hotspot'
 import { useUiStore } from '@concretecms/backendui'
 import { useConcreteUiStore } from '../../stores/concrete-ui'
 

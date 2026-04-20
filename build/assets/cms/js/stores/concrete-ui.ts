@@ -5,7 +5,7 @@ import { useUiStore } from '@concretecms/backendui'
 import { getConcretePinia } from '../src/Store/pinia'
 import type { BlockOperation } from '../src/Block/types'
 import type { PendingAddEditorRequest } from '../src/Block/types'
-import { refreshHotSpotGeometries } from '../support/dom/hotspot'
+import { refreshHotSpotGeometries } from '../src/HotSpot/hotspot'
 import { FOCUSED_EDITING_TARGET_CLASS, FocusedEditingTarget, FOCUSED_EDITING_ROOT_CLASS, FocusedEditingSpotlight} from "../src/HotSpot/FocusedEditingSpotlight";
 
 type DragPointer = { x: number; y: number } | null
@@ -202,22 +202,13 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
 })
 
 function resolveUiMountContainer(): HTMLElement {
-  if (typeof document === 'undefined') {
-    throw new Error('Cannot resolve UI mount container without a document')
-  }
-
   const uiStore = useUiStore()
   const menuContainer = uiStore.menuContainer
-
   if (menuContainer instanceof HTMLElement) {
     return menuContainer
-  }
-
-  if (typeof menuContainer === 'string' && menuContainer.trim().length > 0) {
+  } else {
     return document.querySelector<HTMLElement>(menuContainer) ?? document.body
   }
-
-  return document.body
 }
 
 export function useConcreteUiStore(pinia?: Pinia) {

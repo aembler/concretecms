@@ -1,27 +1,25 @@
 <template>
-  <Teleport :to="toast.toastContainer ?? 'body'">
-    <ToastProvider :duration="activeToast?.duration ?? 3000" swipe-direction="right">
+    <ToastProvider :duration="toast.activeToast?.duration ?? 3000" swipe-direction="right">
       <Toast
-        v-if="activeToast"
-        :key="activeToast.id"
+        v-if="toast.activeToast"
+        :key="toast.activeToast.id"
         :open="open"
         :variant="toastVariant"
         @update:open="handleOpenUpdate"
       >
         <div class="grid gap-1">
-          <ToastTitle>{{ activeToast.title }}</ToastTitle>
-          <ToastDescription>{{ activeToast.message }}</ToastDescription>
+          <ToastTitle>{{ toast.activeToast.title }}</ToastTitle>
+          <ToastDescription>{{ toast.activeToast.message }}</ToastDescription>
         </div>
         <ToastClose />
       </Toast>
       <ToastViewport />
     </ToastProvider>
-  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useToast } from "../../utilities/toast";
+import { computed, ref, watch } from 'vue'
+import { useToast } from "./toast";
 import {
   Toast,
   ToastClose,
@@ -34,22 +32,8 @@ import {
 const toast = useToast()
 const open = ref(false)
 
-const activeToast = computed(() => {
-  const activeId = toast.activeToastId
-  if (!activeId) {
-    return null
-  }
-
-  const operation = toast.queue.find((item) => item.id === activeId)
-  if (!operation) {
-    return null
-  }
-
-  return operation
-})
-
 const toastVariant = computed(() => {
-  const variant = activeToast.value?.variant
+  const variant = toast.activeToast?.variant
   if (variant === 'error') {
     return 'error'
   }
@@ -59,36 +43,16 @@ const toastVariant = computed(() => {
 
 function handleOpenUpdate(nextOpen: boolean) {
   open.value = nextOpen
-  if (!nextOpen && activeToast.value) {
-    toast.finishToast(activeToast.value.id, 'done')
+  if (!nextOpen && toast.activeToast) {
+    toast.completeToast(toast.activeToast.id)
   }
 }
 
 watch(
-  activeToast,
-  (toast) => {
-    open.value = Boolean(toast)
+  () => toast.activeToast,
+  (activeToast) => {
+    open.value = Boolean(activeToast)
   },
   { immediate: true }
 )
-
-watch(
-  () => [toast.queue.length, toast.activeToastId] as const,
-  () => {
-    if (toast.activeToastId && !activeToast.value) {
-      toast.activeToastId = null
-    }
-
-    if (!toast.activeToastId) {
-      toast.startNextToast()
-    }
-  },
-  { immediate: true }
-)
-
-onMounted(() => {
-  if (!toast.activeToastId) {
-    toast.startNextToast()
-  }
-})
 </script>

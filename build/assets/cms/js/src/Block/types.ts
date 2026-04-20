@@ -1,4 +1,4 @@
-import {OperationStatus} from "../App/types"
+import type { Operation } from '../Queue/queue'
 
 export type BlockRef = {
   bID: string | number
@@ -31,28 +31,22 @@ export type PendingAddEditorRequest = {
   }
 }
 
-export type DeleteBlockOperation = {
-  id: string
+export interface DeleteBlockOperation extends Operation {
   type: 'block.delete'
-  status: OperationStatus
   pageBlock: BlockRef
   deleteAll: boolean
 }
 
-export type UpdateBlockOperation = {
-  id: string
+export interface UpdateBlockOperation extends Operation {
   type: 'block.update'
-  status: OperationStatus
   originalBlock: BlockRef
   updatedBlock: BlockRef
   replacementHtml?: string
   response?: any
 }
 
-export type AddBlockOperation = {
-  id: string
+export interface AddBlockOperation extends Operation {
   type: 'block.add'
-  status: OperationStatus
   blockTypeId: number
   blockTypeHandle?: string
   blockTitle?: string
