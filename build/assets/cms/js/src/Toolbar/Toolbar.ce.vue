@@ -5,7 +5,6 @@
     class="w-full fixed top-0 left-0 z-[var(--index-layer-toolbar-wrapper)]"
   >
     <div ref="teleportTarget"></div>
-    <div ref="toastTeleportTarget"></div>
     <div id="ccm-toolbar" class="relative z-[var(--index-layer-toolbar)] flex flex-row justify-between items-center border-b border-base-300 bg-base-100/95 backdrop-blur-sm">
       <div class="navbar mx-auto max-w-screen-2xl px-4 lg:px-6 gap-1">
         <!-- Logo -->
@@ -16,12 +15,12 @@
         <!-- Master Collection Exit -->
         <div
             v-if="isMasterCollection"
-            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="concreteUi.toolbar.showTooltips ? 'Exit Edit Defaults' : null"
+            :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="toolbarStore.showTooltips ? 'Exit Edit Defaults' : null"
         >
           <a :href="masterCollectionUrl" class="c-toolbar-button">
             <ArrowLeftIcon class="w-4 h-4" />
-            <span v-if="concreteUi.toolbar.showTitles">Exit Edit Defaults</span>
+            <span v-if="toolbarStore.showTitles">Exit Edit Defaults</span>
           </a>
         </div>
 
@@ -29,8 +28,8 @@
         <template v-if="!pageInUseBySomeoneElse && !isAlias">
           <div
               v-if="isEditMode"
-              :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-              :data-tip="concreteUi.toolbar.showTooltips ? 'Exit Edit Mode' : null"
+              :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+              :data-tip="toolbarStore.showTooltips ? 'Exit Edit Mode' : null"
           >
             <a
                 :href="checkInUrl"
@@ -38,13 +37,13 @@
                 class="c-toolbar-button c-toolbar-button-active"
             >
               <PencilIcon class="w-4 h-4" />
-              <span v-if="concreteUi.toolbar.showTitles">Exit Edit Mode</span>
+              <span v-if="toolbarStore.showTitles">Exit Edit Mode</span>
             </a>
           </div>
           <div
               v-else-if="canEditPageContents"
-              :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-              :data-tip="concreteUi.toolbar.showTooltips ? 'Edit This Page' : null"
+              :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+              :data-tip="toolbarStore.showTooltips ? 'Edit This Page' : null"
           >
             <a
                 :href="checkoutUrl"
@@ -52,26 +51,26 @@
                 title="Edit This Page"
             >
               <PencilIcon class="w-4 h-4" />
-              <span v-if="concreteUi.toolbar.showTitles">Edit Mode</span>
+              <span v-if="toolbarStore.showTitles">Edit Mode</span>
             </a>
           </div>
         </template>
 
         <!-- Add Content -->
         <div v-if="canEditPageContents && !pageInUseBySomeoneElse"
-             :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-             :data-tip="concreteUi.toolbar.showTooltips ? 'Add Content' : null">
+             :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+             :data-tip="toolbarStore.showTooltips ? 'Add Content' : null">
           <a :href="addContentUrl" @click.prevent="launchAddPanel" class="c-toolbar-button">
             <PlusIcon class="w-4 h-4" />
-            <span v-if="concreteUi.toolbar.showTitles">Add</span>
+            <span v-if="toolbarStore.showTitles">Add</span>
           </a>
         </div>
 
         <!-- Page Settings -->
         <div
             v-if="canEditPageSettings"
-            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="concreteUi.toolbar.showTooltips ? 'Page Settings' : null"
+            :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="toolbarStore.showTooltips ? 'Page Settings' : null"
         >
           <a
               href="#"
@@ -79,7 +78,7 @@
               class="c-toolbar-button"
           >
             <Cog6ToothIcon class="w-4 h-4" />
-            <span v-if="concreteUi.toolbar.showTitles">Settings</span>
+            <span v-if="toolbarStore.showTitles">Settings</span>
           </a>
         </div>
       </div>
@@ -91,24 +90,24 @@
         <!-- Dashboard -->
         <div
             v-if="canAccessDashboard"
-            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="concreteUi.toolbar.showTooltips ? 'Dashboard' : null"
+            :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="toolbarStore.showTooltips ? 'Dashboard' : null"
         >
           <a :href="dashboardUrl" class="c-toolbar-button">
             <DashboardIcon class="w-4 h-4" />
-            <span v-if="concreteUi.toolbar.showTitles">Dashboard</span>
+            <span v-if="toolbarStore.showTitles">Dashboard</span>
           </a>
         </div>
 
         <!-- Sitemap -->
         <div
             v-if="canViewSitemap"
-            :class="[concreteUi.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-            :data-tip="concreteUi.toolbar.showTooltips ? 'Pages' : null"
+            :class="[toolbarStore.showTooltips && 'tooltip tooltip-bottom']"
+            :data-tip="toolbarStore.showTooltips ? 'Pages' : null"
         >
           <a href="#" @click.prevent="launchSitemap" class="c-toolbar-button">
             <SitemapIcon class="w-4 h-4" />
-            <span v-if="concreteUi.toolbar.showTitles">Pages</span>
+            <span v-if="toolbarStore.showTitles">Pages</span>
           </a>
         </div>
 
@@ -164,12 +163,12 @@ import {
   useUiStore,
   useFloatingPanelsStore,
 } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import { useToolbarStore } from './@stores/toolbar'
+import {usePageStore} from "../Page/@stores/page";
 const ui = useUiStore()
-import { useToast } from "../Toast/toast";
-const toast = useToast()
-const concreteUi = useConcreteUiStore()
-const floatingPanels = useFloatingPanelsStore()
+const toolbarStore = useToolbarStore()
+const floatingPanelsStore = useFloatingPanelsStore()
+const pageStore = usePageStore()
 
 const props = defineProps({
   pageId: Number,
@@ -196,14 +195,13 @@ const props = defineProps({
 
 const resolvedTheme = ref('light')
 const teleportTarget = useTemplateRef('teleportTarget')
-const toastTeleportTarget = useTemplateRef('toastTeleportTarget')
 const pageSettingsPanelId = 'toolbar:page-settings'
 const checkInPanelId = 'toolbar:check-in'
 const addPanelId = 'toolbar:add'
-const pageSettingsOpen = computed(() => floatingPanels.activePanel === pageSettingsPanelId)
-const checkInOpen = computed(() => floatingPanels.activePanel === checkInPanelId)
-const addPanelOpen = computed(() => floatingPanels.activePanel === addPanelId)
-const isAddContentDragActive = computed(() => concreteUi.page.addContentDragActive)
+const pageSettingsOpen = computed(() => floatingPanelsStore.activePanel === pageSettingsPanelId)
+const checkInOpen = computed(() => floatingPanelsStore.activePanel === checkInPanelId)
+const addPanelOpen = computed(() => floatingPanelsStore.activePanel === addPanelId)
+const isAddContentDragActive = computed(() => pageStore.add.dragActive)
 const floatingPanelBackdropClass = computed(() =>
   isAddContentDragActive.value
     ? 'pointer-events-none bg-transparent z-[var(--index-layer-panel-backdrop)]'
@@ -215,18 +213,18 @@ function handleSearch() {
 
 function setActivePanel(panelId: string | null) {
   if (panelId) {
-    floatingPanels.open(panelId)
+    floatingPanelsStore.open(panelId)
     return
   }
 
-  const currentPanel = floatingPanels.activePanel
+  const currentPanel = floatingPanelsStore.activePanel
   if (currentPanel) {
-    floatingPanels.close(currentPanel)
+    floatingPanelsStore.close(currentPanel)
   }
 }
 
 function togglePanel(panelId: string) {
-  if (floatingPanels.activePanel === panelId) {
+  if (floatingPanelsStore.activePanel === panelId) {
     setActivePanel(null)
     return
   }
@@ -236,7 +234,7 @@ function togglePanel(panelId: string) {
 function setPanelOpen(panelId: string, isOpen: boolean) {
   if (isOpen) {
     setActivePanel(panelId)
-  } else if (floatingPanels.activePanel === panelId) {
+  } else if (floatingPanelsStore.activePanel === panelId) {
     setActivePanel(null)
   }
 }
@@ -255,7 +253,7 @@ onMounted(() => {
 
 watch(() => addPanelOpen.value, (isOpen) => {
   if (!isOpen) {
-    concreteUi.page.addContentDragActive = false
+    pageStore.add.dragActive = false
   }
 })
 

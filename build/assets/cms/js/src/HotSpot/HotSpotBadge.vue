@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import { computed, inject, type CSSProperties } from 'vue'
 import { HOT_SPOT_BADGE_GEOMETRY_KEY, type HotSpotBadgeGeometry } from './hotspot'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import {usePageStore} from "../Page/@stores/page";
 
 type HotSpotBadgeColorProps = {
   backgroundColor: string
@@ -36,7 +36,7 @@ const props = withDefaults(defineProps<{
 })
 
 
-const concreteUiStore = useConcreteUiStore()
+const pageStore = usePageStore()
 const hotspotGeometry = inject(HOT_SPOT_BADGE_GEOMETRY_KEY, null) as HotSpotBadgeGeometry | null
 const fallbackGeometry = {
   top: 0,
@@ -45,7 +45,7 @@ const fallbackGeometry = {
   width: 0,
 }
 
-const isInteractionsEnabled = computed(() => Boolean(concreteUiStore.page.interactionsEnabled))
+const isInteractionsEnabled = computed(() => pageStore.interactionsEnabled)
 
 const top = computed(() => hotspotGeometry?.top.value ?? fallbackGeometry.top)
 const left = computed(() => hotspotGeometry?.left.value ?? fallbackGeometry.left)

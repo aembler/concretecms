@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import type { Pinia } from 'pinia'
-import { getConcretePinia } from '../Store/pinia'
+import { getConcretePinia } from '../../Store/pinia'
 import {
   current as currentQueueItem,
   enqueue as enqueueQueueItem,
   finish as finishQueueItem,
   type QueueState,
-} from '../Queue/queue'
+} from '../../Queue/queue'
 
 type ToastOptions = {
   title?: string
@@ -15,7 +15,7 @@ type ToastOptions = {
   duration?: number
 }
 
-import type { Operation } from '../Queue/queue'
+import type { Operation } from '../../Queue/queue'
 
 type ToastVariant = 'success' | 'error' | 'info' | 'warning'
 interface ToastOperation extends Operation {
@@ -81,7 +81,7 @@ const useToastStoreBase = defineStore('concrete-ui-toast', {
   },
 })
 
-export function useToast(pinia?: Pinia) {
+export function useToastStore(pinia?: Pinia) {
   const sharedPinia = pinia ?? getConcretePinia()
 
   return useToastStoreBase(sharedPinia)

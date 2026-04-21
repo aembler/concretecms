@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useUiStore } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import { usePageStore } from "../Page/@stores/page";
+import { useWindowStore } from "./@stores/window";
 
 const uiStore = useUiStore()
-const concreteUiStore = useConcreteUiStore()
-
+const pageStore = usePageStore()
+const windowStore = useWindowStore()
 function getFirstElementWithConcreteBlockIdFromPath(eventPath: EventTarget[]): HTMLElement | null {
   const firstElementWithId = eventPath.find(
     (el): el is HTMLElement => el instanceof HTMLElement
@@ -20,9 +21,9 @@ function handleMouseMove(event: MouseEvent) {
   const hoveredBlockId = firstElementWithId?.getAttribute('data-concrete-block-id') || ''
 
   if (hoveredBlockId) {
-    concreteUiStore.clickProxy.hoverElementId = hoveredBlockId
+    pageStore.clickProxy.hoverElementId = hoveredBlockId
   } else {
-    concreteUiStore.clickProxy.hoverElementId = ''
+    pageStore.clickProxy.hoverElementId = ''
   }
 }
 
@@ -64,42 +65,42 @@ function handleGlobalClick(event: MouseEvent) {
 
   const eventPath = event.composedPath()
   const eventTarget = event.target
-  const activeId = concreteUiStore.clickProxy.activeElementId
+  const activeId = pageStore.clickProxy.activeElementId
 
   if (activeId) {
-    const activeMenuId = concreteUiStore.clickProxy.activeElementMenuId
+    const activeMenuId = pageStore.clickProxy.activeElementMenuId
     const clickedInsideActive = isClickInsideActiveMenu(eventPath, eventTarget, activeMenuId)
 
     if (!clickedInsideActive) {
       const firstElementWithId = getFirstElementWithConcreteBlockIdFromPath(eventPath)
       const clickedBlockId = firstElementWithId?.getAttribute('data-concrete-block-id') || ''
-      concreteUiStore.clickProxy.hoverElementId = clickedBlockId
-      concreteUiStore.clickProxy.activeElementId = ''
-      concreteUiStore.clickProxy.activeElementMenuId = ''
-      concreteUiStore.clearDoubleClickedElementId()
+      pageStore.clickProxy.hoverElementId = clickedBlockId
+      pageStore.clickProxy.activeElementId = ''
+      pageStore.clickProxy.activeElementMenuId = ''
+      pageStore.clickProxy.doubleClickedElementId = null
       event.stopPropagation()
     }
-  } else if (concreteUiStore.clickProxy.hoverElementId) {
-    concreteUiStore.clickProxy.activeElementId = concreteUiStore.clickProxy.hoverElementId
+  } else if (pageStore.clickProxy.hoverElementId) {
+    pageStore.clickProxy.activeElementId = pageStore.clickProxy.hoverElementId
   }
 }
 
 function handleGlobalDoubleClick(event: MouseEvent) {
   const path = event.composedPath() as HTMLElement[]
-  const activeId = concreteUiStore.clickProxy.activeElementId
+  const activeId = pageStore.clickProxy.activeElementId
 
   if (activeId) {
     const clickedInsideActive = path.some((el) =>
         el instanceof HTMLElement && el.getAttribute('data-concrete-block-id') === activeId
     )
     if (clickedInsideActive) {
-      concreteUiStore.setDoubleClickedElementId(activeId)
+      pageStore.setDoubleClickedElementId(activeId)
     }
   }
 }
 
 function handleScroll() {
-  concreteUiStore.updateScroll(window.scrollY)
+  windowStore.update(window.scrollY)
 }
 
 onMounted(() => {

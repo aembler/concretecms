@@ -91,11 +91,12 @@ import HotSpot from "../HotSpot/HotSpot.vue";
 import HotSpotOverlay from "../HotSpot/HotSpotOverlay.vue";
 import DeleteBlockModal from "../Block/DeleteBlockModal.vue";
 import { normalizeJsonResponse, useAjax, useParsedJsonPropRef } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import {usePageStore} from "../Page/@stores/page";
+import {useBlocksStore} from "./@stores/blocks";
 import type { DeleteBlockOperation } from './types'
 import type { EditBlockEditorContext } from './Editor/types'
 import { useBlockEditorRegistry } from './Editor/registry'
-import { useToast } from "../Toast/toast";
+import { useToastStore } from "../Toast/@stores/toast";
 import HotSpotBadge from "../HotSpot/HotSpotBadge.vue";
 
 const rootEl = ref<HTMLElement | null>()
@@ -103,8 +104,9 @@ const contentEl = ref<HTMLElement | null>()
 const editMode = ref(false)
 const isDeleted = ref(false)
 const showDeleteModal = ref(false)
-const toast = useToast()
-const uiStore = useConcreteUiStore()
+const toast = useToastStore()
+const pageStore = usePageStore()
+const blocksStore = useBlocksStore()
 const blockEditorRegistry = useBlockEditorRegistry()
 const { request } = useAjax()
 const runningDeleteOperationId = ref<string | null>(null)
@@ -189,35 +191,35 @@ watch(
   [() => props.blockId, blockAreaPath],
   ([newBlockId, newPaths], [oldBlockId]) => {
     if (oldBlockId) {
-      uiStore.clearBlockAreaMap(oldBlockId)
+      blocksStore.clearBlockAreaMap(oldBlockId)
     }
 
     if (!newBlockId) {
       return
     }
 
-    uiStore.setBlockAreaMap(newBlockId, newPaths)
+    blocksStore.setBlockAreaMap(newBlockId, newPaths)
   },
   { immediate: true, deep: true }
 )
 
-const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const isInteractionsEnabled = computed(() => pageStore.interactionsEnabled)
 const shouldRenderHotSpots = computed(() => !editMode.value && isInteractionsEnabled.value)
 const isMasterCollectionBool = computed(() => {
   const value = props.isMasterCollection
   return value === true || value === 1 || value === '1' || value === 'true'
 })
-const isBlockClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.activeElementId === props.blockId)
-const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && uiStore.clickProxy.doubleClickedElementId === props.blockId)
-const isAddContentDragActive = computed(() => Boolean((uiStore.page as any)?.addContentDragActive))
+const isBlockClicked = computed(() => isInteractionsEnabled.value && pageStore.clickProxy.activeElementId === props.blockId)
+const isBlockDoubleClicked = computed(() => isInteractionsEnabled.value && pageStore.clickProxy.doubleClickedElementId === props.blockId)
+const isAddContentDragActive = computed(() => pageStore.add.dragActive)
 
 const isBlockHovered = computed(() => {
   if (!isInteractionsEnabled.value || isAddContentDragActive.value) {
     return false
   }
 
-  if (!uiStore.clickProxy.activeElementId) {
-    const hovered = uiStore.clickProxy.hoverElementId === props.blockId
+  if (!pageStore.clickProxy.activeElementId) {
+    const hovered = pageStore.clickProxy.hoverElementId === props.blockId
     return hovered
   }
 
@@ -239,18 +241,18 @@ function editBlock() {
     return
   }
 
-  uiStore.setFocusedEditingTarget({ blockId: props.blockId })
+  pageStore.setFocusedEditingTarget({ blockId: props.blockId })
   editMode.value = true
 }
 
 
 function handleUpdated() {
-  uiStore.clearFocusedEditingTarget()
+  pageStore.clearFocusedEditingTarget()
   editMode.value = false
 }
 
 function handleEditorClosed() {
-  uiStore.clearFocusedEditingTarget()
+  pageStore.clearFocusedEditingTarget()
   editMode.value = false
 }
 
@@ -342,7 +344,7 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
       if (trailingTarget instanceof HTMLElement) {
         trailingTarget.remove()
       }
-      uiStore.refreshPageAreas()
+      pageStore.refreshPageAreas()
       
       uiStore.completePageOperation(operation.id)
     },
@@ -387,10 +389,10 @@ watch(
 
 onBeforeUnmount(() => {
   if (editMode.value) {
-    uiStore.clearFocusedEditingTarget()
+    pageStore.clearFocusedEditingTarget()
   }
 
-  uiStore.clearBlockAreaMap(props.blockId)
+  blocksStore.clearBlockAreaMap(props.blockId)
 })
 
 </script>

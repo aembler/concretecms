@@ -2,6 +2,7 @@
 import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
+import {usePageStore} from "../../../Page/@stores/page";
 import { useConcreteUiStore } from '../../../../stores/concrete-ui'
 import type { AddBlockOperation, AddBlockTargetRef } from '../../../Block/types'
 import type { BlockTypeEditor } from '../../../Block/Editor/types'
@@ -62,10 +63,10 @@ const imageIconSrc = computed(() => (iconType.value === 'image-file' ? props.ico
 const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ? props.icon?.className ?? '' : ''))
 const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 const uiStore = useUiStore()
+const pageStore = usePageStore()
 const concreteUiStore = useConcreteUiStore()
 const blockEditorRegistry = useBlockEditorRegistry()
 const floatingPanels = useFloatingPanelsStore()
-const pageState = computed(() => (concreteUiStore.page as any))
 const addPanelId = 'toolbar:add'
 const blockButton = ref<HTMLButtonElement | null>(null)
 let interactable: any = null
@@ -74,20 +75,6 @@ let dragPreviewContainer: HTMLElement | null = null
 let dragPanelBounds: DOMRect | null = null
 let hasExitedAddPanel = false
 
-function ensureAddContentPageState() {
-  if (typeof pageState.value.addContentDragInProgress === 'undefined') {
-    pageState.value.addContentDragInProgress = false
-  }
-  if (typeof pageState.value.addContentDragPointer === 'undefined') {
-    pageState.value.addContentDragPointer = null
-  }
-  if (typeof pageState.value.addContentDraggedItem === 'undefined') {
-    pageState.value.addContentDraggedItem = null
-  }
-  if (typeof pageState.value.addContentDropTarget === 'undefined') {
-    pageState.value.addContentDropTarget = null
-  }
-}
 
 function getClientCoordinates(event: any): { x: number; y: number } {
   return {
@@ -145,23 +132,11 @@ function removeDragPreview() {
 }
 
 function setAddContentDragActive(next: boolean) {
-  concreteUiStore.page.addContentDragActive = next
-}
-
-function setAddContentDragInProgress(next: boolean) {
-  pageState.value.addContentDragInProgress = next
-}
-
-function setAddContentDragPointer(x: number, y: number) {
-  pageState.value.addContentDragPointer = { x, y }
-}
-
-function clearAddContentDragPointer() {
-  pageState.value.addContentDragPointer = null
+  pageStore.add.dragActive = next
 }
 
 function setAddContentDraggedItem() {
-  pageState.value.addContentDraggedItem = {
+  pageStore.add.draggedItem = {
     type: 'blockType',
     payload: {
       blockTypeId: props.blockTypeId ?? 0,
@@ -174,13 +149,6 @@ function setAddContentDraggedItem() {
   }
 }
 
-function clearAddContentDraggedItem() {
-  pageState.value.addContentDraggedItem = null
-}
-
-function clearAddContentDropTarget() {
-  pageState.value.addContentDropTarget = null
-}
 
 function isPointOutsideRect(x: number, y: number, rect: DOMRect): boolean {
   return x < rect.left || x > rect.right || y < rect.top || y > rect.bottom
@@ -240,7 +208,7 @@ function requestAddEditor(dropTarget: AddContentDropTarget, draggedItem: AddCont
     return
   }
 
-  concreteUiStore.setPendingAddEditorRequest({
+  pageStore.setPendingAddEditorRequest({
     id: `add-editor.${String(draggedItem?.payload?.blockTypeId || props.blockTypeId || 0)}.${Date.now()}`,
     blockTypeId: Number(draggedItem?.payload?.blockTypeId || props.blockTypeId || 0),
     blockTypeHandle: String(draggedItem?.payload?.blockTypeHandle || props.blockTypeHandle || ''),
@@ -250,12 +218,11 @@ function requestAddEditor(dropTarget: AddContentDropTarget, draggedItem: AddCont
     editor,
   })
 
-  setAddContentDragActive(false)
+  pageStore.add.dragActive = false
   floatingPanels.close(addPanelId)
 }
 
 onMounted(() => {
-  ensureAddContentPageState()
   if (!blockButton.value) {
     return
   }
@@ -276,28 +243,28 @@ onMounted(() => {
 
         dragPanelBounds = addPanel instanceof HTMLElement ? addPanel.getBoundingClientRect() : null
         hasExitedAddPanel = false
-        setAddContentDragActive(false)
-        setAddContentDragInProgress(true)
-        clearAddContentDropTarget()
+        pageStore.add.dragActive = false
+        pageStore.add.dragInProgress = true
+        pageStore.add.dropTarget = null
+        pageStore.add.dragPointer = { x, y }
         setAddContentDraggedItem()
-        setAddContentDragPointer(x, y)
         target.classList.add('opacity-60')
         createDragPreview(target, x, y)
       },
       move: (event: any) => {
         const { x, y } = getClientCoordinates(event)
         moveDragPreview(x, y)
-        setAddContentDragPointer(x, y)
+        pageStore.add.dragPointer = { x, y }
 
         if (!hasExitedAddPanel && (!dragPanelBounds || isPointOutsideRect(x, y, dragPanelBounds))) {
           hasExitedAddPanel = true
-          setAddContentDragActive(true)
+          pageStore.add.dragActive = true
         }
       },
       end: () => {
         const target = blockButton.value
-        const activeDropTarget = (pageState.value.addContentDropTarget || null) as AddContentDropTarget | null
-        const draggedItem = (pageState.value.addContentDraggedItem || null) as AddContentDraggedItem | null
+        const activeDropTarget = pageStore.add.dropTarget
+        const draggedItem = pageStore.add.draggedItem
         const didFindValidDropZone = Boolean(activeDropTarget?.areaHandle && activeDropTarget?.pageId && draggedItem?.type === 'blockType')
 
         removeDragPreview()
@@ -310,11 +277,11 @@ onMounted(() => {
             requestAddEditor(activeDropTarget, draggedItem)
           }
         }
-        setAddContentDragActive(false)
-        setAddContentDragInProgress(false)
-        clearAddContentDragPointer()
-        clearAddContentDraggedItem()
-        clearAddContentDropTarget()
+        pageStore.add.dragActive = false
+        pageStore.add.dragInProgress = false
+        pageStore.add.dragPointer = null
+        pageStore.add.draggedItem = null
+        pageStore.add.dropTarget = null
         dragPanelBounds = null
         hasExitedAddPanel = false
         target?.classList.remove('opacity-60')
@@ -325,11 +292,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   removeDragPreview()
-  setAddContentDragActive(false)
-  setAddContentDragInProgress(false)
-  clearAddContentDragPointer()
-  clearAddContentDraggedItem()
-  clearAddContentDropTarget()
+  pageStore.add.dragActive = false
+  pageStore.add.dragInProgress = false
+  pageStore.add.dragPointer = null
+  pageStore.add.draggedItem = null
+  pageStore.add.dropTarget = null
   dragPanelBounds = null
   hasExitedAddPanel = false
   interactable?.unset?.()

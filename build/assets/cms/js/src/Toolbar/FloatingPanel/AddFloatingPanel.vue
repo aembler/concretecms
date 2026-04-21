@@ -28,6 +28,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import AddBlock from './Add/Block.vue'
 import { useConcreteUiStore } from '../../../stores/concrete-ui'
+import {usePageStore} from "../../Page/@stores/page";
 import type {BlockTypeEditor} from '../../Block/Editor/types'
 
 type AddTabId = 'blocks' | 'clipboard' | 'library' | 'layouts'
@@ -69,6 +70,7 @@ const emit = defineEmits<{
   (event: 'update:open', value: boolean): void
 }>()
 const uiStore = useConcreteUiStore()
+const pageStore = usePageStore()
 const { request } = useAjax()
 
 const modelOpen = computed({
@@ -173,7 +175,7 @@ const { items: filteredLayoutItems } = useFuzzySearch(() => layoutItems, searchK
   debounceMs: 100,
 })
 
-const isAddContentDragActive = computed(() => uiStore.page.addContentDragActive)
+const isAddContentDragActive = computed(() => pageStore.add.dragActive)
 const addPanelDragStyle = computed(() => {
   const active = isAddContentDragActive.value
   return {

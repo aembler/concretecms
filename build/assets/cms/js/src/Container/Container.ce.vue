@@ -31,7 +31,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import {usePageStore} from "../Page/@stores/page";
+import {useBlocksStore} from "../Block/@stores/blocks";
 import HotSpot from "../HotSpot/HotSpot.vue";
 import HotSpotBadge from "../HotSpot/HotSpotBadge.vue";
 
@@ -43,12 +44,13 @@ const props = withDefaults(defineProps<{
   containerName: 'Container'
 })
 
-const uiStore = useConcreteUiStore()
+const pageStore = usePageStore()
+const blocksStore = useBlocksStore()
 const rootEl = ref<HTMLElement | null>(null)
 const isPointerOver = ref(false)
-const effectiveHoveredBlockId = computed(() => uiStore.clickProxy.activeElementId || uiStore.clickProxy.hoverElementId)
-const activeElementId = computed(() => uiStore.clickProxy.activeElementId)
-const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
+const effectiveHoveredBlockId = computed(() => pageStore.clickProxy.activeElementId || pageStore.clickProxy.hoverElementId)
+const activeElementId = computed(() => pageStore.clickProxy.activeElementId)
+const isInteractionsEnabled = computed(() => pageStore.interactionsEnabled)
 const containerKey = computed(() =>
   props.containerBlockId ? `container:${props.containerBlockId}` : ''
 )
@@ -65,7 +67,7 @@ const hasHoveredBlockContainer = computed(() => {
     return false
   }
 
-  const paths = uiStore.blockAreaMap[activeHover] || []
+  const paths = blocksStore.blockAreaMap[activeHover] || []
   const hasPathMatch = paths.includes(containerKey.value)
 
   if (!isInteractionsEnabled.value || !rootEl.value) {

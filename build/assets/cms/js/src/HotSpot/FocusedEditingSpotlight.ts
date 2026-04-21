@@ -142,6 +142,22 @@ class FocusedEditingSpotlight {
         })
     }
 
+    public resolveFocusedEditingElement(target: FocusedEditingTarget): HTMLElement | null {
+        if (!target) {
+            return null
+        }
+
+        if (target.element instanceof HTMLElement) {
+            return target.element
+        }
+
+        if (!target.blockId) {
+            return null
+        }
+
+        return document.querySelector(`concrete-block[block-id="${String(target.blockId)}"]`)
+    }
+
     private hideOverlay() {
         if (!this.overlayElement || typeof window === 'undefined') {
             this.destroyOverlay()

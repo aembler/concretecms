@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../../stores/concrete-ui'
-const ui = useConcreteUiStore()
+import { useToolbarStore } from '../@stores/toolbar'
+const toolbar = useToolbarStore()
 
 const props = defineProps<{
   helpUrl: string
@@ -37,8 +37,8 @@ function showModal(event: MouseEvent) {
 
 <template>
   <div
-      :class="[ui.toolbar.showTooltips && 'tooltip tooltip-bottom']"
-      :data-tip="ui.toolbar.showTooltips ? 'Help' : null"
+      :class="[toolbar.showTooltips && 'tooltip tooltip-bottom']"
+      :data-tip="toolbar.showTooltips ? 'Help' : null"
   >
     <a
         :href="helpUrl"
@@ -47,7 +47,7 @@ function showModal(event: MouseEvent) {
         title="Help"
     >
       <QuestionMarkCircleIcon class="w-4 h-4" />
-      <span v-if="ui.toolbar.showTitles">Help</span>
+      <span v-if="toolbar.showTitles">Help</span>
     </a>
   </div>
 

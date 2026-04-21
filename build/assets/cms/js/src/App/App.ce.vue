@@ -28,7 +28,7 @@
 
 <script setup>
 import Toolbar from '../Toolbar/Toolbar.ce.vue'
-import MouseObserver from "../Support/MouseObserver.vue";
+import MouseObserver from "../Window/MouseObserver.vue";
 
 // Define all the props explicitly
 const props = defineProps({
@@ -59,11 +59,11 @@ const props = defineProps({
   }
 })
 
-import { useConcreteUiStore } from '../../stores/concrete-ui'
-const ui = useConcreteUiStore()
+import {useToolbar, useToolbarStore} from '../Toolbar/@stores/toolbar'
+const toolbar = useToolbarStore()
 
-ui.toolbar.showTooltips = props.toolbarShowTooltips
-ui.toolbar.showTitles = props.toolbarShowTitles
-ui.toolbar.useLargeFont = props.toolbarLargeFont
+toolbar.showTooltips = props.toolbarShowTooltips
+toolbar.showTitles = props.toolbarShowTitles
+toolbar.useLargeFont = props.toolbarLargeFont
 
 </script>

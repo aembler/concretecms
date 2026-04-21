@@ -1,145 +1,21 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import type { Pinia } from 'pinia'
-import { useUiStore } from '@concretecms/backendui'
 import { getConcretePinia } from '../src/Store/pinia'
 import type { BlockOperation } from '../src/Block/types'
-import type { PendingAddEditorRequest } from '../src/Block/types'
-import { refreshHotSpotGeometries } from '../src/HotSpot/hotspot'
-import { FOCUSED_EDITING_TARGET_CLASS, FocusedEditingTarget, FOCUSED_EDITING_ROOT_CLASS, FocusedEditingSpotlight} from "../src/HotSpot/FocusedEditingSpotlight";
-
-type DragPointer = { x: number; y: number } | null
-
-const focusedEditingSpotlight = new FocusedEditingSpotlight()
-
-function getFocusedEditingBlockElement(blockId: string | number | null | undefined): HTMLElement | null {
-  if (!blockId || typeof document === 'undefined') {
-    return null
-  }
-
-  return document.querySelector(`concrete-block[block-id="${String(blockId)}"]`)
-}
-
-function resolveFocusedEditingElement(target: FocusedEditingTarget): HTMLElement | null {
-  if (!target) {
-    return null
-  }
-
-  if (target.element instanceof HTMLElement) {
-    return target.element
-  }
-
-  return getFocusedEditingBlockElement(target.blockId)
-}
 
 
 let pageOperationDoneCleanupQueued = false
 
 const useConcreteUiStoreBase = defineStore('concrete-ui', {
   state: () => ({
-    toolbar: {
-      showTooltips: true,
-      showTitles: false,
-      useLargeFont: false,
-    },
     page: {
-      interactionsEnabled: true,
-      addContentDragActive: false,
-      addContentDragInProgress: false,
-      addContentDragPointer: null as DragPointer,
-      addContentDraggedItem: null as any,
-      addContentDropTarget: null as any,
-      pendingAddEditorRequest: null as PendingAddEditorRequest | null,
       operationsQueue: [] as BlockOperation[],
       activeOperationId: null as string | null,
-      hoverArea: null as String | null,
-      focusedEditingBlockId: null as string | null,
-    },
-    blockAreaMap: {} as Record<string, string[]>,
-    clickProxy: {
-      activeElementId: null as string | null,
-      hoverElementId: null as string | null,
-      doubleClickedElementId: null as string | null,
-      activeElementMenuId: null as string | null,
-    },
-    scroll: {
-      y: 0,
-      direction: 'down' as 'up' | 'down',
-    },
+    }
   }),
   actions: {
-    setPageInteractionsEnabled(enabled: boolean) {
-      if (enabled) {
-        refreshHotSpotGeometries()
-      }
-      this.page.interactionsEnabled = enabled
-    },
-    setFocusedEditingTarget(target: FocusedEditingTarget) {
-      const root = typeof document !== 'undefined' ? document.documentElement : null
-      const previousFocusedElement = typeof document !== 'undefined'
-        ? document.querySelector<HTMLElement>(`.${FOCUSED_EDITING_TARGET_CLASS}`)
-        : null
-
-      previousFocusedElement?.classList.remove(FOCUSED_EDITING_TARGET_CLASS)
-
-      const focusedElement = resolveFocusedEditingElement(target)
-      const blockId = target?.blockId ? String(target.blockId) : null
-      this.page.focusedEditingBlockId = blockId
-
-      if (!root || !focusedElement) {
-        root?.classList.remove(FOCUSED_EDITING_ROOT_CLASS)
-        focusedEditingSpotlight.detach()
-        this.setPageInteractionsEnabled(true)
-        return
-      }
-
-      root.classList.add(FOCUSED_EDITING_ROOT_CLASS)
-      focusedElement.classList.add(FOCUSED_EDITING_TARGET_CLASS)
-      focusedEditingSpotlight.attach(resolveUiMountContainer(), focusedElement)
-      void nextTick(() => {
-        focusedEditingSpotlight.scheduleUpdate()
-      })
-      this.setPageInteractionsEnabled(false)
-    },
-    clearFocusedEditingTarget() {
-      this.setFocusedEditingTarget(null)
-    },
-    setDoubleClickedElementId(id: string) {
-      this.clickProxy.doubleClickedElementId = id
-      queueMicrotask(() => {
-        if (this.clickProxy.doubleClickedElementId === id) {
-          this.clickProxy.doubleClickedElementId = null
-        }
-      })
-    },
-    clearDoubleClickedElementId() {
-      this.clickProxy.doubleClickedElementId = null
-    },
-    refreshPageAreas() {
-      this.clickProxy.activeElementId = null
-      this.clickProxy.hoverElementId = null
-      refreshHotSpotGeometries()
-    },
-    updateScroll(y: number) {
-      const direction = y < this.scroll.y ? 'up' : 'down'
-      this.scroll.direction = direction
-      this.scroll.y = y
-    },
-    setBlockAreaMap(blockId: string, areaPath: string[]) {
-      this.blockAreaMap[blockId] = areaPath
-    },
-    clearBlockAreaMap(blockId: string) {
-      delete this.blockAreaMap[blockId]
-    },
-    setPendingAddEditorRequest(request: PendingAddEditorRequest | null) {
-      this.page.pendingAddEditorRequest = request
-    },
-    clearPendingAddEditorRequest(id?: string) {
-      if (!id || this.page.pendingAddEditorRequest?.id === id) {
-        this.page.pendingAddEditorRequest = null
-      }
-    },
-    enqueuePageOperation(operation: PageOperation) {
+    enqueuePageOperation(operation: BlockOperation) {
       this.page.operationsQueue.push(operation)
       this.startNextPageOperation()
     },
@@ -200,16 +76,6 @@ const useConcreteUiStoreBase = defineStore('concrete-ui', {
     },
   },
 })
-
-function resolveUiMountContainer(): HTMLElement {
-  const uiStore = useUiStore()
-  const menuContainer = uiStore.menuContainer
-  if (menuContainer instanceof HTMLElement) {
-    return menuContainer
-  } else {
-    return document.querySelector<HTMLElement>(menuContainer) ?? document.body
-  }
-}
 
 export function useConcreteUiStore(pinia?: Pinia) {
   const sharedPinia = pinia ?? getConcretePinia()

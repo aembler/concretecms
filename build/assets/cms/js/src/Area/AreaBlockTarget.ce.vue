@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import {usePageStore} from "../Page/@stores/page";
 import type { PendingAddEditorRequest } from '../Block/types'
 import type { AddBlockEditorContext } from '../Block/Editor/types'
 import { useBlockEditorRegistry } from '../Block/Editor/registry'
@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   container: null,
 })
 
-const uiStore = useConcreteUiStore()
+const pageStore = usePageStore()
 const blockEditorRegistry = useBlockEditorRegistry()
 const targetRef = ref<HTMLElement | null>(null)
 let stickyReleaseTimer: ReturnType<typeof setTimeout> | null = null
@@ -43,11 +43,10 @@ const STICKY_RELEASE_PADDING_X = 10
 const STICKY_RELEASE_PADDING_Y = 22
 const STICKY_RELEASE_DELAY_MS = 120
 
-const pageState = computed(() => (uiStore.page as any))
-const isDragInProgress = computed(() => Boolean(pageState.value?.addContentDragInProgress))
-const isInteractionsEnabled = computed(() => Boolean(pageState.value?.interactionsEnabled ?? true))
-const isDragActive = computed(() => isInteractionsEnabled.value && Boolean(pageState.value?.addContentDragActive) && isDragInProgress.value)
-const draggedItem = computed(() => pageState.value?.addContentDraggedItem ?? null)
+const isDragInProgress = computed(() => pageStore.add.dragInProgress)
+const isInteractionsEnabled = computed(() => pageStore.interactionsEnabled)
+const isDragActive = computed(() => isInteractionsEnabled.value && pageStore.add.dragActive && isDragInProgress.value)
+const draggedItem = computed(() => pageStore.add.draggedItem ?? null)
 const isValidDraggedBlockType = computed(() => draggedItem.value?.type === 'blockType')
 
 const ownAreaId = computed(() => Number(props.areaId || 0))
@@ -71,7 +70,7 @@ const parsedContainer = computed<{ start?: string; end?: string } | null>(() => 
   return props.container
 })
 const activeAddEditorRequest = computed<PendingAddEditorRequest | null>(() => {
-  const request = (pageState.value?.pendingAddEditorRequest ?? null) as PendingAddEditorRequest | null
+  const request = (pageStore.add.pendingEditorRequest ?? null) as PendingAddEditorRequest | null
   if (!request) {
     return null
   }
@@ -128,7 +127,7 @@ const shouldWrapAddEditorInContainer = computed(() => {
 })
 
 const isActiveTarget = computed(() => {
-  const dropTarget = pageState.value?.addContentDropTarget
+  const dropTarget = pageStore.add.dropTarget
   if (!dropTarget) {
     return false
   }
@@ -171,11 +170,11 @@ watch(
   activeAddEditorRequest,
   (request) => {
     if (request) {
-      uiStore.setFocusedEditingTarget({ element: targetRef.value })
+      pageStore.setFocusedEditingTarget({ element: targetRef.value })
       return
     }
 
-    uiStore.clearFocusedEditingTarget()
+    pageStore.clearFocusedEditingTarget()
   },
   { immediate: true }
 )
@@ -202,7 +201,7 @@ function claimDropTarget() {
     stickyReleaseTimer = null
   }
 
-  pageState.value.addContentDropTarget = {
+  pageStore.add.dropTarget = {
     areaId: ownAreaId.value,
     pageId: ownPageId.value,
     areaHandle: ownAreaHandle.value,
@@ -222,7 +221,7 @@ function releaseDropTarget() {
     return
   }
 
-  pageState.value.addContentDropTarget = null
+  pageStore.add.dropTarget = null
 }
 
 watchEffect(() => {
@@ -231,7 +230,7 @@ watchEffect(() => {
     return
   }
 
-  const pointer = pageState.value?.addContentDragPointer ?? null
+  const pointer = pageStore.add.dragPointer ?? null
   const hitboxPaddingX = ENABLE_EXPANDED_HITBOX ? HITBOX_PADDING_X : 0
   const hitboxPaddingY = ENABLE_EXPANDED_HITBOX ? HITBOX_PADDING_Y : 0
   if (!justActivatedDrag.value && isPointerInsideTarget(pointer, hitboxPaddingX, hitboxPaddingY)) {
@@ -252,7 +251,7 @@ watchEffect(() => {
       stickyReleaseTimer = setTimeout(() => {
         stickyReleaseTimer = null
         if (isActiveTarget.value) {
-          pageState.value.addContentDropTarget = null
+          pageStore.add.dropTarget = null
         }
       }, STICKY_RELEASE_DELAY_MS)
     }
@@ -272,7 +271,7 @@ onBeforeUnmount(() => {
     stickyReleaseTimer = null
   }
 
-  uiStore.clearFocusedEditingTarget()
+  pageStore.clearFocusedEditingTarget()
 })
 
 function clearActiveAddEditorRequest() {
@@ -280,17 +279,17 @@ function clearActiveAddEditorRequest() {
     return
   }
 
-  uiStore.clearPendingAddEditorRequest(activeAddEditorRequest.value.id)
+  pageStore.clearPendingAddEditorRequest(activeAddEditorRequest.value.id)
 }
 
 function handleAddEditorUpdated() {
   clearActiveAddEditorRequest()
-  uiStore.clearFocusedEditingTarget()
+  pageStore.clearFocusedEditingTarget()
 }
 
 function handleAddEditorClosed() {
   clearActiveAddEditorRequest()
-  uiStore.clearFocusedEditingTarget()
+  pageStore.clearFocusedEditingTarget()
 }
 
 </script>

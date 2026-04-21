@@ -42,10 +42,11 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import HotSpot from '../HotSpot/HotSpot.vue'
 import HotSpotBadge from '../HotSpot/HotSpotBadge.vue'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import {usePageStore} from "../Page/@stores/page";
+import {useBlocksStore} from "../Block/@stores/blocks";
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../Block/types'
 import { BlockRenderer } from '../Block/BlockRenderer'
-import { useToast } from "../Toast/toast";
+import { useToastStore } from "../Toast/@stores/toast";
 import {
   normalizeJsonResponse,
   useAjax,
@@ -64,7 +65,8 @@ const props = withDefaults(defineProps<{
 const isAreaEmpty = computed(() => Number(props.totalBlocks) === 0)
 const badgePlacement = computed(() => isAreaEmpty.value ? 'middle-center' : 'block-bottom-center')
 
-const uiStore = useConcreteUiStore()
+const pageStore = usePageStore()
+const blocksStore = useBlocksStore()
 const blockRenderer = new BlockRenderer()
 const runningUpdateOperationId = ref<string | null>(null)
 const runningAddOperationId = ref<string | null>(null)
@@ -78,15 +80,15 @@ function getHoveredElement(blockId: string): HTMLElement | null {
 
 const isPointerOver = ref(false)
 const areaKey = computed(() => `${props.pageId}:${props.areaHandle}`)
-const isInteractionsEnabled = computed(() => Boolean((uiStore.page as any)?.interactionsEnabled ?? true))
-const effectiveHoveredBlockId = computed(() => uiStore.clickProxy.activeElementId || uiStore.clickProxy.hoverElementId)
-const activeElementId = computed(() => uiStore.clickProxy.activeElementId)
+const isInteractionsEnabled = computed(() => pageStore.interactionsEnabled)
+const effectiveHoveredBlockId = computed(() => pageStore.clickProxy.activeElementId || pageStore.clickProxy.hoverElementId)
+const activeElementId = computed(() => pageStore.clickProxy.activeElementId)
 const hasHoveredBlockArea = computed(() => {
   if (!effectiveHoveredBlockId.value) {
     return false
   }
 
-  const paths = uiStore.blockAreaMap[effectiveHoveredBlockId.value] || []
+  const paths = blocksStore.blockAreaMap[effectiveHoveredBlockId.value] || []
   const hasPathMatch = paths.includes(areaKey.value)
 
   if (!isInteractionsEnabled.value || !rootEl.value) {
@@ -107,7 +109,7 @@ const isHovered = computed(() =>
     isInteractionsEnabled.value && !activeElementId.value && (hasHoveredBlockArea.value || isPointerOver.value)
 )
 
-const toast = useToast()
+const toast = useToastStore()
 const { request } = useAjax()
 
 const activeUpdateOperation = computed<UpdateBlockOperation | null>(() => {
@@ -131,15 +133,15 @@ const activeAddOperation = computed<AddBlockOperation | null>(() => {
 async function refreshHotSpotsAfterRender() {
   await nextTick()
   requestAnimationFrame(() => {
-    uiStore.refreshPageAreas()
+    pageStore.refreshPageAreas()
     requestAnimationFrame(() => {
-      uiStore.refreshPageAreas()
+      pageStore.refreshPageAreas()
     })
   })
 }
 
 watch(
-  () => uiStore.page.pendingAddEditorRequest,
+  () => pageStore.add.pendingEditorRequest,
   (request) => {
     if (!request) {
       return
@@ -224,7 +226,7 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       evaluateScripts: true,
       ignoreContainer: Boolean(operation.ignoreContainer),
     })
-    uiStore.refreshPageAreas()
+    pageStore.refreshPageAreas()
 
     toast.success(
       submitResponse?.title || 'Add Block',
