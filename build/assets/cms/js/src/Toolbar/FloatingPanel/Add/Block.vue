@@ -3,10 +3,11 @@ import interact from 'interactjs'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useFloatingPanelsStore, useUiStore } from '@concretecms/backendui'
 import {usePageStore} from "../../../Page/@stores/page";
-import { useConcreteUiStore } from '../../../../stores/concrete-ui'
+import {useBlocksStore} from "../../../Block/@stores/blocks";
 import type { AddBlockOperation, AddBlockTargetRef } from '../../../Block/types'
 import type { BlockTypeEditor } from '../../../Block/Editor/types'
 import { useBlockEditorRegistry } from '../../../Block/Editor/registry'
+import {enqueue} from "../../../Queue/queue";
 
 type PanelIcon = {
   type: string
@@ -64,7 +65,7 @@ const fontAwesomeClassName = computed(() => (iconType.value === 'font-awesome' ?
 const inlineSvg = computed(() => (iconType.value === 'inline-svg' ? props.icon?.svg ?? '' : ''))
 const uiStore = useUiStore()
 const pageStore = usePageStore()
-const concreteUiStore = useConcreteUiStore()
+const blocksStore = useBlocksStore()
 const blockEditorRegistry = useBlockEditorRegistry()
 const floatingPanels = useFloatingPanelsStore()
 const addPanelId = 'toolbar:add'
@@ -180,7 +181,7 @@ function enqueueAddBlockOperation(dropTarget: AddContentDropTarget, draggedItem:
     },
   }
 
-  concreteUiStore.enqueuePageOperation(operation)
+  enqueue(blocksStore.operations, operation)
 }
 
 function toAddBlockTarget(dropTarget: AddContentDropTarget): AddBlockTargetRef {

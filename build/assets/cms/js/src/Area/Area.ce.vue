@@ -47,6 +47,8 @@ import {useBlocksStore} from "../Block/@stores/blocks";
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../Block/types'
 import { BlockRenderer } from '../Block/BlockRenderer'
 import { useToastStore } from "../Toast/@stores/toast";
+import { current as currentQueueItem, finish as finishQueueItem } from "../Queue/queue";
+
 import {
   normalizeJsonResponse,
   useAjax,
@@ -113,21 +115,19 @@ const toast = useToastStore()
 const { request } = useAjax()
 
 const activeUpdateOperation = computed<UpdateBlockOperation | null>(() => {
-  const operationId = uiStore.page.activeOperationId
-  const operation = uiStore.page.operationsQueue.find(
-    (item): item is UpdateBlockOperation =>
-      item.id === operationId && item.type === 'block.update' && item.status === 'running'
-  )
-  return operation ?? null
+  const operation = currentQueueItem(blocksStore.operations)
+  if (operation && operation.type === 'block.update') {
+    return operation
+  }
+  return null
 })
 
 const activeAddOperation = computed<AddBlockOperation | null>(() => {
-  const operationId = uiStore.page.activeOperationId
-  const operation = uiStore.page.operationsQueue.find(
-    (item): item is AddBlockOperation =>
-      item.id === operationId && item.type === 'block.add' && item.status === 'running'
-  )
-  return operation ?? null
+  const operation = currentQueueItem(blocksStore.operations)
+  if (operation && operation.type === 'block.add') {
+    return operation
+  }
+  return null
 })
 
 async function refreshHotSpotsAfterRender() {
@@ -188,9 +188,9 @@ async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise
       operation.response?.message || 'The block has been saved successfully.'
     )
 
-    uiStore.completePageOperation(operation.id)
+    finishQueueItem(blocksStore.operations, operation.id, 'done')
   } catch {
-    uiStore.failPageOperation(operation.id)
+    finishQueueItem(blocksStore.operations, operation.id, 'failed')
   } finally {
     runningUpdateOperationId.value = null
   }
@@ -233,9 +233,9 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       submitResponse?.message || 'The block has been added successfully.'
     )
 
-    uiStore.completePageOperation(operation.id)
+    finishQueueItem(blocksStore.operations, operation.id, 'done')
   } catch {
-    uiStore.failPageOperation(operation.id)
+    finishQueueItem(blocksStore.operations, operation.id, 'failed')
   } finally {
     runningAddOperationId.value = null
   }

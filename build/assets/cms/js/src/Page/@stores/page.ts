@@ -7,7 +7,6 @@ import type {PendingAddEditorRequest} from "../../Block/types";
 type DragPointer = { x: number; y: number } | null
 
 const focusedEditingSpotlight = new FocusedEditingSpotlight()
-const uiStore = useUiStore()
 export const usePageStore = defineStore('concrete-ui-page', {
   state: () => ({
     interactionsEnabled: true,
@@ -28,11 +27,11 @@ export const usePageStore = defineStore('concrete-ui-page', {
   }),
   actions: {
     setPendingAddEditorRequest(request: PendingAddEditorRequest | null) {
-      this.page.pendingAddEditorRequest = request
+      this.add.pendingEditorRequest = request
     },
     clearPendingAddEditorRequest(id?: string) {
-      if (!id || this.page.pendingAddEditorRequest?.id === id) {
-        this.page.pendingAddEditorRequest = null
+      if (!id || this.add.pendingEditorRequest?.id === id) {
+        this.add.pendingEditorRequest = null
       }
     },
     setFocusedEditingTarget(target: FocusedEditingTarget) {
@@ -52,6 +51,7 @@ export const usePageStore = defineStore('concrete-ui-page', {
         return
       }
 
+      const uiStore = useUiStore()
       let menuContainer = uiStore.menuContainer
       if (typeof(menuContainer) === 'string') {
         menuContainer = document.querySelector<HTMLElement>(menuContainer)
@@ -72,7 +72,7 @@ export const usePageStore = defineStore('concrete-ui-page', {
       if (enabled) {
         refreshHotSpotGeometries()
       }
-      this.page.interactionsEnabled = enabled
+      this.interactionsEnabled = enabled
     },
     setDoubleClickedElementId(id: string) {
       this.clickProxy.doubleClickedElementId = id

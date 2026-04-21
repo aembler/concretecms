@@ -59,7 +59,7 @@ const props = defineProps({
   }
 })
 
-import {useToolbar, useToolbarStore} from '../Toolbar/@stores/toolbar'
+import {useToolbarStore} from '../Toolbar/@stores/toolbar'
 const toolbar = useToolbarStore()
 
 toolbar.showTooltips = props.toolbarShowTooltips

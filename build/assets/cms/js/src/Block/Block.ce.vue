@@ -98,6 +98,7 @@ import type { EditBlockEditorContext } from './Editor/types'
 import { useBlockEditorRegistry } from './Editor/registry'
 import { useToastStore } from "../Toast/@stores/toast";
 import HotSpotBadge from "../HotSpot/HotSpotBadge.vue";
+import {current, finish} from "../Queue/queue";
 
 const rootEl = ref<HTMLElement | null>()
 const contentEl = ref<HTMLElement | null>()
@@ -280,16 +281,10 @@ const currentEditorContext = computed<EditBlockEditorContext | null>(() => {
 })
 
 const activeDeleteOperation = computed<DeleteBlockOperation | null>(() => {
-  const operationId = uiStore.page.activeOperationId
-  if (!operationId) {
-    return null
-  }
-
-  const operation = uiStore.page.operationsQueue.find((item) => item.id === operationId)
+  const operation = current(blocksStore.operations)
   if (!operation || operation.type !== 'block.delete' || operation.status !== 'running') {
     return null
   }
-
   return operation
 })
 
@@ -346,10 +341,10 @@ function runDeleteOperation(operation: DeleteBlockOperation) {
       }
       pageStore.refreshPageAreas()
       
-      uiStore.completePageOperation(operation.id)
+      finish(blocksStore.operations, operation.id, 'done')
     },
     onError: (error: any) => {
-      uiStore.failPageOperation(operation.id)
+      finish(blocksStore.operations, operation.id, 'failed')
 
       const message = error?.responseText || error?.message || 'An unknown error occurred.'
       const globalWindow = window as any

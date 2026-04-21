@@ -1,8 +1,9 @@
 import { computed, ref, unref, watch, type MaybeRefOrGetter } from 'vue'
 import { normalizeJsonResponse, useAjax } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../../stores/concrete-ui'
+import {useBlocksStore} from "../@stores/blocks";
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../types'
 import type { BlockEditorContext } from './types'
+import {enqueue} from "../../Queue/queue";
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -50,7 +51,7 @@ export function useBlockEditorSession(
   options: SessionOptions = {},
 ) {
   const { request } = useAjax()
-  const uiStore = useConcreteUiStore()
+  const blocksStore = useBlocksStore()
   const isSubmitting = ref(false)
   const pendingOperationId = ref<string | null>(null)
   const pendingOperationResponse = ref<any | null>(null)
@@ -105,7 +106,7 @@ export function useBlockEditorSession(
         response,
       }
 
-      uiStore.enqueuePageOperation(operation)
+      enqueue(blocksStore.operations, operation)
       return operation.id
     }
 
@@ -130,7 +131,7 @@ export function useBlockEditorSession(
       response,
     }
 
-    uiStore.enqueuePageOperation(operation)
+    enqueue(blocksStore.operations, operation)
     return operation.id
   }
 
@@ -182,7 +183,7 @@ export function useBlockEditorSession(
 
   watch(
     () => pendingOperationId.value
-      ? uiStore.page.operationsQueue.find((operation) => operation.id === pendingOperationId.value) ?? null
+      ? blocksStore.operations.queue.find((operation) => operation.id === pendingOperationId.value) ?? null
       : null,
     (operation) => {
       if (!pendingOperationId.value) {

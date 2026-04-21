@@ -49,7 +49,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@concretecms/backendui'
-import { useConcreteUiStore } from '../../stores/concrete-ui'
+import { useBlocksStore } from "./@stores/blocks";
 import type { DeleteBlockOperation } from './types'
 
 const props = withDefaults(defineProps<{
@@ -73,7 +73,7 @@ const emit = defineEmits<{
 }>()
 
 const deleteAll = ref('0')
-const uiStore = useConcreteUiStore()
+import { enqueue } from "../Queue/queue";
 const dialogTitle = computed(() => props.lang?.dialogTitle || 'Delete Block')
 const message = computed(() => props.lang?.dialogMessage || 'Are you sure you want to remove this block?')
 const defaultsMessage = computed(() => (
@@ -82,6 +82,7 @@ const defaultsMessage = computed(() => (
 ))
 
 const isMasterCollection = computed(() => props.isMasterCollection === true)
+const blocksStore = useBlocksStore()
 
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
@@ -103,7 +104,7 @@ function submitDelete() {
     deleteAll: useDeleteAll,
   }
 
-  uiStore.enqueuePageOperation(operation)
+  enqueue(blocksStore.operations, operation)
   emit('update:open', false)
 }
 </script>
