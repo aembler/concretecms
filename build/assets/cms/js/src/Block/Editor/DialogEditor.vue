@@ -76,7 +76,13 @@ const closeEmitTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const pendingUpdatedResponse = ref<any | null>(null)
 const DIALOG_CLOSE_TRANSITION_MS = 240
 const lazyDialogRef = ref<any>(null)
-const { isSubmitting, submit, requestUrl, submitUrl} = useBlockEditorSession(computed(() => props.context))
+const { isSubmitting, submit, requestUrl, submitUrl} = useBlockEditorSession(computed(() => props.context), {
+  onApplied: ({ response }) => {
+    pendingUpdatedResponse.value = response
+    open.value = false
+    helpTooltipOpen.value = false
+  },
+})
 
 const emit = defineEmits<{
   (e: 'updated', payload: { response: any }): void
@@ -165,13 +171,7 @@ function handleSave() {
     body: formData,
     skipResponseValidation: true,
   }, {
-    closeBehavior: 'manual',
     responseHasErrors: hasResponseErrors,
-    onSuccess: ({ response }) => {
-      pendingUpdatedResponse.value = response
-      open.value = false
-      helpTooltipOpen.value = false
-    },
   })
 }
 

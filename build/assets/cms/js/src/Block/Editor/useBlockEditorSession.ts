@@ -3,7 +3,6 @@ import { normalizeJsonResponse, useAjax } from '@concretecms/backendui'
 import {useBlocksStore} from "../@stores/blocks";
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../types'
 import type { BlockEditorContext } from './types'
-import {enqueue} from "../../Queue/queue";
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -16,13 +15,11 @@ type BlockEditorSubmitRequest = {
 
 type SubmitOptions = {
   responseHasErrors?: (response: any) => boolean
-  closeBehavior?: 'after-operation' | 'manual'
-  onSuccess?: (payload: { response: any; operationId: string }) => void
 }
 
 type SessionOptions = {
-  onUpdated?: (payload: { response: any }) => void
-  onClosed?: () => void
+  onApplied?: (payload: { response: any; operationId: string }) => void
+  onFailed?: (payload: { operationId: string | null }) => void
 }
 
 function applyAddRequestDefaults(
@@ -53,11 +50,8 @@ export function useBlockEditorSession(
   const { request } = useAjax()
   const blocksStore = useBlocksStore()
   const isSubmitting = ref(false)
-  const pendingOperationId = ref<string | null>(null)
-  const pendingOperationResponse = ref<any | null>(null)
-  const pendingOperationHasStarted = ref(false)
-  const pendingOperationReachedDone = ref(false)
-  const awaitingQueuedOperation = ref(false)
+  const submittedOperationId = ref<string | null>(null)
+  const submittedOperationResponse = ref<any | null>(null)
 
   const resolvedContext = computed(() => unref(context))
   const isAddMode = computed(() => resolvedContext.value.mode === 'add')
@@ -84,15 +78,12 @@ export function useBlockEditorSession(
     return `${url.pathname}${url.search}`
   })
 
-  function resetPendingOperationState() {
-    pendingOperationId.value = null
-    pendingOperationResponse.value = null
-    pendingOperationHasStarted.value = false
-    pendingOperationReachedDone.value = false
-    awaitingQueuedOperation.value = false
+  function resetSubmittedOperationState() {
+    submittedOperationId.value = null
+    submittedOperationResponse.value = null
   }
 
-  function queueResponse(response: any): string {
+  function queueResponse(response: any) {
     const ctx = resolvedContext.value
 
     if (ctx.mode === 'add') {
@@ -106,8 +97,7 @@ export function useBlockEditorSession(
         response,
       }
 
-      enqueue(blocksStore.operations, operation)
-      return operation.id
+      return blocksStore.enqueueOperation(operation)
     }
 
     const originalBlock: BlockRef = {
@@ -131,20 +121,17 @@ export function useBlockEditorSession(
       response,
     }
 
-    enqueue(blocksStore.operations, operation)
-    return operation.id
+    return blocksStore.enqueueOperation(operation)
   }
 
   function submit(submitRequest: BlockEditorSubmitRequest, submitOptions: SubmitOptions = {}) {
-    if (isSubmitting.value || pendingOperationId.value) {
+    if (isSubmitting.value || submittedOperationId.value) {
       return
     }
 
-    const closeBehavior = submitOptions.closeBehavior ?? 'after-operation'
     const currentContext = resolvedContext.value
 
     isSubmitting.value = true
-    awaitingQueuedOperation.value = false
 
     request({
       url: submitRequest.url,
@@ -158,67 +145,47 @@ export function useBlockEditorSession(
           return
         }
 
-        const operationId = queueResponse(normalizedResponse)
-
-        if (closeBehavior === 'after-operation') {
-          pendingOperationId.value = operationId
-          pendingOperationResponse.value = normalizedResponse
-          pendingOperationHasStarted.value = false
-          pendingOperationReachedDone.value = false
-          awaitingQueuedOperation.value = true
-        }
-
-        submitOptions.onSuccess?.({
-          response: normalizedResponse,
-          operationId,
-        })
+        const operation = queueResponse(normalizedResponse)
+        submittedOperationId.value = operation.id
+        submittedOperationResponse.value = normalizedResponse
       },
       onComplete: () => {
-        if (!awaitingQueuedOperation.value) {
+        if (!submittedOperationId.value) {
           isSubmitting.value = false
         }
       },
     })
   }
 
+  const submittedOperation = computed(() =>
+    blocksStore.findOperation(submittedOperationId.value)
+  )
+
   watch(
-    () => pendingOperationId.value
-      ? blocksStore.operations.queue.find((operation) => operation.id === pendingOperationId.value) ?? null
-      : null,
-    (operation) => {
-      if (!pendingOperationId.value) {
+    () => [submittedOperationId.value, submittedOperation.value?.status ?? null] as const,
+    () => {
+      const operationId = submittedOperationId.value
+      if (!operationId) {
         return
       }
 
-      if (!operation) {
-        if (pendingOperationReachedDone.value || pendingOperationHasStarted.value) {
-          const response = pendingOperationResponse.value
-          resetPendingOperationState()
-          isSubmitting.value = false
-          options.onUpdated?.({ response })
-          options.onClosed?.()
-        }
-        return
-      }
+      const activeOperation = submittedOperation.value
 
-      if (operation.status === 'queued' || operation.status === 'running') {
-        pendingOperationHasStarted.value = true
-      }
-
-      if (operation.status === 'done') {
-        pendingOperationReachedDone.value = true
-        const response = pendingOperationResponse.value
-        resetPendingOperationState()
+      if (activeOperation?.status === 'failed') {
+        resetSubmittedOperationState()
         isSubmitting.value = false
-        options.onUpdated?.({ response })
-        options.onClosed?.()
+        options.onFailed?.({ operationId })
         return
       }
 
-      if (operation.status === 'failed') {
-        resetPendingOperationState()
-        isSubmitting.value = false
+      if (activeOperation) {
+        return
       }
+
+      const response = submittedOperationResponse.value
+      resetSubmittedOperationState()
+      isSubmitting.value = false
+      options.onApplied?.({ response, operationId })
     }
   )
 

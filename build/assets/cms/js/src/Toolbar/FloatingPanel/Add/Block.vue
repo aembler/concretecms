@@ -7,7 +7,6 @@ import {useBlocksStore} from "../../../Block/@stores/blocks";
 import type { AddBlockOperation, AddBlockTargetRef } from '../../../Block/types'
 import type { BlockTypeEditor } from '../../../Block/Editor/types'
 import { useBlockEditorRegistry } from '../../../Block/Editor/registry'
-import {enqueue} from "../../../Queue/queue";
 
 type PanelIcon = {
   type: string
@@ -181,7 +180,7 @@ function enqueueAddBlockOperation(dropTarget: AddContentDropTarget, draggedItem:
     },
   }
 
-  enqueue(blocksStore.operations, operation)
+  blocksStore.enqueueOperation(operation)
 }
 
 function toAddBlockTarget(dropTarget: AddContentDropTarget): AddBlockTargetRef {

@@ -198,7 +198,7 @@ const isExpanded = ref(false)
 const { isSubmitting, submit, submitUrl } = useBlockEditorSession(
   computed(() => props.context),
   {
-    onUpdated: (payload) => {
+    onApplied: (payload) => {
       emit('updated', payload)
       isOpen.value = false
     },

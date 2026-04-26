@@ -47,7 +47,6 @@ import {useBlocksStore} from "../Block/@stores/blocks";
 import type { AddBlockOperation, BlockRef, UpdateBlockOperation } from '../Block/types'
 import { BlockRenderer } from '../Block/BlockRenderer'
 import { useToastStore } from "../Toast/@stores/toast";
-import { current as currentQueueItem, finish as finishQueueItem } from "../Queue/queue";
 
 import {
   normalizeJsonResponse,
@@ -115,7 +114,7 @@ const toast = useToastStore()
 const { request } = useAjax()
 
 const activeUpdateOperation = computed<UpdateBlockOperation | null>(() => {
-  const operation = currentQueueItem(blocksStore.operations)
+  const operation = blocksStore.currentOperation
   if (operation && operation.type === 'block.update') {
     return operation
   }
@@ -123,7 +122,7 @@ const activeUpdateOperation = computed<UpdateBlockOperation | null>(() => {
 })
 
 const activeAddOperation = computed<AddBlockOperation | null>(() => {
-  const operation = currentQueueItem(blocksStore.operations)
+  const operation = blocksStore.currentOperation
   if (operation && operation.type === 'block.add') {
     return operation
   }
@@ -188,9 +187,9 @@ async function runBlockUpdateOperation(operation: UpdateBlockOperation): Promise
       operation.response?.message || 'The block has been saved successfully.'
     )
 
-    finishQueueItem(blocksStore.operations, operation.id, 'done')
+    blocksStore.completeOperation(operation.id)
   } catch {
-    finishQueueItem(blocksStore.operations, operation.id, 'failed')
+    blocksStore.failOperation(operation.id)
   } finally {
     runningUpdateOperationId.value = null
   }
@@ -233,9 +232,9 @@ async function runAddBlockOperation(operation: AddBlockOperation): Promise<void>
       submitResponse?.message || 'The block has been added successfully.'
     )
 
-    finishQueueItem(blocksStore.operations, operation.id, 'done')
+    blocksStore.completeOperation(operation.id)
   } catch {
-    finishQueueItem(blocksStore.operations, operation.id, 'failed')
+    blocksStore.failOperation(operation.id)
   } finally {
     runningAddOperationId.value = null
   }

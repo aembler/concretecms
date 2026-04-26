@@ -73,7 +73,6 @@ const emit = defineEmits<{
 }>()
 
 const deleteAll = ref('0')
-import { enqueue } from "../Queue/queue";
 const dialogTitle = computed(() => props.lang?.dialogTitle || 'Delete Block')
 const message = computed(() => props.lang?.dialogMessage || 'Are you sure you want to remove this block?')
 const defaultsMessage = computed(() => (
@@ -104,7 +103,7 @@ function submitDelete() {
     deleteAll: useDeleteAll,
   }
 
-  enqueue(blocksStore.operations, operation)
+  blocksStore.enqueueOperation(operation)
   emit('update:open', false)
 }
 </script>
